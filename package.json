@@ -3,10 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+
   "scripts": {
     "start": "node server.js",
     "dev": "concurrently \"nodemon server.js\" \"npm:watch:css\"",
-    "watch:css": "npx @tailwindcss/cli -i ./src/input.css -o ./public/output.css --watch"
+    "watch:css": "npx @tailwindcss/cli -i ./src/input.css -o ./public/output.css --watch",
+    "build:css": "npx @tailwindcss/cli -i ./src/input.css -o ./public/output.css",
+    "build:html": "copyfiles -u 1 src/index.html public",
+    "build": "npm run build:css && npm run build:html"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +30,7 @@
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.11",
     "concurrently": "^9.2.0",
+    "copyfiles": "^2.4.1",
     "nodemon": "^3.1.10",
     "tailwindcss": "^4.1.11"
   }
