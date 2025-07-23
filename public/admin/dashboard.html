@@ -1,0 +1,146 @@
+<!-- public/admin/dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="/output.css" rel="stylesheet">
+</head>
+<body class="bg-slate-900 text-slate-300">
+
+    <!-- Header -->
+    <header class="bg-slate-800 shadow-md">
+        <div class="container mx-auto p-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-white">Admin Dashboard</h1>
+            <button id="logout-button" class="bg-red-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-red-700 transition-colors">Logout</button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- ======================= -->
+        <!-- PROJECTS MANAGEMENT -->
+        <!-- ======================= -->
+        <section id="projects-management" class="mb-12">
+            <h2 class="text-3xl font-bold text-white mb-6 border-l-4 border-teal-400 pl-4">Manage Projects</h2>
+            <div class="bg-slate-800 p-6 rounded-lg">
+                <form id="project-form" class="grid grid-cols-1 md:grid-cols-2 gap-6" enctype="multipart/form-data">
+                    <input type="hidden" id="project-id" name="id">
+                    <!-- Left Column -->
+                    <div>
+                        <div class="mb-4">
+                            <label for="project-name" class="block mb-2">Project Name</label>
+                            <input type="text" id="project-name" name="name" required class="w-full bg-slate-700 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                        <div class="mb-4">
+    <label for="project-image-file" class="block mb-2">Project Image</label>
+    <input type="file" id="project-image-file" name="projectImage" class="w-full file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-slate-600 file:text-white hover:file:bg-slate-700">
+    <input type="hidden" id="project-imageUrl" name="imageUrl">
+    <p class="text-sm text-slate-500 mt-1">Leave empty if you don't want to change the existing image.</p>
+</div>
+                        <div class="mb-4">
+                            <label for="project-tags" class="block mb-2">Tags (comma-separated)</label>
+                            <input type="text" id="project-tags" name="tags" required class="w-full bg-slate-700 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                         <div class="mb-4">
+                            <label for="project-liveUrl" class="block mb-2">Live Demo URL</label>
+                            <input type="text" id="project-liveUrl" name="liveUrl" class="w-full bg-slate-700 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                        <div class="mb-4">
+                            <label for="project-sourceUrl" class="block mb-2">Source Code URL</label>
+                            <input type="text" id="project-sourceUrl" name="sourceUrl" class="w-full bg-slate-700 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                    </div>
+                    <!-- Right Column -->
+                    <div>
+                        <label for="project-description" class="block mb-2">Description</label>
+                        <textarea id="project-description" name="description" rows="11" required class="w-full bg-slate-700 p-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+                    </div>
+                    <!-- Form Buttons -->
+                    <div class="md:col-span-2 flex space-x-4">
+                         <button type="submit" class="flex-1 bg-teal-500 text-white font-semibold py-3 rounded-md hover:bg-teal-600 transition-colors">Save Project</button>
+                         <button type="button" id="clear-project-form" class="flex-1 bg-slate-600 text-white font-semibold py-3 rounded-md hover:bg-slate-700 transition-colors">Clear Form</button>
+                    </div>
+                </form>
+            </div>
+            <!-- Projects Table -->
+            <div class="mt-8 bg-slate-800 rounded-lg overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-700 text-white">
+                        <tr>
+                            <th class="p-4">Name</th>
+                            <th class="p-4">Description</th>
+                            <th class="p-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="projects-table-body">
+                        <!-- Rows will be injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+      <!-- public/admin/dashboard.html -->
+
+    <!-- ======================= -->
+    <!-- SERVICES MANAGEMENT -->
+    <!-- ======================= -->
+    <section id="services-management">
+        <h2 class="text-3xl font-bold text-white mb-6 border-l-4 border-teal-400 pl-4">Manage Services</h2>
+        <div class="bg-slate-800 p-6 rounded-lg">
+            <form id="service-form" class="space-y-4">
+                <input type="hidden" id="service-id" name="id">
+                <div>
+                    <label for="service-title" class="block mb-2">Service Title</label>
+                    <input type="text" id="service-title" name="title" required class="w-full bg-slate-700 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500">
+                </div>
+                <div>
+                    <label for="service-description" class="block mb-2">Description</label>
+                    <textarea id="service-description" name="description" rows="4" required class="w-full bg-slate-700 p-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+                </div>
+                <div>
+                    <label for="service-iconSvg" class="block mb-2">Icon SVG Code</label>
+                    <textarea id="service-iconSvg" name="iconSvg" rows="4" required class="w-full bg-slate-700 p-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+                </div>
+                <!-- Form Buttons -->
+                <div class="flex space-x-4">
+                     <button type="submit" class="flex-1 bg-teal-500 text-white font-semibold py-3 rounded-md hover:bg-teal-600 transition-colors">Save Service</button>
+                     <button type="button" id="clear-service-form" class="flex-1 bg-slate-600 text-white font-semibold py-3 rounded-md hover:bg-slate-700 transition-colors">Clear Form</button>
+                </div>
+            </form>
+        </div>
+        <!-- Services Table -->
+        <div class="mt-8 bg-slate-800 rounded-lg overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-slate-700 text-white">
+                    <tr>
+                        <th class="p-4">Title</th>
+                        <th class="p-4">Description</th>
+                        <th class="p-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="services-table-body">
+                    <!-- Rows will be injected by JS -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+    </main>
+    
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+        <div class="bg-slate-800 p-8 rounded-lg text-center">
+            <h3 class="text-2xl font-bold text-white mb-4">Are you sure?</h3>
+            <p class="text-slate-400 mb-6">This action cannot be undone.</p>
+            <div class="flex space-x-4">
+                <button id="confirm-delete-button" class="flex-1 bg-red-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-red-700">Delete</button>
+                <button id="cancel-delete-button" class="flex-1 bg-slate-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-slate-700">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="/admin/dashboard.js"></script>
+</body>
+</html>
