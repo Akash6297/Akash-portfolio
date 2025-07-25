@@ -18,6 +18,7 @@ require('dotenv').config();
 const Project = require('./models/project');
 const Service = require('./models/service');
 const User = require('./models/user');
+const Experience = require('./models/experience'); 
 
 // --- Multer Setup (for handling file uploads) ---
 const storage = multer.memoryStorage(); // Store files in memory to upload to ImgBB
@@ -79,19 +80,64 @@ app.get('/api/services', async (req, res) => {
     }
 });
 
+// server.js
+
 app.post('/send-message', (req, res) => {
     const { name, email, message } = req.body;
+
+    // --- Modern HTML Email Template ---
+    const htmlTemplate = `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+            <div style="background-color: #1e293b; color: white; padding: 20px;">
+                <h1 style="margin: 0; text-align: center;">New Message from Your Portfolio</h1>
+            </div>
+            <div style="padding: 20px;">
+                <h2 style="color: #0d9488;">Contact Details</h2>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 8px; font-weight: bold;">Name:</td>
+                        <td style="padding: 8px;">${name}</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 8px; font-weight: bold;">Email:</td>
+                        <td style="padding: 8px;"><a href="mailto:${email}">${email}</a></td>
+                    </tr>
+                </table>
+                <h2 style="color: #0d9488; margin-top: 20px;">Message</h2>
+                <p style="background-color: #f8f8f8; padding: 15px; border-radius: 5px; white-space: pre-wrap;">${message}</p>
+            </div>
+            <div style="background-color: #f1f5f9; color: #666; text-align: center; padding: 10px; font-size: 12px;">
+                <p>This email was sent from your portfolio contact form.</p>
+            </div>
+        </div>
+    `;
+
+    // --- Nodemailer Transporter (unchanged) ---
     const transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST, port: process.env.EMAIL_PORT, secure: false,
-        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+        host: process.env.EMAIL_HOST,
+        port: process.env.EMAIL_PORT,
+        secure: false, // true for 465, false for other ports
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
     });
+
+    // --- Mail Options with Reply-To (CRITICAL CHANGE) ---
     const mailOptions = {
-        from: `"${name}" <${email}>`, to: process.env.EMAIL_USER, subject: `New Message from Portfolio`,
-        html: `<p>Name: ${name}</p><p>Email: ${email}</p><p>Message: ${message}</p>`,
+        from: `"Portfolio Inquiry" <${process.env.EMAIL_USER}>`, // FROM YOUR OWN EMAIL
+        to: process.env.EMAIL_USER,                             // TO YOUR OWN EMAIL
+        replyTo: email,                                         // ** THE KEY FOR EASY REPLIES **
+        subject: `New Portfolio Message from ${name}`,
+        html: htmlTemplate,                                     // Use the new HTML template
     };
+
     transporter.sendMail(mailOptions, (error, info) => {
-        if (error) { return res.status(500).json({ success: false, message: 'Something went wrong.' }); }
-        res.status(200).json({ success: true, message: 'Message sent successfully!' });
+        if (error) {
+            console.error('Error sending email:', error);
+            return res.status(500).json({ success: false, message: 'Something went wrong.' });
+        }
+        res.status(200).json({ success: true, message: 'Your message has been sent successfully!' });
     });
 });
 
@@ -235,6 +281,48 @@ app.delete('/api/admin/services/:id', requireLogin, async (req, res) => {
     } catch (error) { res.status(500).json({ message: error.message }); }
 });
 
+// server.js -> Public Routes
+app.get('/api/experiences', async (req, res) => {
+    try {
+        // Sort by the 'createdAt' field in descending order to show newest first
+        const data = await Experience.find().sort({ createdAt: -1 });
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// server.js -> Protected CRUD Routes
+
+// --- PROTECTED CRUD API ROUTES FOR EXPERIENCE ---
+app.post('/api/admin/experiences', requireLogin, async (req, res) => {
+    try {
+        const newExperience = new Experience(req.body);
+        await newExperience.save();
+        res.status(201).json(newExperience);
+    } catch (error) { res.status(400).json({ message: error.message }); }
+});
+
+app.get('/api/admin/experiences/:id', requireLogin, async (req, res) => {
+    try {
+        const experience = await Experience.findById(req.params.id);
+        res.json(experience);
+    } catch (error) { res.status(404).json({ message: 'Experience not found' }); }
+});
+
+app.put('/api/admin/experiences/:id', requireLogin, async (req, res) => {
+    try {
+        const updatedExperience = await Experience.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        res.json(updatedExperience);
+    } catch (error) { res.status(400).json({ message: error.message }); }
+});
+
+app.delete('/api/admin/experiences/:id', requireLogin, async (req, res) => {
+    try {
+        await Experience.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Experience deleted successfully' });
+    } catch (error) { res.status(500).json({ message: error.message }); }
+});
 
 // --- Server Start ---
 app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));

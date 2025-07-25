@@ -12,6 +12,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const servicesTableBody = document.getElementById('services-table-body');
     const clearServiceFormBtn = document.getElementById('clear-service-form');
 
+    //ecperince section
+const experienceForm = document.getElementById('experience-form');
+    const experiencesTableBody = document.getElementById('experiences-table-body');
     // Shared elements
     const logoutBtn = document.getElementById('logout-button');
     const deleteModal = document.getElementById('delete-modal');
@@ -190,6 +193,76 @@ projectForm.addEventListener('submit', async (e) => {
     });
 
 
+        // --- EXPERIENCE MANAGEMENT (NEW) ---
+    const fetchExperiences = async () => {
+        const experiences = await apiRequest('GET', '/api/experiences');
+        if (!experiences) return;
+        experiencesTableBody.innerHTML = '';
+        experiences.forEach(exp => {
+            const row = `<tr data-id="${exp._id}">
+                <td class="p-4 border-t border-slate-700">${exp.title}</td>
+                <td class="p-4 border-t border-slate-700">${exp.company}</td>
+                <td class="p-4 border-t border-slate-700">
+                    <button class="edit-experience-btn bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 mr-2">Edit</button>
+                    <button class="delete-btn bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700" data-type="experience">Delete</button>
+                </td></tr>`;
+            experiencesTableBody.insertAdjacentHTML('beforeend', row);
+        });
+    };
+
+    const clearExperienceForm = () => {
+        experienceForm.reset();
+        experienceForm.querySelector('#experience-id').value = '';
+    };
+
+    experienceForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = experienceForm.querySelector('#experience-id').value;
+        const data = Object.fromEntries(new FormData(experienceForm).entries());
+        const url = id ? `/api/admin/experiences/${id}` : '/api/admin/experiences';
+        const method = id ? 'PUT' : 'POST';
+        await apiRequest(method, url, data);
+        clearExperienceForm();
+        await fetchExperiences();
+    });
+
+    document.getElementById('clear-experience-form').addEventListener('click', clearExperienceForm);
+
+    experiencesTableBody.addEventListener('click', async (e) => {
+        const target = e.target;
+        const row = target.closest('tr');
+        if (!row) return;
+        const id = row.dataset.id;
+
+        if (target.classList.contains('edit-experience-btn')) {
+            const exp = await apiRequest('GET', `/api/admin/experiences/${id}`);
+            if (!exp) return;
+            experienceForm.querySelector('#experience-id').value = exp._id;
+            experienceForm.querySelector('#experience-title').value = exp.title;
+            experienceForm.querySelector('#experience-company').value = exp.company;
+            experienceForm.querySelector('#experience-dateRange').value = exp.dateRange;
+            experienceForm.querySelector('#experience-description').value = exp.description;
+            document.getElementById('experience-management').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        if (target.classList.contains('delete-btn') && target.dataset.type === 'experience') {
+            deleteInfo = { id, type: 'experience' };
+            deleteModal.classList.remove('hidden');
+        }
+    });
+
+    // --- UPDATE DELETE MODAL LOGIC ---
+    confirmDeleteBtn.addEventListener('click', async () => {
+        const { id, type } = deleteInfo;
+        if (id && type) {
+            await apiRequest('DELETE', `/api/admin/${type}s/${id}`); // Note the 's' for plural
+            deleteModal.classList.add('hidden');
+            if (type === 'project') await fetchProjects();
+            else if (type === 'service') await fetchServices();
+            else if (type === 'experience') await fetchExperiences(); // <-- UPDATED
+        }
+    });
+
     // --- SHARED LOGIC (DELETE & LOGOUT) ---
     cancelDeleteBtn.addEventListener('click', () => {
         deleteModal.classList.add('hidden');
@@ -219,4 +292,5 @@ projectForm.addEventListener('submit', async (e) => {
     // Fetch all data when the dashboard loads
     fetchProjects();
     fetchServices();
+     fetchExperiences(); 
 });
