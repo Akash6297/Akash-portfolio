@@ -3,6 +3,3 @@
 
 # Environment variables
 .env
-
-# Build output
-/public/output.css

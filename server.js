@@ -59,7 +59,7 @@ const requireLogin = (req, res, next) => {
 };
 
 // --- PUBLIC ROUTES ---
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'src', 'index.html')));
 
 app.get('/api/projects', async (req, res) => {
     try {
