@@ -107,66 +107,78 @@ app.get('/api/hero', async (req, res) => {
     }
 });
 
-// server.js
 
-app.post('/send-message', (req, res) => {
+
+// ============================================
+// --- FINAL, CORRECTED CONTACT FORM ROUTE (using HTTP API) ---
+// ============================================
+app.post('/send-message', async (req, res) => {
     const { name, email, message } = req.body;
+    const myReceivingEmail = "akashmandal6297@gmail.com"; // Your email address
 
-    // --- Modern HTML Email Template ---
-    const htmlTemplate = `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
-            <div style="background-color: #1e293b; color: white; padding: 20px;">
-                <h1 style="margin: 0; text-align: center;">New Message from Your Portfolio</h1>
-            </div>
-            <div style="padding: 20px;">
-                <h2 style="color: #0d9488;">Contact Details</h2>
-                <table style="width: 100%; border-collapse: collapse;">
-                    <tr style="border-bottom: 1px solid #eee;">
-                        <td style="padding: 8px; font-weight: bold;">Name:</td>
-                        <td style="padding: 8px;">${name}</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #eee;">
-                        <td style="padding: 8px; font-weight: bold;">Email:</td>
-                        <td style="padding: 8px;"><a href="mailto:${email}">${email}</a></td>
-                    </tr>
-                </table>
-                <h2 style="color: #0d9488; margin-top: 20px;">Message</h2>
-                <p style="background-color: #f8f8f8; padding: 15px; border-radius: 5px; white-space: pre-wrap;">${message}</p>
-            </div>
-            <div style="background-color: #f1f5f9; color: #666; text-align: center; padding: 10px; font-size: 12px;">
-                <p>This email was sent from your portfolio contact form.</p>
-            </div>
-        </div>
-    `;
-
-    // --- Nodemailer Transporter (unchanged) ---
-    const transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT,
-        secure: false, // true for 465, false for other ports
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-        },
-    });
-
-    // --- Mail Options with Reply-To (CRITICAL CHANGE) ---
-    const mailOptions = {
-        from: `"Portfolio Inquiry" <${process.env.EMAIL_USER}>`, // FROM YOUR OWN EMAIL
-        to: process.env.EMAIL_USER,                             // TO YOUR OWN EMAIL
-        replyTo: email,                                         // ** THE KEY FOR EASY REPLIES **
+    // --- 1. Prepare the email to YOU (the Admin) ---
+    const adminEmailData = {
+        sender: { name: name, email: email }, // The user is the "sender"
+        to: [{ email: myReceivingEmail, name: 'Akash Mandal' }],
+        replyTo: { email: email, name: name }, // So you can reply to the user easily
         subject: `New Portfolio Message from ${name}`,
-        html: htmlTemplate,                                     // Use the new HTML template
+        htmlContent: `
+             <div style="font-family: 'Poppins', sans-serif; background-color: #f1f5f9; padding: 40px;">
+                <div style="max-width: 600px; margin: auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                    <div style="background-color: #1e293b; color: white; padding: 20px; text-align: center;"><h1 style="margin: 0; font-size: 24px;">New Portfolio Inquiry</h1></div>
+                    <div style="padding: 30px;">
+                        <h2 style="color: #0d9488; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">Contact Details</h2>
+                        <p style="font-size: 16px;"><strong>Name:</strong> ${name}</p>
+                        <p style="font-size: 16px;"><strong>Email:</strong> <a href="mailto:${email}" style="color: #14b8a6;">${email}</a></p>
+                        <h2 style="color: #0d9488; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-top: 30px;">Message</h2>
+                        <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; font-size: 16px; line-height: 1.7; white-space: pre-wrap;">${message}</div>
+                    </div>
+                </div>
+            </div>`
     };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            console.error('Error sending email:', error);
-            return res.status(500).json({ success: false, message: 'Something went wrong.' });
+    // --- 2. Prepare the "Thank You" email to the USER ---
+    const userEmailData = {
+        sender: { name: 'Akash Mandal', email: myReceivingEmail }, // You are the "sender"
+        to: [{ email: email, name: name }],
+        subject: `Thank You for Your Message, ${name}!`,
+        htmlContent: `
+             <div style="font-family: 'Poppins', sans-serif; background-color: #f1f5f9; padding: 40px;">
+                <div style="max-width: 600px; margin: auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                    <div style="background-color: #1e293b; color: white; padding: 20px; text-align: center;"><h1 style="margin: 0; font-size: 24px;">Message Received!</h1></div>
+                    <div style="padding: 30px;">
+                        <h2 style="color: #0d9488; font-size: 20px;">Hello ${name},</h2>
+                        <p style="font-size: 16px; line-height: 1.7;">Thank you for reaching out through my portfolio. I've successfully received your message and will review it shortly.</p>
+                        <p style="font-size: 16px; line-height: 1.7;">I appreciate your interest and will get back to you as soon as possible.</p>
+                        <p style="font-size: 16px; line-height: 1.7; margin-top: 30px;">Best regards,<br><b>Akash Mandal</b></p>
+                    </div>
+                </div>
+            </div>`
+    };
+
+    // --- Set up the API request configuration ---
+    const apiConfig = {
+        headers: {
+            'accept': 'application/json',
+            'api-key': process.env.BREVO_API_KEY,
+            'content-type': 'application/json'
         }
+    };
+    
+    // --- Send both emails using Axios ---
+    try {
+        await axios.post('https://api.brevo.com/v3/smtp/email', adminEmailData, apiConfig);
+        await axios.post('https://api.brevo.com/v3/smtp/email', userEmailData, apiConfig);
+        
+        console.log('Emails sent successfully via Brevo API.');
         res.status(200).json({ success: true, message: 'Your message has been sent successfully!' });
-    });
+
+    } catch (error) {
+        console.error('Error sending email via Brevo API:', error.response ? error.response.data : error.message);
+        res.status(500).json({ success: false, message: 'An error occurred. Please try again later.' });
+    }
 });
+
 
 
 // --- ADMIN AUTH ROUTES ---
