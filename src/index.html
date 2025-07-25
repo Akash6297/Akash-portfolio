@@ -11,48 +11,58 @@
 <style>
     body {
         font-family: 'Poppins', sans-serif;
+        /* This helps hide the overflow from the glowing divs */
+        overflow-x: hidden;
+    }
+     /* NEW: Keyframes for the ripple effect */
+    @keyframes ripple-effect {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+
+    /* NEW: The style for the ripple element we will create with JavaScript */
+    .ripple {
+        position: fixed; /* Position relative to the viewport */
+        border-radius: 50%;
+        background-color: rgba(20, 184, 166, 0.4); /* A semi-transparent teal */
+        width: 100px;  /* Initial size of the ripple */
+        height: 100px;
+        /* Center the ripple on the click point */
+        transform: translate(-50%, -50%); 
+        animation: ripple-effect 0.7s ease-out forwards;
+        pointer-events: none; /* The ripple itself cannot be clicked */
+        z-index: -1; /* Ensure it stays behind all content */
     }
     
-    /* Keyframes for button animations (already there) */
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-    .animate-spin-fast {
-        animation: spin 0.5s linear infinite;
-    }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .animate-spin-fast { animation: spin 0.5s linear infinite; }
 
-    /* NEW: Keyframes for the floating illustration */
-    @keyframes float {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-12px); }
-        100% { transform: translateY(0px); }
-    }
-    .animate-float {
-        animation: float 4s ease-in-out infinite;
-    }
+    @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-12px); } 100% { transform: translateY(0px); } }
+    .animate-float { animation: float 4s ease-in-out infinite; }
 
-    /* NEW: Keyframes for the section fade-in-up effect */
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    
+    @keyframes pulse-slow { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+    .animate-pulse-slow { animation: pulse-slow 6s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
 </style>
 </head>
-<body class="bg-slate-900 text-slate-300">
+<body class="bg-slate-900 text-slate-300 relative">
 
-    
+  <!-- ============================================ -->
+  <!-- THE ONE, UNIFIED "AURORA GLOW" BACKGROUND -->
+  <!-- ============================================ -->
+  <div class="fixed top-0 left-0 w-full h-full -z-10">
+      <div class="absolute w-[40rem] h-[40rem] bg-teal-500/10 rounded-full blur-3xl animate-pulse-slow -top-20 -left-40"></div>
+      <div class="absolute w-[30rem] h-[30rem] bg-teal-500/10 rounded-full blur-3xl animate-pulse-slow bottom-0 -right-40" style="animation-delay: 1s;"></div>
+      <div class="absolute w-[20rem] h-[20rem] bg-teal-500/10 rounded-full blur-3xl animate-pulse-slow bottom-40 right-40" style="animation-delay: 2s;"></div>
+  </div>
+
   <!-- Preloader -->
   <div id="preloader" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-[100]">
     <div class="w-16 h-16 border-4 border-slate-700 border-t-teal-500 rounded-full animate-spin"></div>
   </div>
-
   <!-- Header -->
   <header class="bg-slate-800/80 backdrop-blur-sm sticky top-0 z-50">
     <nav class="container mx-auto flex items-center justify-between p-4">
@@ -82,66 +92,92 @@
   </header>
 
   <!-- Main Content -->
-  <main class="container mx-auto p-4">
+<main class="container mx-auto p-4 relative">
+  
 
 <!-- HERO SECTION -->
-<section id="hero" class="min-h-screen flex items-center">
-  <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+<!-- ============================================ -->
+<!-- HERO SECTION (DYNAMIC & ANIMATED) -->
+<!-- ============================================ -->
+<section id="hero" class="min-h-screen flex items-center relative overflow-hidden">
+
+
+  <div class="container mx-auto px-4 w-full grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+    <!-- Text Content -->
     <div class="text-center md:text-left">
-      <span class="text-teal-400 font-semibold">Hello, I'm Akash Mandal</span>
-      <h1 class="text-4xl md:text-6xl font-bold text-white mt-2">
-        Digital Marketing Specialist & Frontend Developer
-      </h1>
-      <p class="mt-4 text-slate-400">
-        Results-driven professional skilled in React.js, Next.js, JavaScript, and SEO. Experienced in building responsive web applications and managing digital campaigns to create effective solutions.
-      </p>
+      <span id="hero-greeting" class="text-teal-400 font-semibold text-lg"></span>
+      <h1 id="hero-headline" class="text-4xl md:text-6xl font-bold text-white mt-2"></h1>
+      <p id="hero-bio" class="mt-4 text-slate-300"></p>
       <div class="mt-8 flex justify-center md:justify-start space-x-4">
         <a href="#contact" class="bg-teal-500 text-white font-semibold py-3 px-6 rounded-md hover:bg-teal-600 transition-all duration-300">Hire Me</a>
         <a href="#projects" class="border-2 border-slate-600 text-white font-semibold py-3 px-6 rounded-md hover:bg-slate-700 hover:border-slate-700 transition-all duration-300">View Projects</a>
       </div>
     </div>
-    <div class="flex justify-center">
-      <!-- UPDATE: Add your photo here -->
-      <div class="w-64 h-64 md:w-80 md:h-80 bg-slate-800 rounded-full flex items-center justify-center overflow-hidden">
-        <img src="/images/logo.jpeg" alt="Akash Mandal" class="object-cover w-full h-full"> 
+    
+    <!-- Image with Animated Ring -->
+    <div class="flex justify-center p-4">
+      <div class="relative w-64 h-64 md:w-80 md:h-80">
+        <!-- The spinning ring -->
+        <div class="absolute inset-0 border-2 border-teal-500/30 rounded-full animate-spin [animation-duration:8s]"></div>
+        <div class="absolute inset-2 border-t-2 border-teal-500/80 rounded-full animate-spin [animation-duration:6s]"></div>
+        <!-- Image container -->
+        <div class="relative w-full h-full bg-slate-800 rounded-full flex items-center justify-center overflow-hidden shadow-2xl">
+          <img id="hero-photo" src="" alt="Akash Mandal" class="object-cover w-full h-full">
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ABOUT ME SECTION -->
+<!-- ============================================ -->
+<!-- ABOUT ME SECTION (DYNAMIC & ANIMATED) -->
+<!-- ============================================ -->
 <section id="about" class="py-20">
   <div class="container mx-auto px-4">
-    <div class="text-center mb-12">
+    <div class="text-center mb-16">
       <h2 class="text-4xl font-bold text-white">About Me</h2>
       <p class="text-teal-400">My journey and expertise</p>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-12 items-start">
-      <div class="md:col-span-2">
-        <h3 class="text-2xl font-semibold text-white mb-4">Who Am I?</h3>
-        <p class="text-slate-400 mb-4">
-          Hello! I'm Akash, a developer from Purulia, West Bengal, with a unique blend of skills in frontend development and digital marketing. I am passionate about using technology to build effective, responsive web applications and to drive engagement through strategic digital campaigns.
-        </p>
-        <p class="text-slate-400">
-          I enjoy turning complex problems into simple, elegant solutions. Whether it's crafting a pixel-perfect interface with React and Next.js or optimizing an SEO strategy to boost organic reach, I bring dedication and a results-driven mindset to every project.
-        </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+      <!-- Left Side: Illustration -->
+       <!-- Left Side: Illustration (NEW VERSION) -->
+      <div class="text-center hidden md:block">
+        <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="inline-block w-full max-w-sm">
+          <!-- Desk and Chair -->
+          <rect x="20" y="150" width="160" height="10" rx="5" fill="#1E293B"/>
+          <path d="M100 120 L100 150 M70 160 L70 175 L130 175 L130 160" stroke="#334155" stroke-width="6" stroke-linecap="round"/>
+          
+          <!-- Person -->
+          <circle cx="100" cy="90" r="15" fill="#475569"/>
+          <rect x="85" y="105" width="30" height="40" rx="15" fill="#475569"/>
+          
+          <!-- Laptop -->
+          <path d="M60 150 L65 120 L135 120 L140 150 Z" fill="#334155"/>
+          <rect x="70" y="122" width="60" height="3" rx="1.5" fill="#1E293B"/>
+          <rect x="75" y="128" width="50" height="2" rx="1" fill="#14B8A6"/>
+          <rect x="75" y="133" width="40" height="2" rx="1" fill="#14B8A6"/>
+          <rect x="75" y="138" width="45" height="2" rx="1" fill="#14B8A6"/>
+          
+          <!-- Animated Code Elements -->
+          <g class="animate-float">
+            <text fill="#2DD4BF" x="40" y="60" font-family="monospace" font-size="24" font-weight="bold" opacity="0.8">{ }</text>
+            <text fill="#2DD4BF" x="150" y="90" font-family="monospace" font-size="24" font-weight="bold" opacity="0.8"></></text>
+            <circle cx="165" cy="45" r="5" fill="#14B8A6" opacity="0.5"/>
+            <circle cx="30" cy="110" r="3" fill="#14B8A6" opacity="0.5"/>
+          </g>
+        </svg>
       </div>
+
+      <!-- Right Side: Text & Skills -->
       <div>
-        <h3 class="text-2xl font-semibold text-white mb-4">My Skills</h3>
-        <div class="flex flex-wrap gap-2">
-          <span class="bg-slate-700 text-teal-400 font-semibold py-1 px-3 rounded-md text-sm">React.js</span>
-          <span class="bg-slate-700 text-teal-400 font-semibold py-1 px-3 rounded-md text-sm">Next.js</span>
-          <span class="bg-slate-700 text-teal-400 font-semibold py-1 px-3 rounded-md text-sm">JavaScript</span>
-          <span class="bg-slate-700 text-teal-400 font-semibold py-1 px-3 rounded-md text-sm">HTML</span>
-          <span class="bg-slate-700 text-teal-400 font-semibold py-1 px-3 rounded-md text-sm">CSS</span>
-          <span class="bg-slate-700 text-teal-400 font-semibold py-1 px-3 rounded-md text-sm">Tailwind CSS</span>
-          <span class="bg-slate-700 text-teal-400 font-semibold py-1 px-3 rounded-md text-sm">Node.js</span>
-          <span class="bg-slate-700 text-teal-400 font-semibold py-1 px-3 rounded-md text-sm">MongoDB</span>
-          <span class="bg-slate-700 text-teal-400 font-semibold py-1 px-3 rounded-md text-sm">WordPress</span>
-          <span class="bg-slate-700 text-teal-400 font-semibold py-1 px-3 rounded-md text-sm">SEO</span>
-          <span class="bg-slate-700 text-teal-400 font-semibold py-1 px-3 rounded-md text-sm">Git & GitHub</span>
-          <span class="bg-slate-700 text-teal-400 font-semibold py-1 px-3 rounded-md text-sm">Azure</span>
-          <span class="bg-slate-700 text-teal-400 font-semibold py-1 px-3 rounded-md text-sm">AWS</span>
+        <div id="about-bio">
+          <!-- Bio paragraphs will be injected here -->
+        </div>
+        
+        <h3 class="text-2xl font-semibold text-white mt-8 mb-4">My Skills</h3>
+        <div id="skills-container" class="flex flex-wrap gap-3">
+          <!-- Skill tags will be injected here -->
         </div>
       </div>
     </div>
@@ -164,28 +200,36 @@
   </div>
 </section>
 
-<!-- PROJECTS SECTION -->
+<!-- ============================================ -->
+<!-- PROJECTS SECTION (with Background) -->
+<!-- ============================================ -->
 <section id="projects" class="py-20">
+ 
+  
   <div class="container mx-auto px-4">
     <div class="text-center mb-12">
       <h2 class="text-4xl font-bold text-white">My Projects</h2>
       <p class="text-teal-400">A selection of my work</p>
     </div>
     <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      <!-- Project cards will be inserted here by JavaScript -->
+      <!-- Project cards will be injected here by JavaScript -->
     </div>
   </div>
 </section>
 
-<!-- SERVICES SECTION -->
-<section id="services" class="py-20 bg-slate-900">
-  <div class="container mx-auto px-4">
+<!-- ============================================ -->
+<!-- SERVICES SECTION (with Background) -->
+<!-- ============================================ -->
+<section id="services" class="py-20">
+  
+
+  <div class="container mx-auto px-4 relative z-10">
     <div class="text-center mb-12">
       <h2 class="text-4xl font-bold text-white">What I Offer</h2>
       <p class="text-teal-400">Services to help you build your vision</p>
     </div>
     <div id="services-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      <!-- Service cards will be inserted here by JavaScript -->
+      <!-- Service cards will be injected here by JavaScript -->
     </div>
   </div>
 </section>
@@ -193,7 +237,9 @@
 <!-- ============================================ -->
 <!-- PROFESSIONAL CONTACT SECTION (REVISED) -->
 <!-- ============================================ -->
+
 <section id="contact" class="py-20">
+
   <div class="container mx-auto px-4">
     <!-- Section Title -->
     <div class="text-center mb-12">
@@ -337,9 +383,39 @@
     }, 500); // Match this duration with CSS transition duration
   });
 
+// --- NEW: WATER RIPPLE EFFECT ON BACKGROUND CLICK ---
+    document.body.addEventListener('click', (e) => {
+        // IMPORTANT: Check if the click was on an interactive element.
+        // If so, we do NOT create a ripple.
+        if (e.target.closest('a, button, input, textarea, .group, .bg-slate-800')) {
+            return;
+        }
+
+        // Create the ripple element
+        const ripple = document.createElement('div');
+        ripple.className = 'ripple';
+        
+        // Append it to the body
+        document.body.appendChild(ripple);
+
+        // Position the ripple where the user clicked
+        // We use clientX/Y because the ripple is position: fixed
+        ripple.style.left = `${e.clientX}px`;
+        ripple.style.top = `${e.clientY}px`;
+
+        // IMPORTANT: Remove the ripple from the DOM after the animation is done
+        // This prevents the page from filling up with thousands of hidden divs.
+        setTimeout(() => {
+            ripple.remove();
+        }, 700); // This duration must match the animation duration in the CSS
+    });
+
+
   // --- Runs after HTML is parsed ---
   document.addEventListener('DOMContentLoaded', () => {
     // Initialize data fetching
+    fetchHero();
+    fetchAbout(); 
     fetchProjects();
     fetchServices();
     fetchExperiences();
@@ -365,6 +441,50 @@
         behavior: 'smooth'
       });
     });
+
+    
+    // --- NEW: Function to Fetch and Render Hero Section ---
+    async function fetchHero() {
+        try {
+            const response = await fetch('/api/hero');
+            const data = await response.json();
+            if (data) {
+                document.getElementById('hero-greeting').textContent = data.greeting;
+                document.getElementById('hero-headline').textContent = data.headline;
+                document.getElementById('hero-bio').textContent = data.bio;
+                document.getElementById('hero-photo').src = data.photoUrl;
+            }
+        } catch (error) {
+            console.error('Error fetching hero data:', error);
+        }
+    }
+
+       // --- NEW: Function to Fetch and Render About Section ---
+    async function fetchAbout() {
+        const bioContainer = document.getElementById('about-bio');
+        const skillsContainer = document.getElementById('skills-container');
+        try {
+            const response = await fetch('/api/about');
+            const data = await response.json();
+
+            if (!data) return;
+
+            // Populate Bio
+            bioContainer.innerHTML = `
+                <h3 class="text-2xl font-semibold text-white mb-4">Who Am I?</h3>
+                <p class="text-slate-400 mb-4">${data.bioParagraph1}</p>
+                <p class="text-slate-400">${data.bioParagraph2}</p>`;
+
+            // Populate Skills
+            skillsContainer.innerHTML = data.skills.map(skill => 
+                `<span class="bg-slate-700 text-teal-400 font-semibold py-2 px-4 rounded-md transition-transform hover:-translate-y-1">${skill}</span>`
+            ).join('');
+
+        } catch (error) {
+            bioContainer.innerHTML = '<p class="text-red-500">Failed to load about information.</p>';
+            console.error('Error fetching about data:', error);
+        }
+    }
 
     // --- DATA FETCHING AND RENDERING (Projects) ---
     async function fetchProjects() {

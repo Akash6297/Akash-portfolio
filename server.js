@@ -19,6 +19,8 @@ const Project = require('./models/project');
 const Service = require('./models/service');
 const User = require('./models/user');
 const Experience = require('./models/experience'); 
+const About = require('./models/about');
+const Hero = require('./models/hero');
 
 // --- Multer Setup (for handling file uploads) ---
 const storage = multer.memoryStorage(); // Store files in memory to upload to ImgBB
@@ -74,6 +76,31 @@ app.get('/api/projects', async (req, res) => {
 app.get('/api/services', async (req, res) => {
     try {
         const data = await Service.find();
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+app.get('/api/about', async (req, res) => {
+    try {
+        // There should only ever be one "about" document
+        const data = await About.findOne(); 
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// server.js -> with other public routes
+app.get('/api/hero', async (req, res) => {
+    try {
+        // Find one document, or create it with defaults if it doesn't exist
+        let data = await Hero.findOne();
+        if (!data) {
+            data = new Hero();
+            await data.save();
+        }
         res.json(data);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -322,6 +349,49 @@ app.delete('/api/admin/experiences/:id', requireLogin, async (req, res) => {
         await Experience.findByIdAndDelete(req.params.id);
         res.json({ message: 'Experience deleted successfully' });
     } catch (error) { res.status(500).json({ message: error.message }); }
+});
+
+
+// --- PROTECTED CRUD API ROUTE FOR ABOUT SECTION ---
+app.put('/api/admin/about', requireLogin, async (req, res) => {
+    try {
+        const updateData = { ...req.body };
+        if (updateData.skills && typeof updateData.skills === 'string') {
+            updateData.skills = updateData.skills.split(',').map(tag => tag.trim());
+        }
+        // Find one document and update it, or create it if it doesn't exist ('upsert: true')
+        const updatedAbout = await About.findOneAndUpdate({}, updateData, { new: true, upsert: true });
+        res.json(updatedAbout);
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+});
+
+// server.js -> with other protected admin routes
+
+// --- PROTECTED CRUD API ROUTE FOR HERO SECTION ---
+app.put('/api/admin/hero', requireLogin, upload.single('heroPhoto'), async (req, res) => {
+    try {
+        const updateData = { ...req.body };
+        let currentHero = await Hero.findOne();
+
+        if (req.file) {
+            // If a new photo is uploaded, send it to ImgBB
+            const formData = new FormData();
+            formData.append('image', req.file.buffer, { filename: req.file.originalname });
+            const response = await axios.post(`https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`, formData, { headers: formData.getHeaders() });
+            updateData.photoUrl = response.data.data.url;
+        } else {
+            // Keep the existing photo if no new one is uploaded
+            updateData.photoUrl = currentHero ? currentHero.photoUrl : '/images/logo.jpeg';
+        }
+
+        const updatedHero = await Hero.findOneAndUpdate({}, updateData, { new: true, upsert: true });
+        res.json(updatedHero);
+    } catch (error) {
+        console.error('Error updating hero section:', error.response ? error.response.data : error.message);
+        res.status(400).json({ message: 'Error updating hero section.' });
+    }
 });
 
 // --- Server Start ---

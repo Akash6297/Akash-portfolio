@@ -2,6 +2,8 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- ELEMENT SELECTORS ---
+    const aboutForm = document.getElementById('about-form');
+      const heroForm = document.getElementById('hero-form');
     // Project elements
     const projectForm = document.getElementById('project-form');
     const projectsTableBody = document.getElementById('projects-table-body');
@@ -13,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearServiceFormBtn = document.getElementById('clear-service-form');
 
     //ecperince section
-const experienceForm = document.getElementById('experience-form');
+    const experienceForm = document.getElementById('experience-form');
     const experiencesTableBody = document.getElementById('experiences-table-body');
     // Shared elements
     const logoutBtn = document.getElementById('logout-button');
@@ -47,6 +49,54 @@ const experienceForm = document.getElementById('experience-form');
             return null; // Return null on failure
         }
     };
+
+
+    
+    // --- HERO MANAGEMENT (NEW) ---
+    const fetchHeroData = async () => {
+        const data = await apiRequest('GET', '/api/hero');
+        if (data) {
+            heroForm.querySelector('#hero-greeting').value = data.greeting;
+            heroForm.querySelector('#hero-headline').value = data.headline;
+            heroForm.querySelector('#hero-bio').value = data.bio;
+            heroForm.querySelector('#hero-photo-preview').src = data.photoUrl;
+        }
+    };
+
+    heroForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(heroForm);
+        try {
+            const response = await fetch('/api/admin/hero', {
+                method: 'PUT',
+                body: formData
+            });
+            if (!response.ok) throw new Error('Failed to update Hero section');
+            alert('Hero section updated successfully!');
+            await fetchHeroData(); // Refresh the preview image
+        } catch (error) {
+            console.error('Hero form submission error:', error);
+            alert('An error occurred.');
+        }
+    });
+
+
+  // --- ABOUT ME MANAGEMENT (NEW) ---
+    const fetchAboutData = async () => {
+        const data = await apiRequest('GET', '/api/about');
+        if (data) {
+            aboutForm.querySelector('#about-p1').value = data.bioParagraph1;
+            aboutForm.querySelector('#about-p2').value = data.bioParagraph2;
+            aboutForm.querySelector('#about-skills').value = data.skills.join(', ');
+        }
+    };
+
+    aboutForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(aboutForm).entries());
+        await apiRequest('PUT', '/api/admin/about', data);
+        alert('About section updated successfully!');
+    });
 
 
     // --- PROJECT MANAGEMENT ---
@@ -290,7 +340,9 @@ projectForm.addEventListener('submit', async (e) => {
 
     // --- INITIALIZE PAGE ---
     // Fetch all data when the dashboard loads
+    fetchHeroData();
+    fetchAboutData();
     fetchProjects();
     fetchServices();
-     fetchExperiences(); 
+    fetchExperiences(); 
 });
