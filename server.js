@@ -1,4 +1,4 @@
-// server.js (Complete Version with All Routes)
+// server.js (Corrected with No Duplicate Logic)
 
 const express = require('express');
 const path = require('path');
@@ -6,60 +6,34 @@ const nodemailer = require('nodemailer');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
-const multer = require('multer'); // <-- NEW
-const axios = require('axios'); // <-- NEW
-const FormData = require('form-data'); // <-- NEW
+const multer = require('multer');
+const axios = require('axios');
+const FormData = require('form-data');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 require('dotenv').config();
 
-
-
-// --- Models ---
+// --- Models (Unchanged) ---
 const Project = require('./models/project');
 const Service = require('./models/service');
 const User = require('./models/user');
-const Experience = require('./models/experience'); 
+const Experience = require('./models/experience');
 const About = require('./models/about');
 const Hero = require('./models/hero');
+const Message = require('./models/message');
 
-// --- Multer Setup (for handling file uploads) ---
-const storage = multer.memoryStorage(); // Store files in memory to upload to ImgBB
+// --- Multer, App, Port, DB Connection, Middleware (UNCHANGED) ---
+const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
-
-// --- App & Port ---
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// --- Database Connection ---
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('MongoDB Connected...'))
-    .catch(err => console.error('MongoDB Connection Error:', err));
-
-// --- Middleware ---
+mongoose.connect(process.env.MONGO_URI).then(() => console.log('MongoDB Connected...')).catch(err => console.error('MongoDB Connection Error:', err));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-app.use(express.json({ limit: '50mb' }));
-app.use(express.json());
-
-// --- Session Middleware ---
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'a_very_secret_key_that_is_long_and_random',
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({ mongoUrl: process.env.MONGO_URI })
-}));
-
-// --- Auth Middleware (to protect admin routes) ---
-const requireLogin = (req, res, next) => {
-    if (!req.session.userId) {
-        // For API requests, return 401 Unauthorized. For page loads, redirect.
-        if (req.originalUrl.startsWith('/api/admin')) {
-             return res.status(401).json({ message: 'Unauthorized' });
-        }
-        return res.redirect('/admin/login.html');
-    }
-    next();
-};
+app.use(express.json({ limit: '50mb' })); // You only need this line once
+app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: false, store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }) }));
+const requireLogin = (req, res, next) => { if (!req.session.userId) { if (req.originalUrl.startsWith('/api/admin')) { return res.status(401).json({ message: 'Unauthorized' }); } return res.redirect('/admin/login.html'); } next(); };
+const requireOtpVerification = (req, res, next) => { if (!req.session.isOtpVerified) { return res.status(403).json({ message: 'Access denied. Please complete OTP verification first.' }); } next(); };
 
 // --- PUBLIC ROUTES ---
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'src', 'index.html')));
@@ -108,77 +82,88 @@ app.get('/api/hero', async (req, res) => {
 });
 
 
-
 // ============================================
-// --- FINAL, CORRECTED CONTACT FORM ROUTE (using HTTP API) ---
+// --- FINAL, CORRECTED CONTACT FORM ROUTE ---
 // ============================================
 app.post('/send-message', async (req, res) => {
-    const { name, email, message } = req.body;
-    const myReceivingEmail = "akashmandal6297@gmail.com"; // Your email address
-
-    // --- 1. Prepare the email to YOU (the Admin) ---
-    const adminEmailData = {
-        sender: { name: name, email: email }, // The user is the "sender"
-        to: [{ email: myReceivingEmail, name: 'Akash Mandal' }],
-        replyTo: { email: email, name: name }, // So you can reply to the user easily
-        subject: `New Portfolio Message from ${name}`,
-        htmlContent: `
-             <div style="font-family: 'Poppins', sans-serif; background-color: #f1f5f9; padding: 40px;">
-                <div style="max-width: 600px; margin: auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-                    <div style="background-color: #1e293b; color: white; padding: 20px; text-align: center;"><h1 style="margin: 0; font-size: 24px;">New Portfolio Inquiry</h1></div>
-                    <div style="padding: 30px;">
-                        <h2 style="color: #0d9488; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">Contact Details</h2>
-                        <p style="font-size: 16px;"><strong>Name:</strong> ${name}</p>
-                        <p style="font-size: 16px;"><strong>Email:</strong> <a href="mailto:${email}" style="color: #14b8a6;">${email}</a></p>
-                        <h2 style="color: #0d9488; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-top: 30px;">Message</h2>
-                        <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; font-size: 16px; line-height: 1.7; white-space: pre-wrap;">${message}</div>
-                    </div>
-                </div>
-            </div>`
-    };
-
-    // --- 2. Prepare the "Thank You" email to the USER ---
-    const userEmailData = {
-        sender: { name: 'Akash Mandal', email: myReceivingEmail }, // You are the "sender"
-        to: [{ email: email, name: name }],
-        subject: `Thank You for Your Message, ${name}!`,
-        htmlContent: `
-             <div style="font-family: 'Poppins', sans-serif; background-color: #f1f5f9; padding: 40px;">
-                <div style="max-width: 600px; margin: auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-                    <div style="background-color: #1e293b; color: white; padding: 20px; text-align: center;"><h1 style="margin: 0; font-size: 24px;">Message Received!</h1></div>
-                    <div style="padding: 30px;">
-                        <h2 style="color: #0d9488; font-size: 20px;">Hello ${name},</h2>
-                        <p style="font-size: 16px; line-height: 1.7;">Thank you for reaching out through my portfolio. I've successfully received your message and will review it shortly.</p>
-                        <p style="font-size: 16px; line-height: 1.7;">I appreciate your interest and will get back to you as soon as possible.</p>
-                        <p style="font-size: 16px; line-height: 1.7; margin-top: 30px;">Best regards,<br><b>Akash Mandal</b></p>
-                    </div>
-                </div>
-            </div>`
-    };
-
-    // --- Set up the API request configuration ---
-    const apiConfig = {
-        headers: {
-            'accept': 'application/json',
-            'api-key': process.env.BREVO_API_KEY,
-            'content-type': 'application/json'
-        }
-    };
-    
-    // --- Send both emails using Axios ---
+    // This single try...catch block will handle the entire process.
     try {
-        await axios.post('https://api.brevo.com/v3/smtp/email', adminEmailData, apiConfig);
-        await axios.post('https://api.brevo.com/v3/smtp/email', userEmailData, apiConfig);
+        const { name, email, message } = req.body;
+
+        // --- Step 1: Save the message to the database FIRST ---
+        const newMessage = new Message({ name, email, message });
+        await newMessage.save();
+        console.log('Message saved to database.');
+
+        // --- Step 2: Prepare the transporter and email templates ---
+        const gmailTransporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true, // Use SSL
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS, // Your Gmail App Password
+            },
+        });
+
+        // Template for the notification email to YOU
+        const adminMailOptions = {
+            from: `"${name}" <${process.env.EMAIL_USER}>`,
+            to: process.env.EMAIL_USER,
+            replyTo: email,
+            subject: `New Portfolio Message from ${name}`,
+            html: `
+                <div style="font-family: 'Poppins', sans-serif; background-color: #f1f5f9; padding: 40px;">
+                    <div style="max-width: 600px; margin: auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                        <div style="background-color: #1e293b; color: white; padding: 20px; text-align: center;"><h1 style="margin: 0; font-size: 24px;">New Portfolio Inquiry</h1></div>
+                        <div style="padding: 30px;">
+                            <h2 style="color: #0d9488; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">Contact Details</h2>
+                            <p style="font-size: 16px;"><strong>Name:</strong> ${name}</p>
+                            <p style="font-size: 16px;"><strong>Email:</strong> <a href="mailto:${email}" style="color: #14b8a6;">${email}</a></p>
+                            <h2 style="color: #0d9488; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-top: 30px;">Message</h2>
+                            <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; font-size: 16px; line-height: 1.7; white-space: pre-wrap;">${message}</div>
+                        </div>
+                    </div>
+                </div>
+            `,
+        };
+
+        // Template for the "Thank You" email to the USER
+        const userMailOptions = {
+            from: `"Akash Mandal" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: `Thank You for Your Message, ${name}!`,
+            html: `
+                <div style="font-family: 'Poppins', sans-serif; background-color: #f1f5f9; padding: 40px;">
+                    <div style="max-width: 600px; margin: auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                        <div style="background-color: #1e293b; color: white; padding: 20px; text-align: center;"><h1 style="margin: 0; font-size: 24px;">Message Received!</h1></div>
+                        <div style="padding: 30px;">
+                            <h2 style="color: #0d9488; font-size: 20px;">Hello ${name},</h2>
+                            <p style="font-size: 16px; line-height: 1.7;">Thank you for reaching out through my portfolio. I've successfully received your message and will review it shortly.</p>
+                            <p style="font-size: 16px; line-height: 1.7;">I appreciate your interest and will get back to you as soon as possible.</p>
+                            <p style="font-size: 16px; line-height: 1.7; margin-top: 30px;">Best regards,<br><b>Akash Mandal</b></p>
+                        </div>
+                    </div>
+                </div>
+            `,
+        };
+
+        // --- Step 3: Send the emails ---
+        await gmailTransporter.sendMail(adminMailOptions);
+        console.log('Admin notification sent successfully via Gmail.');
         
-        console.log('Emails sent successfully via Brevo API.');
-        res.status(200).json({ success: true, message: 'Your message has been sent successfully!' });
+        await gmailTransporter.sendMail(userMailOptions);
+        console.log('User confirmation sent successfully via Gmail.');
+
+        // --- Step 4: Send ONE final success response ---
+        return res.status(200).json({ success: true, message: 'Your message has been sent successfully!' });
 
     } catch (error) {
-        console.error('Error sending email via Brevo API:', error.response ? error.response.data : error.message);
-        res.status(500).json({ success: false, message: 'An error occurred. Please try again later.' });
+        console.error('Error in contact form submission process:', error);
+        // --- Step 5: Send ONE final error response if anything fails ---
+        return res.status(500).json({ success: false, message: 'An error occurred. Please try again.' });
     }
 });
-
 
 
 // --- ADMIN AUTH ROUTES ---
@@ -201,10 +186,199 @@ app.post('/api/admin/logout', (req, res) => {
 });
 
 
+// 1. Request OTP
+app.post('/api/admin/request-otp', requireLogin, async (req, res) => {
+    try {
+        const user = await User.findById(req.session.userId);
+        if (!user || !user.email) {
+            return res.status(400).json({ message: 'Admin email not found.' });
+        }
+        
+        const otp = crypto.randomInt(100000, 999999).toString();
+        req.session.otp = otp;
+        req.session.otpExpires = Date.now() + 10 * 60 * 1000; // OTP expires in 10 minutes
+
+        // Use Gmail transporter specifically for this sensitive task
+        const gmailTransporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com', port: 465, secure: true,
+            auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
+        });
+
+        await gmailTransporter.sendMail({
+            from: `"Portfolio Admin" <${process.env.EMAIL_USER}>`,
+            to: user.email,
+            subject: 'Your Admin Area Verification Code',
+            html: `<div style="font-family: sans-serif; text-align: center; padding: 40px;">
+                       <h2>Verification Required</h2>
+                       <p>Your one-time password to access the admin settings is:</p>
+                       <p style="font-size: 32px; font-weight: bold; letter-spacing: 5px; margin: 20px 0;">${otp}</p>
+                       <p>This code will expire in 10 minutes.</p>
+                   </div>`
+        });
+
+        res.json({ success: true, message: `An OTP has been sent to ${user.email}.` });
+    } catch (error) {
+        console.error('Error sending OTP:', error);
+        res.status(500).json({ message: 'Failed to send OTP.' });
+    }
+});
+
+// 2. Verify OTP
+app.post('/api/admin/verify-otp', requireLogin, (req, res) => {
+    const { otp } = req.body;
+    if (!req.session.otp || Date.now() > req.session.otpExpires) {
+        return res.status(400).json({ message: 'OTP is invalid or has expired. Please request a new one.' });
+    }
+    if (otp !== req.session.otp) {
+        return res.status(400).json({ message: 'Incorrect OTP.' });
+    }
+    
+    // Success! Grant access.
+    req.session.isOtpVerified = true;
+    delete req.session.otp; // Clear OTP after successful verification
+    delete req.session.otpExpires;
+    
+    res.json({ success: true, message: 'Verification successful.' });
+});
+
+// 3. Change Password
+app.put('/api/admin/change-password', requireLogin, requireOtpVerification, async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword || newPassword.length < 8) {
+        return res.status(400).json({ message: 'Please provide current password and a new password (min. 8 characters).' });
+    }
+    
+    try {
+        const user = await User.findById(req.session.userId);
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Incorrect current password.' });
+        }
+        
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+        
+        req.session.isOtpVerified = false; // Require re-verification for next action
+        res.json({ success: true, message: 'Password changed successfully.' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error.' });
+    }
+});
+
+// 4. Create New Admin
+app.post('/api/admin/create-admin', requireLogin, requireOtpVerification, async (req, res) => {
+    const { newUsername, newEmail, newPassword } = req.body;
+     if (!newUsername || !newEmail || !newPassword || newPassword.length < 8) {
+        return res.status(400).json({ message: 'Please provide username, email, and a password (min. 8 characters).' });
+    }
+
+    try {
+        const existingUser = await User.findOne({ $or: [{ username: newUsername }, { email: newEmail }] });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Username or email already exists.' });
+        }
+        
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const newUser = new User({ username: newUsername, email: newEmail, password: hashedPassword });
+        await newUser.save();
+
+        req.session.isOtpVerified = false; // Require re-verification for next action
+        res.status(201).json({ success: true, message: `Admin user '${newUsername}' created successfully.` });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error.' });
+    }
+});
+
+
 // --- PROTECTED ADMIN PAGES ---
 app.get('/admin/dashboard.html', requireLogin, (req, res) => {
     res.sendFile(path.join(__dirname, 'public/admin/dashboard.html'));
 });
+
+// --- NEW: PROTECTED CRUD API ROUTES FOR MESSAGES ---
+app.get('/api/admin/messages', requireLogin, async (req, res) => {
+    try {
+        const messages = await Message.find().sort({ createdAt: -1 }); // Newest first
+        res.json(messages);
+    } catch (error) { res.status(500).json({ message: 'Failed to fetch messages.' }); }
+});
+
+// --- THIS IS THE NEW, MISSING ENDPOINT ---
+app.get('/api/admin/messages/:id', requireLogin, async (req, res) => {
+    try {
+        const message = await Message.findById(req.params.id);
+        if (!message) return res.status(404).json({ message: 'Message not found' });
+        res.json(message);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch message.' });
+    }
+});
+
+app.put('/api/admin/messages/:id/read', requireLogin, async (req, res) => {
+    try {
+        await Message.findByIdAndUpdate(req.params.id, { isRead: true });
+        res.json({ success: true });
+    } catch (error) { res.status(500).json({ message: 'Failed to mark as read.' }); }
+});
+
+app.delete('/api/admin/messages/:id', requireLogin, async (req, res) => {
+    try {
+        await Message.findByIdAndDelete(req.params.id);
+        res.json({ success: true, message: 'Message deleted.' });
+    } catch (error) { res.status(500).json({ message: 'Failed to delete message.' }); }
+});
+
+// THIS IS THE CORRECTED ROUTE
+app.post('/api/admin/messages/:id/reply', requireLogin, async (req, res) => {
+    const { replyMessage } = req.body;
+    try {
+        const originalMessage = await Message.findById(req.params.id);
+        if (!originalMessage) {
+            return res.status(404).json({ message: 'Original message not found.' });
+        }
+
+        // --- THIS IS THE FIX ---
+        // Use the same reliable Gmail configuration as your other email functions
+        const gmailTransporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true, // Use SSL
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
+        
+        const replyOptions = {
+            from: `"Akash Mandal" <${process.env.EMAIL_USER}>`,
+            to: originalMessage.email,
+            subject: `Re: Your message from my portfolio`,
+            html: `
+                <div style="font-family: 'Poppins', sans-serif; background-color: #f1f5f9; padding: 20px;">
+                    <div style="max-width: 600px; margin: auto; background-color: white; border-radius: 8px; padding: 30px;">
+                        <h2 style="color: #1e293b;">Hello ${originalMessage.name},</h2>
+                        <p style="font-size: 16px; line-height: 1.7;">${replyMessage.replace(/\n/g, '<br>')}</p>
+                        <p style="font-size: 16px; line-height: 1.7; margin-top: 20px;">Best regards,<br><b>Akash Mandal</b></p>
+                        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+                        <div style="font-size: 12px; color: #64748b;">
+                            <p><b>Original Message from you:</b></p>
+                            <p style="font-style: italic;">"${originalMessage.message}"</p>
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+        
+        await gmailTransporter.sendMail(replyOptions);
+        await Message.findByIdAndUpdate(req.params.id, { replied: true });
+
+        res.json({ success: true, message: 'Reply sent successfully.' });
+    } catch (error) {
+        console.error('Error sending reply:', error);
+        res.status(500).json({ message: 'Failed to send reply.' });
+    }
+});
+
 
 
 // --- PROTECTED CRUD API ROUTES FOR PROJECTS ---
