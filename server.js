@@ -21,6 +21,7 @@ const Experience = require('./models/experience');
 const About = require('./models/about');
 const Hero = require('./models/hero');
 const Message = require('./models/message');
+const EmailTemplate = require('./models/emailTemplate');
 
 // --- Multer, App, Port, DB Connection, Middleware (UNCHANGED) ---
 const storage = multer.memoryStorage();
@@ -94,6 +95,25 @@ app.post('/send-message', async (req, res) => {
         const newMessage = new Message({ name, email, message });
         await newMessage.save();
         console.log('Message saved to database.');
+// 2. Fetch email templates from the database
+        const adminTemplate = await EmailTemplate.findOne({ templateName: 'adminNotification' });
+        const userTemplate = await EmailTemplate.findOne({ templateName: 'userConfirmation' });
+
+        if (!adminTemplate || !userTemplate) {
+            throw new Error('Email templates not found in database.');
+        }
+
+        // 3. Personalize the templates
+         let adminHtml = adminTemplate.htmlContent
+            .replace(/{{name}}/g, name)
+            .replace(/{{email}}/g, email)
+            .replace(/{{message}}/g, message);
+        let adminSubject = adminTemplate.subject.replace(/{{name}}/g, name);
+        
+        let userHtml = userTemplate.htmlContent
+            .replace(/{{name}}/g, name)
+            .replace(/{{message}}/g, message);
+        let userSubject = userTemplate.subject.replace(/{{name}}/g, name);
 
         // --- Step 2: Prepare the transporter and email templates ---
         const gmailTransporter = nodemailer.createTransport({
@@ -107,45 +127,60 @@ app.post('/send-message', async (req, res) => {
         });
 
         // Template for the notification email to YOU
+        // const adminMailOptions = {
+        //     from: `"${name}" <${process.env.EMAIL_USER}>`,
+        //     to: process.env.EMAIL_USER,
+        //     replyTo: email,
+        //     subject: `New Portfolio Message from ${name}`,
+        //     html: `
+        //         <div style="font-family: 'Poppins', sans-serif; background-color: #f1f5f9; padding: 40px;">
+        //             <div style="max-width: 600px; margin: auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+        //                 <div style="background-color: #1e293b; color: white; padding: 20px; text-align: center;"><h1 style="margin: 0; font-size: 24px;">New Portfolio Inquiry</h1></div>
+        //                 <div style="padding: 30px;">
+        //                     <h2 style="color: #0d9488; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">Contact Details</h2>
+        //                     <p style="font-size: 16px;"><strong>Name:</strong> ${name}</p>
+        //                     <p style="font-size: 16px;"><strong>Email:</strong> <a href="mailto:${email}" style="color: #14b8a6;">${email}</a></p>
+        //                     <h2 style="color: #0d9488; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-top: 30px;">Message</h2>
+        //                     <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; font-size: 16px; line-height: 1.7; white-space: pre-wrap;">${message}</div>
+        //                 </div>
+        //             </div>
+        //         </div>
+        //     `,
+        // };
+
+        // Template for the "Thank You" email to the USER
+        // const userMailOptions = {
+        //     from: `"Akash Mandal" <${process.env.EMAIL_USER}>`,
+        //     to: email,
+        //     subject: `Thank You for Your Message, ${name}!`,
+        //     html: `
+        //         <div style="font-family: 'Poppins', sans-serif; background-color: #f1f5f9; padding: 40px;">
+        //             <div style="max-width: 600px; margin: auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+        //                 <div style="background-color: #1e293b; color: white; padding: 20px; text-align: center;"><h1 style="margin: 0; font-size: 24px;">Message Received!</h1></div>
+        //                 <div style="padding: 30px;">
+        //                     <h2 style="color: #0d9488; font-size: 20px;">Hello ${name},</h2>
+        //                     <p style="font-size: 16px; line-height: 1.7;">Thank you for reaching out through my portfolio. I've successfully received your message and will review it shortly.</p>
+        //                     <p style="font-size: 16px; line-height: 1.7;">I appreciate your interest and will get back to you as soon as possible.</p>
+        //                     <p style="font-size: 16px; line-height: 1.7; margin-top: 30px;">Best regards,<br><b>Akash Mandal</b></p>
+        //                 </div>
+        //             </div>
+        //         </div>
+        //     `,
+        // };
+
         const adminMailOptions = {
             from: `"${name}" <${process.env.EMAIL_USER}>`,
             to: process.env.EMAIL_USER,
             replyTo: email,
-            subject: `New Portfolio Message from ${name}`,
-            html: `
-                <div style="font-family: 'Poppins', sans-serif; background-color: #f1f5f9; padding: 40px;">
-                    <div style="max-width: 600px; margin: auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-                        <div style="background-color: #1e293b; color: white; padding: 20px; text-align: center;"><h1 style="margin: 0; font-size: 24px;">New Portfolio Inquiry</h1></div>
-                        <div style="padding: 30px;">
-                            <h2 style="color: #0d9488; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">Contact Details</h2>
-                            <p style="font-size: 16px;"><strong>Name:</strong> ${name}</p>
-                            <p style="font-size: 16px;"><strong>Email:</strong> <a href="mailto:${email}" style="color: #14b8a6;">${email}</a></p>
-                            <h2 style="color: #0d9488; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-top: 30px;">Message</h2>
-                            <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; font-size: 16px; line-height: 1.7; white-space: pre-wrap;">${message}</div>
-                        </div>
-                    </div>
-                </div>
-            `,
+            subject: adminSubject,
+            html: adminHtml,
         };
-
-        // Template for the "Thank You" email to the USER
+        
         const userMailOptions = {
             from: `"Akash Mandal" <${process.env.EMAIL_USER}>`,
             to: email,
-            subject: `Thank You for Your Message, ${name}!`,
-            html: `
-                <div style="font-family: 'Poppins', sans-serif; background-color: #f1f5f9; padding: 40px;">
-                    <div style="max-width: 600px; margin: auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-                        <div style="background-color: #1e293b; color: white; padding: 20px; text-align: center;"><h1 style="margin: 0; font-size: 24px;">Message Received!</h1></div>
-                        <div style="padding: 30px;">
-                            <h2 style="color: #0d9488; font-size: 20px;">Hello ${name},</h2>
-                            <p style="font-size: 16px; line-height: 1.7;">Thank you for reaching out through my portfolio. I've successfully received your message and will review it shortly.</p>
-                            <p style="font-size: 16px; line-height: 1.7;">I appreciate your interest and will get back to you as soon as possible.</p>
-                            <p style="font-size: 16px; line-height: 1.7; margin-top: 30px;">Best regards,<br><b>Akash Mandal</b></p>
-                        </div>
-                    </div>
-                </div>
-            `,
+            subject: userSubject,
+            html: userHtml,
         };
 
         // --- Step 3: Send the emails ---
@@ -154,6 +189,8 @@ app.post('/send-message', async (req, res) => {
         
         await gmailTransporter.sendMail(userMailOptions);
         console.log('User confirmation sent successfully via Gmail.');
+
+        
 
         // --- Step 4: Send ONE final success response ---
         return res.status(200).json({ success: true, message: 'Your message has been sent successfully!' });
@@ -289,6 +326,22 @@ app.post('/api/admin/create-admin', requireLogin, requireOtpVerification, async 
     }
 });
 
+// --- NEW: PROTECTED CRUD API ROUTES FOR EMAIL TEMPLATES ---
+app.get('/api/admin/email-templates', requireLogin, async (req, res) => {
+    try {
+        const templates = await EmailTemplate.find();
+        res.json(templates);
+    } catch (error) { res.status(500).json({ message: 'Failed to fetch templates.' }); }
+});
+
+app.put('/api/admin/email-templates/:id', requireLogin, async (req, res) => {
+    try {
+        const { subject, htmlContent } = req.body;
+        const updatedTemplate = await EmailTemplate.findByIdAndUpdate(req.params.id, { subject, htmlContent }, { new: true });
+        res.json(updatedTemplate);
+    } catch (error) { res.status(400).json({ message: error.message }); }
+});
+
 
 // --- PROTECTED ADMIN PAGES ---
 app.get('/admin/dashboard.html', requireLogin, (req, res) => {
@@ -337,6 +390,9 @@ app.post('/api/admin/messages/:id/reply', requireLogin, async (req, res) => {
             return res.status(404).json({ message: 'Original message not found.' });
         }
 
+        const replyTemplate = await EmailTemplate.findOne({ templateName: 'adminReply' });
+        if (!replyTemplate) throw new Error('Reply template not found.');
+
         // --- THIS IS THE FIX ---
         // Use the same reliable Gmail configuration as your other email functions
         const gmailTransporter = nodemailer.createTransport({
@@ -348,31 +404,25 @@ app.post('/api/admin/messages/:id/reply', requireLogin, async (req, res) => {
                 pass: process.env.EMAIL_PASS,
             },
         });
+
+        // Use global replace for all placeholders here as well
+        let replyHtml = replyTemplate.htmlContent
+            .replace(/{{name}}/g, originalMessage.name)
+            .replace(/{{replyMessage}}/g, replyMessage.replace(/\n/g, '<br>'))
+            .replace(/{{originalMessage}}/g, originalMessage.message);
         
-        const replyOptions = {
+        let replySubject = replyTemplate.subject.replace(/{{subject}}/g, originalMessage.message.substring(0, 20));
+
+        await gmailTransporter.sendMail({
             from: `"Akash Mandal" <${process.env.EMAIL_USER}>`,
             to: originalMessage.email,
-            subject: `Re: Your message from my portfolio`,
-            html: `
-                <div style="font-family: 'Poppins', sans-serif; background-color: #f1f5f9; padding: 20px;">
-                    <div style="max-width: 600px; margin: auto; background-color: white; border-radius: 8px; padding: 30px;">
-                        <h2 style="color: #1e293b;">Hello ${originalMessage.name},</h2>
-                        <p style="font-size: 16px; line-height: 1.7;">${replyMessage.replace(/\n/g, '<br>')}</p>
-                        <p style="font-size: 16px; line-height: 1.7; margin-top: 20px;">Best regards,<br><b>Akash Mandal</b></p>
-                        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
-                        <div style="font-size: 12px; color: #64748b;">
-                            <p><b>Original Message from you:</b></p>
-                            <p style="font-style: italic;">"${originalMessage.message}"</p>
-                        </div>
-                    </div>
-                </div>
-            `
-        };
+            subject: replySubject,
+            html: replyHtml
+        });
         
-        await gmailTransporter.sendMail(replyOptions);
         await Message.findByIdAndUpdate(req.params.id, { replied: true });
-
         res.json({ success: true, message: 'Reply sent successfully.' });
+
     } catch (error) {
         console.error('Error sending reply:', error);
         res.status(500).json({ message: 'Failed to send reply.' });

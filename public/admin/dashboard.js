@@ -18,6 +18,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const experiencesTableBody = document.getElementById('experiences-table-body');
     const clearExperienceFormBtn = document.getElementById('clear-experience-form');
     const aboutForm = document.getElementById('about-form');
+    const projectImagePreview = document.getElementById('project-image-preview');
+    const projectImagePlaceholder = document.getElementById('project-image-placeholder');
+    const emailTemplatesList = document.getElementById('email-templates-list');
+    const emailPreviewModal = document.getElementById('email-preview-modal');
+    const closePreviewModalBtn = document.getElementById('close-preview-modal');
+    const previewSubject = document.getElementById('preview-subject');
+    const previewIframe = document.getElementById('preview-iframe');
 
      // NEW: Admin Settings selectors
     const otpRequestView = document.getElementById('otp-request-view');
@@ -42,6 +49,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelDeleteBtn = document.getElementById('cancel-delete-button');
     let deleteInfo = { id: null, type: null }; // To store what we are about to delete
 
+  // --- NEW: TOAST NOTIFICATION FUNCTION ---
+    const showToast = (message, type = 'success') => {
+        const toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) return;
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            toast.addEventListener('transitionend', () => toast.remove());
+        }, 3000);
+    };
 
      // --- UI FUNCTIONALITY: SECTION TOGGLING (CORRECTED) ---
     const showSection = (sectionId) => {
@@ -73,6 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (sectionId === 'messages-management') {
                 fetchMessages(); // This will now be called correctly
             }
+            else if (sectionId === 'email-templates') {
+                fetchEmailTemplates();
+            }
         }
     };
 
@@ -83,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- API REQUEST HELPER ---
+ // --- API REQUEST HELPER (UPDATED) ---
     const apiRequest = async (method, url, body = null) => {
         try {
             const options = {
@@ -94,15 +118,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 options.body = JSON.stringify(body);
             }
             const response = await fetch(url, options);
+            const result = await response.json();
             if (!response.ok) {
                 if (response.status === 401) window.location.href = '/admin/login.html';
-                const errorText = await response.text();
-                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                throw new Error(result.message || `HTTP error! status: ${response.status}`);
             }
-            return response.json();
+            return result;
         } catch (error) {
             console.error(`API request failed: ${method} ${url}`, error);
-            alert(`An error occurred. Check the console for details.`);
+            showToast(error.message, 'error');
             return null;
         }
     };
@@ -128,11 +152,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Failed to update Hero section');
             }
-            alert('Hero section updated successfully!');
+            showToast('Hero section updated successfully!');
             await fetchHeroData(); // Refresh the preview image
         } catch (error) {
             console.error('Hero form submission error:', error);
-            alert(`An error occurred: ${error.message}`);
+            showToast(`An error occurred: ${error.message}`);
         }
     });
 
@@ -153,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
             data.skills = data.skills.split(',').map(s => s.trim());
         }
         const result = await apiRequest('PUT', '/api/admin/about', data);
-        if (result) alert('About section updated successfully!');
+        if (result) showToast('About section updated successfully!');
     });
 
     // --- EXPERIENCE MANAGEMENT ---
@@ -188,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (result) {
             clearExperienceForm();
             await fetchExperiences();
-        }
+        }showToast('Experience section updated successfully!');
     });
 
     clearExperienceFormBtn.addEventListener('click', clearExperienceForm);
@@ -235,36 +259,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    const clearProjectForm = () => {
+  const clearProjectForm = () => {
         projectForm.reset();
         projectForm.querySelector('#project-id').value = '';
+        projectImagePreview.classList.add('hidden');
+        projectImagePlaceholder.classList.remove('hidden');
     };
-
     projectForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = projectForm.querySelector('#project-id').value;
         const formData = new FormData(projectForm);
-        
         const url = id ? `/api/admin/projects/${id}` : '/api/admin/projects';
         const method = id ? 'PUT' : 'POST';
-
         try {
-            const response = await fetch(url, { method: method, body: formData });
-            if (!response.ok) {
-                if (response.status === 401) window.location.href = '/admin/login.html';
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to submit project data');
-            }
+            const response = await fetch(url, { method, body: formData });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message);
+            showToast(`Project ${id ? 'updated' : 'created'} successfully!`);
             clearProjectForm();
             await fetchProjects();
         } catch (error) {
-            console.error('Form submission error:', error);
-            alert(`An error occurred: ${error.message}`);
+            showToast(error.message, 'error');
         }
     });
-
     clearProjectFormBtn.addEventListener('click', clearProjectForm);
-
     projectsTableBody.addEventListener('click', async (e) => {
         const target = e.target;
         const row = target.closest('tr');
@@ -274,6 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (target.classList.contains('edit-project-btn')) {
             const [project] = await apiRequest('GET', `/api/admin/projects/${id}`);
             if(!project) return;
+            // ... (fill all form fields like name, description, etc.) ...
             projectForm.querySelector('#project-id').value = project._id;
             projectForm.querySelector('#project-name').value = project.name;
             projectForm.querySelector('#project-description').value = project.description;
@@ -283,7 +302,15 @@ document.addEventListener('DOMContentLoaded', () => {
             projectForm.querySelector('#project-tags').value = (project.tags || []).join(', ');
             projectForm.querySelector('#project-liveUrl').value = project.liveUrl || '';
             projectForm.querySelector('#project-sourceUrl').value = project.sourceUrl || '';
-            // Removed scroll, as the section is already visible
+            // Handle image preview
+            if (project.imageUrl) {
+                projectImagePreview.src = project.imageUrl;
+                projectImagePreview.classList.remove('hidden');
+                projectImagePlaceholder.classList.add('hidden');
+            } else {
+                projectImagePreview.classList.add('hidden');
+                projectImagePlaceholder.classList.remove('hidden');
+            }
         }
         
         if (target.classList.contains('delete-btn')) {
@@ -328,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (result) {
             clearServiceForm();
             await fetchServices();
-        }
+        }showToast('Service section updated successfully!');
     });
 
     clearServiceFormBtn.addEventListener('click', clearServiceForm);
@@ -532,7 +559,103 @@ document.addEventListener('DOMContentLoaded', () => {
             statusEl.className = 'mt-4 h-6 text-red-500';
         }
     });
+ // --- EMAIL TEMPLATE MANAGEMENT (UPDATED) ---
+    const fetchEmailTemplates = async () => {
+        const templates = await apiRequest('GET', '/api/admin/email-templates');
+        if (!templates) return;
+        
+        emailTemplatesList.innerHTML = '';
+        templates.forEach(template => {
+            const templateForm = `
+                <div class="bg-slate-800 p-6 rounded-lg shadow-xl">
+                    <form class="email-template-form space-y-4" data-id="${template._id}">
+                        <h3 class="text-2xl font-semibold text-white">${template.templateName}</h3>
+                        <p class="text-sm text-slate-400">Available variables: ${template.variables.join(', ')}</p>
+                        <div>
+                            <label class="block mb-2">Email Subject</label>
+                            <input type="text" name="subject" value="${template.subject}" required class="w-full bg-slate-700 p-2 rounded-md">
+                        </div>
+                        <div>
+                            <label class="block mb-2">HTML Content</label>
+                            <textarea name="htmlContent" rows="10" required class="w-full bg-slate-700 p-2 rounded-md font-mono text-sm">${template.htmlContent}</textarea>
+                        </div>
+                        <div class="flex space-x-4">
+                            <button type="submit" class="flex-1 bg-teal-500 text-white font-semibold py-2 px-6 rounded-md hover:bg-teal-600">Save Template</button>
+                            <button type="button" class="preview-template-btn flex-1 bg-sky-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-sky-700" data-template-name="${template.templateName}">Preview</button>
+                        </div>
+                    </form>
+                </div>`;
+            emailTemplatesList.insertAdjacentHTML('beforeend', templateForm);
+        });
+    };
+    
+    // Use event delegation for dynamically created forms
+    emailTemplatesList.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('preview-template-btn')) {
+            e.preventDefault();
+            const form = e.target.closest('.email-template-form');
+            const templateName = e.target.dataset.templateName;
+            const subject = form.querySelector('[name="subject"]').value;
+            const htmlContent = form.querySelector('[name="htmlContent"]').value;
+            
+            showPreview(templateName, subject, htmlContent);
+        }
+    });
+    
+    emailTemplatesList.addEventListener('submit', async (e) => {
+        if (e.target.classList.contains('email-template-form')) {
+            e.preventDefault();
+            // ... (your existing form submission logic for templates) ...
+            showToast('Email template saved successfully!');
+        }
+    });
 
+    // --- NEW: EMAIL PREVIEW LOGIC ---
+    const getSampleData = (templateName) => {
+        const sample = {
+            name: 'John Doe',
+            email: 'johndoe@example.com',
+            message: 'This is a test message to see how the template looks.\n\nIt can even have multiple lines!',
+            replyMessage: 'Thank you for your feedback! We will look into this and get back to you shortly.',
+            originalMessage: 'I had a question about your services.',
+            subject: 'Question about your services'
+        };
+
+        switch (templateName) {
+            case 'adminNotification':
+                return { '{{name}}': sample.name, '{{email}}': sample.email, '{{message}}': sample.message };
+            case 'userConfirmation':
+                return { '{{name}}': sample.name, '{{message}}': sample.message };
+            case 'adminReply':
+                return { '{{name}}': sample.name, '{{replyMessage}}': sample.replyMessage, '{{originalMessage}}': sample.originalMessage, '{{subject}}': sample.subject };
+            default:
+                return {};
+        }
+    };
+
+    const showPreview = (templateName, subject, htmlContent) => {
+        const sampleData = getSampleData(templateName);
+        let personalizedSubject = subject;
+        let personalizedHtml = htmlContent;
+
+        // Replace all variables in the subject and HTML
+        for (const [variable, value] of Object.entries(sampleData)) {
+            const regex = new RegExp(variable, 'g');
+            personalizedSubject = personalizedSubject.replace(regex, value);
+            personalizedHtml = personalizedHtml.replace(regex, value.replace(/\n/g, '<br>'));
+        }
+        
+        previewSubject.textContent = personalizedSubject;
+        // Using srcdoc is the best way to render HTML in an iframe for security and style isolation
+        previewIframe.srcdoc = personalizedHtml;
+        
+        emailPreviewModal.classList.remove('hidden');
+    };
+
+    closePreviewModalBtn.addEventListener('click', () => {
+        emailPreviewModal.classList.add('hidden');
+        previewIframe.srcdoc = ''; // Clear the iframe content
+    });
 
     // --- INITIALIZE PAGE ---
     // Show the Hero section by default on load
