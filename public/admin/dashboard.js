@@ -34,7 +34,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const otpVerifyForm = document.getElementById('otp-verify-form');
     const changePasswordForm = document.getElementById('change-password-form');
     const createAdminForm = document.getElementById('create-admin-form');
-
+   const normalAdminView = document.getElementById('normal-admin-view');
+    const superAdminView = document.getElementById('super-admin-view');
+    const usersTableBody = document.getElementById('users-table-body');
+    const editUserModal = document.getElementById('edit-user-modal');
+    const editUserForm = document.getElementById('edit-user-form');
+    const cancelEditUserBtn = document.getElementById('cancel-edit-user');
 // Message Center selectors
     const messagesList = document.getElementById('messages-list');
     const noMessagesDiv = document.getElementById('no-messages');
@@ -64,42 +69,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     };
 
-    
-     // --- UI FUNCTIONALITY: SECTION TOGGLING (CORRECTED) ---
-    const showSection = (sectionId) => {
-        sidebarLinks.forEach(link => link.classList.remove('active'));
-        adminSections.forEach(section => section.classList.add('hidden'));
+ let currentUserIsSuperAdmin = false;
+    let allUsers = [];
 
-        const activeLink = document.querySelector(`.sidebar-link[data-section="${sectionId}"]`);
-        if (activeLink) activeLink.classList.add('active');
-
-        const selectedSection = document.getElementById(`${sectionId}-container`);
-        if (selectedSection) {
-            selectedSection.classList.remove('hidden');
-            
-            // This is the corrected logic block with a proper if/else if chain
-            if (sectionId === 'admin-settings') {
-                document.getElementById('otp-request-view').classList.remove('hidden');
-                document.getElementById('otp-verify-view').classList.add('hidden');
-                document.getElementById('admin-content-view').classList.add('hidden');
-            } else if (sectionId === 'hero-management') {
-                fetchHeroData();
-            } else if (sectionId === 'about-management') {
-                fetchAboutData();
-            } else if (sectionId === 'experience-management') {
-                fetchExperiences();
-            } else if (sectionId === 'projects-management') {
-                fetchProjects();
-            } else if (sectionId === 'services-management') {
-                fetchServices();
-            } else if (sectionId === 'messages-management') {
-                fetchMessages(); // This will now be called correctly
-            }
-            else if (sectionId === 'email-templates') {
-                fetchEmailTemplates();
-            }
+    // --- CHECK ADMIN STATUS ---
+   
+    const checkAdminStatus = async () => {
+        const status = await apiRequest('GET', '/api/admin/status');
+        if (status) {
+            currentUserIsSuperAdmin = status.isSuperAdmin;
         }
     };
+    checkAdminStatus();
+    
+     // --- UI FUNCTIONALITY: SECTION TOGGLING (CORRECTED) ---
+  
 
     sidebarLinks.forEach(link => {
         link.addEventListener('click', (e) => {
@@ -673,6 +657,81 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+ 
+    // --- SUPER ADMIN FUNCTIONS ---
+    const fetchUsers = async () => {
+        const users = await apiRequest('GET', '/api/admin/users');
+        if (!users) return;
+        allUsers = users; // Store users for later access
+        usersTableBody.innerHTML = '';
+        users.forEach(user => {
+            const isSuper = user.email === 'akashmandal6297@gmail.com';
+            const row = `
+                <tr data-id="${user._id}">
+                    <td class="p-3 border-t border-slate-700">${user.username} ${isSuper ? '<span class="text-xs text-teal-400">(Super Admin)</span>' : ''}</td>
+                    <td class="p-3 border-t border-slate-700">${user.email}</td>
+                    <td class="p-3 border-t border-slate-700">
+                        <button class="edit-user-btn bg-yellow-500 text-white px-3 py-1 rounded-md text-sm hover:bg-yellow-600">Edit</button>
+                        ${!isSuper ? `<button class="delete-btn bg-red-600 text-white px-3 py-1 rounded-md text-sm hover:bg-red-700 ml-2" data-type="user">Delete</button>` : ''}
+                    </td>
+                </tr>`;
+            usersTableBody.insertAdjacentHTML('beforeend', row);
+        });
+    };
+    
+    // --- UI FUNCTIONALITY: SECTION TOGGLING ---
+    const showSection = (sectionId) => {
+        sidebarLinks.forEach(link => link.classList.remove('active'));
+        adminSections.forEach(section => section.classList.add('hidden'));
+
+        const activeLink = document.querySelector(`.sidebar-link[data-section="${sectionId}"]`);
+        if (activeLink) activeLink.classList.add('active');
+
+        const selectedSection = document.getElementById(`${sectionId}-container`);
+        if (selectedSection) {
+            selectedSection.classList.remove('hidden');
+            
+            if (sectionId === 'admin-settings') {
+                if (currentUserIsSuperAdmin) {
+                    superAdminView.classList.remove('hidden');
+                    normalAdminView.classList.add('hidden');
+                    fetchUsers();
+                } else {
+                    normalAdminView.classList.remove('hidden');
+                    superAdminView.classList.add('hidden');
+                }
+            } else if (sectionId === 'hero-management') fetchHeroData();
+            else if (sectionId === 'about-management') fetchAboutData();
+            else if (sectionId === 'experience-management') fetchExperiences();
+            else if (sectionId === 'projects-management') fetchProjects();
+            else if (sectionId === 'services-management') fetchServices();
+            else if (sectionId === 'messages-management') fetchMessages();
+            else if (sectionId === 'email-templates') fetchEmailTemplates();
+        }
+    };
+
+// Super Admin event listeners
+    usersTableBody.addEventListener('click', async (e) => {
+        const target = e.target;
+        const row = target.closest('tr');
+        if (!row) return;
+        const id = row.dataset.id;
+
+        if (target.classList.contains('edit-user-btn')) {
+            const user = allUsers.find(u => u._id === id); // Use the stored user list
+            if (!user) return;
+            editUserForm.querySelector('#edit-user-id').value = id;
+            editUserForm.querySelector('#edit-username').value = user.username;
+            editUserForm.querySelector('#edit-email').value = user.email;
+            editUserForm.querySelector('#edit-new-password').value = '';
+            editUserModal.classList.remove('hidden');
+        }
+        if (target.classList.contains('delete-btn')) {
+             deleteInfo = { id, type: 'user' };
+             deleteModal.classList.remove('hidden');
+        }
+    });
+
     const showPreview = (templateName, subject, htmlContent) => {
         const sampleData = getSampleData(templateName);
         let personalizedSubject = subject;
@@ -697,7 +756,17 @@ document.addEventListener('DOMContentLoaded', () => {
         previewIframe.srcdoc = ''; // Clear the iframe content
     });
 
-    // --- INITIALIZE PAGE ---
-    // Show the Hero section by default on load
-    showSection('hero-management');
+     // --- STEP 4: INITIALIZE THE PAGE ---
+    // ===================================================================
+    const initializeDashboard = async () => {
+        // First, check the admin status
+        const status = await apiRequest('GET', '/api/admin/status');
+        if (status) {
+            currentUserIsSuperAdmin = status.isSuperAdmin;
+        }
+        // THEN, show the default section
+        showSection('hero-management');
+    };
+
+    initializeDashboard();
 });

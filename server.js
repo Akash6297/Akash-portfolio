@@ -37,8 +37,6 @@ const requireLogin = (req, res, next) => { if (!req.session.userId) { if (req.or
 const requireOtpVerification = (req, res, next) => { if (!req.session.isOtpVerified) { return res.status(403).json({ message: 'Access denied. Please complete OTP verification first.' }); } next(); };
 
 
-
-
 // --- Helper Function to Build Email HTML ---
 const buildEmailHtml = (templateConfig, variables) => {
     const { primaryColor, headerText, bodyText, footerText, showSocials, githubLink, linkedinLink } = templateConfig;
@@ -74,6 +72,76 @@ const buildEmailHtml = (templateConfig, variables) => {
     `;
 };
 
+
+// --- NEW: Middleware to check if user is Super Admin ---
+const isSuperAdmin = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.session.userId);
+        if (user && user.email === process.env.SUPER_ADMIN_EMAIL) {
+            next(); // User is the super admin, proceed
+        } else {
+            res.status(403).json({ message: 'Forbidden: Super admin access required.' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Server error during authorization.' });
+    }
+};
+
+// --- NEW: Route to check current user's status ---
+app.get('/api/admin/status', requireLogin, async (req, res) => {
+    try {
+        const user = await User.findById(req.session.userId).select('username email');
+        const isSuper = user.email === process.env.SUPER_ADMIN_EMAIL;
+        res.json({ username: user.username, isSuperAdmin: isSuper });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to get user status.' });
+    }
+});
+
+
+// NEW: Get all users (for Super Admin to see)
+app.get('/api/admin/users', requireLogin, isSuperAdmin, async (req, res) => {
+    try {
+        const users = await User.find().select('username email'); // Don't send passwords
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch users.' });
+    }
+});
+
+// NEW: Update any user's details (for Super Admin)
+app.put('/api/admin/users/:id', requireLogin, isSuperAdmin, async (req, res) => {
+    try {
+        const { username, email, newPassword } = req.body;
+        const userToUpdate = await User.findById(req.params.id);
+        if (!userToUpdate) return res.status(404).json({ message: 'User not found.' });
+
+        userToUpdate.username = username;
+        userToUpdate.email = email;
+        if (newPassword && newPassword.length >= 8) {
+            userToUpdate.password = await bcrypt.hash(newPassword, 10);
+        }
+        await userToUpdate.save();
+        res.json({ success: true, message: `User ${username} updated successfully.` });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to update user.' });
+    }
+});
+
+// NEW: Delete a user (for Super Admin)
+app.delete('/api/admin/users/:id', requireLogin, isSuperAdmin, async (req, res) => {
+    try {
+        const userToDelete = await User.findById(req.params.id);
+        // Prevent Super Admin from deleting themselves
+        if (userToDelete.email === process.env.SUPER_ADMIN_EMAIL) {
+            return res.status(400).json({ message: 'Cannot delete the super admin account.' });
+        }
+        await User.findByIdAndDelete(req.params.id);
+        res.json({ success: true, message: 'User deleted successfully.' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to delete user.' });
+    }
+});
 
 // --- PUBLIC ROUTES ---
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'src', 'index.html')));
