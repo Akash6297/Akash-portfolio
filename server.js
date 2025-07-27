@@ -36,6 +36,45 @@ app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUniniti
 const requireLogin = (req, res, next) => { if (!req.session.userId) { if (req.originalUrl.startsWith('/api/admin')) { return res.status(401).json({ message: 'Unauthorized' }); } return res.redirect('/admin/login.html'); } next(); };
 const requireOtpVerification = (req, res, next) => { if (!req.session.isOtpVerified) { return res.status(403).json({ message: 'Access denied. Please complete OTP verification first.' }); } next(); };
 
+
+
+
+// --- Helper Function to Build Email HTML ---
+const buildEmailHtml = (templateConfig, variables) => {
+    const { primaryColor, headerText, bodyText, footerText, showSocials, githubLink, linkedinLink } = templateConfig;
+
+    // Replace placeholders in the body text first
+    let personalizedBody = bodyText;
+    for (const [key, value] of Object.entries(variables)) {
+        personalizedBody = personalizedBody.replace(new RegExp(`{{${key}}}`, 'g'), value.replace(/\n/g, '<br>'));
+    }
+
+    // Generate social links block if enabled
+    const socialsHTML = showSocials ? `
+        <div style="text-align: center; margin-top: 20px;">
+            ${githubLink ? `<a href="${githubLink}" style="margin: 0 10px; text-decoration: none;">GitHub</a>` : ''}
+            ${linkedinLink ? `<a href="${linkedinLink}" style="margin: 0 10px; text-decoration: none;">LinkedIn</a>` : ''}
+        </div>` : '';
+
+    return `
+        <div style="font-family: 'Poppins', sans-serif; background-color: #f1f5f9; padding: 40px;">
+            <div style="max-width: 600px; margin: auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                <div style="background-color: ${primaryColor}; color: white; padding: 20px; text-align: center;">
+                    <h1 style="margin: 0; font-size: 24px;">${headerText}</h1>
+                </div>
+                <div style="padding: 30px; font-size: 16px; line-height: 1.7;">
+                    ${personalizedBody}
+                </div>
+                <div style="background-color: #f8fafc; padding: 20px; text-align: center; font-size: 12px; color: #64748b;">
+                    <p>${footerText}</p>
+                    ${socialsHTML}
+                </div>
+            </div>
+        </div>
+    `;
+};
+
+
 // --- PUBLIC ROUTES ---
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'src', 'index.html')));
 
@@ -83,39 +122,30 @@ app.get('/api/hero', async (req, res) => {
 });
 
 
-// ============================================
-// --- FINAL, CORRECTED CONTACT FORM ROUTE ---
-// ============================================
+
+
+// =======================================================
+// --- CONTACT FORM ROUTE (REBUILT FOR DYNAMIC TEMPLATES) ---
+// =======================================================
 app.post('/send-message', async (req, res) => {
-    // This single try...catch block will handle the entire process.
     try {
         const { name, email, message } = req.body;
+        await new Message({ name, email, message }).save();
 
-        // --- Step 1: Save the message to the database FIRST ---
-        const newMessage = new Message({ name, email, message });
-        await newMessage.save();
-        console.log('Message saved to database.');
-// 2. Fetch email templates from the database
-        const adminTemplate = await EmailTemplate.findOne({ templateName: 'adminNotification' });
-        const userTemplate = await EmailTemplate.findOne({ templateName: 'userConfirmation' });
+        const adminTemplateDoc = await EmailTemplate.findOne({ templateName: 'adminNotification' });
+        const userTemplateDoc = await EmailTemplate.findOne({ templateName: 'userConfirmation' });
 
-        if (!adminTemplate || !userTemplate) {
-            throw new Error('Email templates not found in database.');
-        }
+        if (!adminTemplateDoc || !userTemplateDoc) throw new Error('Email templates not found.');
 
-        // 3. Personalize the templates
-         let adminHtml = adminTemplate.htmlContent
-            .replace(/{{name}}/g, name)
-            .replace(/{{email}}/g, email)
-            .replace(/{{message}}/g, message);
-        let adminSubject = adminTemplate.subject.replace(/{{name}}/g, name);
+        const adminConfig = JSON.parse(adminTemplateDoc.htmlContent);
+        const userConfig = JSON.parse(userTemplateDoc.htmlContent);
+
+        const adminHtml = buildEmailHtml(adminConfig, { name, email, message: `<b>From:</b> ${name} (${email})<br><br>${message}` });
+        const userHtml = buildEmailHtml(userConfig, { name, message });
+
+        const adminSubject = adminTemplateDoc.subject.replace('{{name}}', name);
+        const userSubject = userTemplateDoc.subject.replace('{{name}}', name);
         
-        let userHtml = userTemplate.htmlContent
-            .replace(/{{name}}/g, name)
-            .replace(/{{message}}/g, message);
-        let userSubject = userTemplate.subject.replace(/{{name}}/g, name);
-
-        // --- Step 2: Prepare the transporter and email templates ---
         const gmailTransporter = nodemailer.createTransport({
             host: 'smtp.gmail.com',
             port: 465,
@@ -125,80 +155,13 @@ app.post('/send-message', async (req, res) => {
                 pass: process.env.EMAIL_PASS, // Your Gmail App Password
             },
         });
+        await gmailTransporter.sendMail({ from: `"${name}" <...>`, to: process.env.EMAIL_USER, replyTo: email, subject: adminSubject, html: adminHtml });
+        await gmailTransporter.sendMail({ from: `"Akash Mandal" <...>`, to: email, subject: userSubject, html: userHtml });
 
-        // Template for the notification email to YOU
-        // const adminMailOptions = {
-        //     from: `"${name}" <${process.env.EMAIL_USER}>`,
-        //     to: process.env.EMAIL_USER,
-        //     replyTo: email,
-        //     subject: `New Portfolio Message from ${name}`,
-        //     html: `
-        //         <div style="font-family: 'Poppins', sans-serif; background-color: #f1f5f9; padding: 40px;">
-        //             <div style="max-width: 600px; margin: auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-        //                 <div style="background-color: #1e293b; color: white; padding: 20px; text-align: center;"><h1 style="margin: 0; font-size: 24px;">New Portfolio Inquiry</h1></div>
-        //                 <div style="padding: 30px;">
-        //                     <h2 style="color: #0d9488; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">Contact Details</h2>
-        //                     <p style="font-size: 16px;"><strong>Name:</strong> ${name}</p>
-        //                     <p style="font-size: 16px;"><strong>Email:</strong> <a href="mailto:${email}" style="color: #14b8a6;">${email}</a></p>
-        //                     <h2 style="color: #0d9488; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-top: 30px;">Message</h2>
-        //                     <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; font-size: 16px; line-height: 1.7; white-space: pre-wrap;">${message}</div>
-        //                 </div>
-        //             </div>
-        //         </div>
-        //     `,
-        // };
-
-        // Template for the "Thank You" email to the USER
-        // const userMailOptions = {
-        //     from: `"Akash Mandal" <${process.env.EMAIL_USER}>`,
-        //     to: email,
-        //     subject: `Thank You for Your Message, ${name}!`,
-        //     html: `
-        //         <div style="font-family: 'Poppins', sans-serif; background-color: #f1f5f9; padding: 40px;">
-        //             <div style="max-width: 600px; margin: auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-        //                 <div style="background-color: #1e293b; color: white; padding: 20px; text-align: center;"><h1 style="margin: 0; font-size: 24px;">Message Received!</h1></div>
-        //                 <div style="padding: 30px;">
-        //                     <h2 style="color: #0d9488; font-size: 20px;">Hello ${name},</h2>
-        //                     <p style="font-size: 16px; line-height: 1.7;">Thank you for reaching out through my portfolio. I've successfully received your message and will review it shortly.</p>
-        //                     <p style="font-size: 16px; line-height: 1.7;">I appreciate your interest and will get back to you as soon as possible.</p>
-        //                     <p style="font-size: 16px; line-height: 1.7; margin-top: 30px;">Best regards,<br><b>Akash Mandal</b></p>
-        //                 </div>
-        //             </div>
-        //         </div>
-        //     `,
-        // };
-
-        const adminMailOptions = {
-            from: `"${name}" <${process.env.EMAIL_USER}>`,
-            to: process.env.EMAIL_USER,
-            replyTo: email,
-            subject: adminSubject,
-            html: adminHtml,
-        };
-        
-        const userMailOptions = {
-            from: `"Akash Mandal" <${process.env.EMAIL_USER}>`,
-            to: email,
-            subject: userSubject,
-            html: userHtml,
-        };
-
-        // --- Step 3: Send the emails ---
-        await gmailTransporter.sendMail(adminMailOptions);
-        console.log('Admin notification sent successfully via Gmail.');
-        
-        await gmailTransporter.sendMail(userMailOptions);
-        console.log('User confirmation sent successfully via Gmail.');
-
-        
-
-        // --- Step 4: Send ONE final success response ---
-        return res.status(200).json({ success: true, message: 'Your message has been sent successfully!' });
-
+        return res.status(200).json({ success: true, message: 'Message sent successfully!' });
     } catch (error) {
-        console.error('Error in contact form submission process:', error);
-        // --- Step 5: Send ONE final error response if anything fails ---
-        return res.status(500).json({ success: false, message: 'An error occurred. Please try again.' });
+        console.error('Error in contact form process:', error);
+        return res.status(500).json({ success: false, message: 'An error occurred.' });
     }
 });
 
@@ -383,15 +346,17 @@ app.delete('/api/admin/messages/:id', requireLogin, async (req, res) => {
 
 // THIS IS THE CORRECTED ROUTE
 app.post('/api/admin/messages/:id/reply', requireLogin, async (req, res) => {
-    const { replyMessage } = req.body;
     try {
+        const { replyMessage } = req.body;
         const originalMessage = await Message.findById(req.params.id);
-        if (!originalMessage) {
-            return res.status(404).json({ message: 'Original message not found.' });
-        }
-
-        const replyTemplate = await EmailTemplate.findOne({ templateName: 'adminReply' });
-        if (!replyTemplate) throw new Error('Reply template not found.');
+        if (!originalMessage) return res.status(404).json({ message: 'Original message not found.' });
+        
+        const replyTemplateDoc = await EmailTemplate.findOne({ templateName: 'adminReply' });
+        if (!replyTemplateDoc) throw new Error('Reply template not found.');
+        
+        const replyConfig = JSON.parse(replyTemplateDoc.htmlContent);
+        const replyHtml = buildEmailHtml(replyConfig, { name: originalMessage.name, replyMessage, originalMessage: `<b>Original Message from you:</b><br><i>"${originalMessage.message}"</i>` });
+        const replySubject = replyTemplateDoc.subject.replace('{{subject}}', originalMessage.message.substring(0, 20));
 
         // --- THIS IS THE FIX ---
         // Use the same reliable Gmail configuration as your other email functions
@@ -406,29 +371,16 @@ app.post('/api/admin/messages/:id/reply', requireLogin, async (req, res) => {
         });
 
         // Use global replace for all placeholders here as well
-        let replyHtml = replyTemplate.htmlContent
-            .replace(/{{name}}/g, originalMessage.name)
-            .replace(/{{replyMessage}}/g, replyMessage.replace(/\n/g, '<br>'))
-            .replace(/{{originalMessage}}/g, originalMessage.message);
         
-        let replySubject = replyTemplate.subject.replace(/{{subject}}/g, originalMessage.message.substring(0, 20));
-
-        await gmailTransporter.sendMail({
-            from: `"Akash Mandal" <${process.env.EMAIL_USER}>`,
-            to: originalMessage.email,
-            subject: replySubject,
-            html: replyHtml
-        });
+        await gmailTransporter.sendMail({ from: `"Akash Mandal" <...>`, to: originalMessage.email, subject: replySubject, html: replyHtml });
         
         await Message.findByIdAndUpdate(req.params.id, { replied: true });
         res.json({ success: true, message: 'Reply sent successfully.' });
-
     } catch (error) {
         console.error('Error sending reply:', error);
         res.status(500).json({ message: 'Failed to send reply.' });
     }
 });
-
 
 
 // --- PROTECTED CRUD API ROUTES FOR PROJECTS ---

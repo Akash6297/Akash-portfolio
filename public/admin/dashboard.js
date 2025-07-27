@@ -64,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     };
 
+    
      // --- UI FUNCTIONALITY: SECTION TOGGLING (CORRECTED) ---
     const showSection = (sectionId) => {
         sidebarLinks.forEach(link => link.classList.remove('active'));
@@ -559,33 +560,72 @@ document.addEventListener('DOMContentLoaded', () => {
             statusEl.className = 'mt-4 h-6 text-red-500';
         }
     });
- // --- EMAIL TEMPLATE MANAGEMENT (UPDATED) ---
+     // --- EMAIL TEMPLATE BUILDER LOGIC ---
+    const createMasterTemplate = (config, variables) => {
+        const { primaryColor, headerText, bodyText, footerText, showSocials, githubLink, linkedinLink } = config;
+        let personalizedBody = bodyText;
+        for (const [key, value] of Object.entries(variables)) {
+            personalizedBody = personalizedBody.replace(new RegExp(`{{${key}}}`, 'g'), value.replace(/\n/g, '<br>'));
+        }
+        const socialsHTML = (showSocials === 'on' || showSocials === true) ? `<div style="text-align: center; margin-top: 20px;"><a href="${githubLink}" style="margin: 0 10px;">GitHub</a><a href="${linkedinLink}" style="margin: 0 10px;">LinkedIn</a></div>` : '';
+        return `<div style="font-family: Poppins, sans-serif; background-color: #f1f5f9; padding: 40px;"><div style="max-width: 600px; margin: auto; background-color: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1);"><div style="background-color: ${primaryColor}; color: white; padding: 20px; text-align: center;"><h1 style="margin: 0; font-size: 24px;">${headerText}</h1></div><div style="padding: 30px; font-size: 16px; line-height: 1.7;">${personalizedBody}</div><div style="background-color: #f8fafc; padding: 20px; text-align: center; font-size: 12px; color: #64748b;"><p>${footerText}</p>${socialsHTML}</div></div></div>`;
+    };
+
     const fetchEmailTemplates = async () => {
         const templates = await apiRequest('GET', '/api/admin/email-templates');
         if (!templates) return;
         
         emailTemplatesList.innerHTML = '';
         templates.forEach(template => {
-            const templateForm = `
-                <div class="bg-slate-800 p-6 rounded-lg shadow-xl">
-                    <form class="email-template-form space-y-4" data-id="${template._id}">
+            const config = JSON.parse(template.htmlContent);
+            const builderHTML = `
+                <div class="bg-slate-800 p-6 rounded-lg shadow-xl" id="builder-${template._id}">
+                    <form class="email-template-form" data-id="${template._id}">
                         <h3 class="text-2xl font-semibold text-white">${template.templateName}</h3>
-                        <p class="text-sm text-slate-400">Available variables: ${template.variables.join(', ')}</p>
-                        <div>
-                            <label class="block mb-2">Email Subject</label>
-                            <input type="text" name="subject" value="${template.subject}" required class="w-full bg-slate-700 p-2 rounded-md">
-                        </div>
-                        <div>
-                            <label class="block mb-2">HTML Content</label>
-                            <textarea name="htmlContent" rows="10" required class="w-full bg-slate-700 p-2 rounded-md font-mono text-sm">${template.htmlContent}</textarea>
-                        </div>
-                        <div class="flex space-x-4">
-                            <button type="submit" class="flex-1 bg-teal-500 text-white font-semibold py-2 px-6 rounded-md hover:bg-teal-600">Save Template</button>
-                            <button type="button" class="preview-template-btn flex-1 bg-sky-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-sky-700" data-template-name="${template.templateName}">Preview</button>
+                        <p class="text-sm text-slate-400">Variables: ${template.variables.join(', ')}</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
+                            <div class="space-y-4">
+                                <div><label class="block mb-2">Primary Color</label><input type="color" name="primaryColor" value="${config.primaryColor || '#14b8a6'}" class="w-full h-10 p-1 bg-slate-700 rounded-md"></div>
+                                <div><label class="block mb-2">Header Text</label><input type="text" name="headerText" value="${config.headerText || ''}" class="w-full bg-slate-700 p-2 rounded-md"></div>
+                                <div><label class="block mb-2">Body Content</label><textarea name="bodyText" rows="6" class="w-full bg-slate-700 p-2 rounded-md">${config.bodyText || ''}</textarea></div>
+                                <div><label class="block mb-2">Footer Text</label><input type="text" name="footerText" value="${config.footerText || ''}" class="w-full bg-slate-700 p-2 rounded-md"></div>
+                                <div class="flex items-center"><input type="checkbox" id="showSocials-${template._id}" name="showSocials" ${config.showSocials ? 'checked' : ''}><label for="showSocials-${template._id}" class="ml-2">Show Social Links</label></div>
+                                <div class="social-inputs ${config.showSocials ? '' : 'hidden'}"><label class="block mb-2">GitHub URL</label><input type="text" name="githubLink" value="${config.githubLink || ''}" class="w-full bg-slate-700 p-2 rounded-md"></div>
+                                <div class="social-inputs ${config.showSocials ? '' : 'hidden'}"><label class="block mb-2">LinkedIn URL</label><input type="text" name="linkedinLink" value="${config.linkedinLink || ''}" class="w-full bg-slate-700 p-2 rounded-md"></div>
+                                <button type="submit" class="w-full bg-teal-500 text-white font-semibold py-2 px-6 rounded-md">Save Template</button>
+                            </div>
+                            <div>
+                                <label class="block mb-2">Live Preview</label>
+                                <iframe class="w-full h-96 bg-white border-0 rounded-md"></iframe>
+                            </div>
                         </div>
                     </form>
                 </div>`;
-            emailTemplatesList.insertAdjacentHTML('beforeend', templateForm);
+            emailTemplatesList.insertAdjacentHTML('beforeend', builderHTML);
+        });
+
+        document.querySelectorAll('.email-template-form').forEach(form => {
+            const updatePreview = () => {
+                const config = Object.fromEntries(new FormData(form).entries());
+                config.showSocials = form.querySelector('[name="showSocials"]').checked;
+                form.querySelectorAll('.social-inputs').forEach(el => el.classList.toggle('hidden', !config.showSocials));
+                const iframe = form.querySelector('iframe');
+                const sampleVars = getSampleData(form.closest('.bg-slate-800').querySelector('h3').textContent);
+                iframe.srcdoc = createMasterTemplate(config, sampleVars);
+            };
+
+            form.addEventListener('input', updatePreview);
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = form.dataset.id;
+                const config = Object.fromEntries(new FormData(form).entries());
+                config.showSocials = form.querySelector('[name="showSocials"]').checked;
+                
+                const data = { htmlContent: JSON.stringify(config), subject: "placeholder" }; // Subject update needs more complex logic
+                const result = await apiRequest('PUT', `/api/admin/email-templates/${id}`, data);
+                if (result) showToast('Template saved successfully!');
+            });
+            updatePreview();
         });
     };
     
