@@ -7,6 +7,7 @@
   <link href="/output.css" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
     body {
@@ -256,6 +257,15 @@
     <div id="services-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       <!-- Service cards will be injected here by JavaScript -->
     </div>
+
+    <!-- NEW: Calendly Call-to-Action Button -->
+        <div class="text-center mt-16">
+            <a href="https://calendly.com/akashmandal6297/30min" 
+               onclick="Calendly.initPopupWidget({url: 'https://calendly.com/akashmandal6297/30min'});return false;"
+               class="inline-block bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold text-lg py-4 px-8 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300">
+                Book a Free Discovery Call
+            </a>
+        </div>
   </div>
 </section>
 
@@ -412,7 +422,8 @@
 
   <!-- JAVASCRIPT for Mobile Menu -->
   <!-- ============================================ -->
-<!-- src/index.html (at the bottom) -->
+<!-- NEW: Calendly Widget Script -->
+    <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
 <script>
   // --- Wait for the entire page to load (including images) ---
   window.addEventListener('load', () => {
