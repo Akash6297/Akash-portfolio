@@ -6,77 +6,139 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <link href="/output.css" rel="stylesheet">
-    <style>
-        /* Optional: Add some custom scrollbar styling for a cleaner look */
-        body::-webkit-scrollbar {
-            width: 8px;
-        }
-        body::-webkit-scrollbar-track {
-            background: #1e293b; /* slate-800 */
-        }
-        body::-webkit-scrollbar-thumb {
-            background-color: #334155; /* slate-700 */
-            border-radius: 4px;
-        }
-        body::-webkit-scrollbar-thumb:hover {
-            background-color: #475569; /* slate-600 */
-        }
+        <style>
+        /* Modern Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background-color: #475569; }
 
+        .sidebar-link { position: relative; overflow: hidden; }
+        .sidebar-link::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            transition: left 0.5s ease;
+        }
+        .sidebar-link:hover::before { left: 100%; }
         .sidebar-link.active {
-            background-color: #14b8a6; /* teal-500 */
-            color: white;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
+            color: white; border-color: transparent;
+            box-shadow: 0 4px 15px -3px rgba(13, 148, 136, 0.4);
         }
-        .admin-section {
-            animation: fadeIn 0.5s ease-in-out;
-        }
+        
+        .admin-section { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- NEW: Toast Notification Styles --- */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .animated-button { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease; }
+        .animated-button:hover { transform: translateY(-3px) scale(1.02); }
+        .animated-button:active { transform: translateY(0) scale(0.98); }
+
+        /* --- Toast Notification Styles --- */
         #toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 100; }
         .toast {
             display: flex; align-items: center; padding: 1rem 1.5rem;
-            color: white; border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            color: white; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3);
             transform: translateX(120%); opacity: 0;
-            transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease-in-out;
+            border: 1px solid rgba(255,255,255,0.1);
         }
         .toast.show { transform: translateX(0); opacity: 1; }
-        .toast.success { background-color: #059669; } /* green-700 */
-        .toast.error { background-color: #dc2626; } /* red-600 */
+        .toast.success { background: linear-gradient(135deg, #059669, #047857); }
+        .toast.error { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+        
+        /* Input Transitions */
+        input, textarea, select { transition: border-color 0.3s, box-shadow 0.3s, background-color 0.3s; }
+        input:focus, textarea:focus, select:focus { background-color: rgba(30, 41, 59, 0.9) !important; box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
 
+        /* Quill Editor Styling */
+        .quill-editor-container {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(51, 65, 85, 0.6) !important;
+            border-radius: 0.75rem;
+            color: #e2e8f0;
+            overflow: visible; /* Changed to visible to allow toolbar to show properly */
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .ql-toolbar.ql-snow {
+            border: none !important;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.4) !important;
+            background: rgba(30, 41, 59, 0.9);
+            border-radius: 0.75rem 0.75rem 0 0;
+            padding: 8px !important;
+        }
+        .ql-container.ql-snow {
+            border: none !important;
+            min-height: 180px;
+            font-family: inherit;
+            flex-grow: 1;
+        }
+        .ql-editor {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            padding: 1.25rem !important;
+        }
+        .ql-editor.ql-blank::before {
+            color: rgba(148, 163, 184, 0.5);
+            font-style: normal;
+        }
     </style>
+    <!-- Quill.js CDN -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 </head>
-<body class="bg-slate-900 text-slate-300 min-h-screen flex flex-col">
+<body class="bg-slate-950 text-slate-300 min-h-screen flex flex-col selection:bg-teal-500/30 font-sans">
 <!-- NEW: Toast Notification Container -->
     <div id="toast-container"></div>
     <!-- Main Wrapper for Dashboard Layout -->
     <div class="flex flex-col flex-1">
         <!-- Header -->
-         <header class="bg-slate-800 shadow-lg p-4 sticky top-0 z-20">
+         <header class="bg-slate-800/80 backdrop-blur-lg shadow-[0_4px_30px_rgba(0,0,0,0.3)] p-4 sticky top-0 z-30 border-b border-slate-700/50">
             <div class="container mx-auto flex items-center justify-between">
-                <h1 class="text-2xl font-bold text-white">Admin Dashboard</h1>
-                <button id="logout-button" class="bg-red-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-red-700 transition-colors duration-300">Logout</button>
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400 tracking-tight drop-shadow-sm">Admin Dashboard</h1>
+                </div>
+                <div class="flex items-center space-x-3 md:space-x-5">
+                    <a href="/" class="group flex items-center space-x-2 bg-slate-700/50 hover:bg-slate-600 text-white font-medium py-2 px-3 md:px-4 rounded-xl border border-slate-600/50 hover:border-teal-500/50 transition-all duration-300 backdrop-blur-sm shadow-lg animated-button">
+                        <svg class="w-5 h-5 text-teal-400 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                        <span class="hidden md:inline">Main Page</span>
+                    </a>
+                    <button id="logout-button" class="bg-gradient-to-r from-red-600 to-rose-600 text-white font-semibold py-2 px-4 md:px-6 rounded-xl hover:from-red-500 hover:to-rose-500 transition-all duration-300 shadow-[0_0_15px_rgba(225,29,72,0.3)] hover:shadow-[0_0_20px_rgba(225,29,72,0.5)] border border-rose-500/30 animated-button flex items-center space-x-2">
+                        <span>Logout</span>
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    </button>
+                </div>
             </div>
         </header>
 
         <!-- Main Content Area with Sidebar -->
         <div class="flex flex-1 flex-col md:flex-row">
             <!-- Sidebar -->
-             <aside class="w-full md:w-64 bg-slate-800 shadow-lg p-4 md:p-6 flex-shrink-0">
+             <aside class="w-full md:w-64 bg-slate-900/95 shadow-2xl p-4 md:p-6 flex-shrink-0 border-r border-slate-800/60 relative z-20">
                 <nav>
                     <ul class="space-y-2">
-                        <li><a href="#" data-section="hero-management" class="sidebar-link flex items-center py-2 px-4 rounded-lg transition-colors duration-200"><svg class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001 1h2a1 1 0 001-1m-6 0v-4a1 1 0 011-1h2a1 1 0 011 1v4m-6 0h.01M6 20h12"/></svg>Hero Section</a></li>
-                        <li><a href="#" data-section="about-management" class="sidebar-link flex items-center py-2 px-4 rounded-lg transition-colors duration-200"><svg class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0h4m-4 0H5m0 0h.01M17 12h.01M17 16h.01"/></svg>About Me</a></li>
-                        <li><a href="#" data-section="experience-management" class="sidebar-link flex items-center py-2 px-4 rounded-lg transition-colors duration-200"><svg class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.564 23.564 0 0112 15c-1.864 0-3.614-.38-5.255-1.045M15 13.5l-3-3m0 0l-3 3m3-3v5.25mH12V3.75m0 0L2.25 9m9.75-5.25V21.75m0 0H2.25m9.75 0h19.5"/></svg>Experience</a></li>
-                        <li><a href="#" data-section="projects-management" class="sidebar-link flex items-center py-2 px-4 rounded-lg transition-colors duration-200"><svg class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>Projects</a></li>
-                        <li><a href="#" data-section="services-management" class="sidebar-link flex items-center py-2 px-4 rounded-lg transition-colors duration-200"><svg class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c1.333 0 2.5.567 3.5 1.5M12 8l4-4 4 4m-4-4v12a2 2 0 01-2 2H6a2 2 0 01-2-2V8m4-4L8 4m4 0V3m-4 5h8"/></svg>Services</a></li>
-                        <li><a href="#" data-section="bookings-management" class="sidebar-link flex items-center py-2 px-4 rounded-lg transition-colors duration-200"><svg class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>Bookings</a></li>
-                        <li><a href="#" data-section="messages-management" class="sidebar-link flex items-center py-2 px-4 rounded-lg transition-colors duration-200"><svg class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>Contact Messages</a></li>
-                        <li><a href="#" data-section="admin-settings" class="sidebar-link flex items-center py-2 px-4 rounded-lg transition-colors duration-200"><svg class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Admin Settings</a></li>
-                        <li><a href="#" data-section="email-templates" class="sidebar-link flex items-center py-2 px-4 rounded-lg transition-colors duration-200"><svg class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.25m8.25 8.25v-8.25m8.25 8.25v-8.25m0 0l-8.25-8.25L3 10.75m18 0l-8.25 8.25L3 10.75m18 0l-8.25-8.25L3 10.75"/></svg>Email Templates</a></li>
+                        <li><a href="#" data-section="hero-management" class="sidebar-link flex items-center py-3 px-4 rounded-xl transition-all duration-300 border border-transparent hover:bg-slate-800/80 hover:border-slate-700/50 group text-slate-400 font-medium"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001 1h2a1 1 0 001-1m-6 0v-4a1 1 0 011-1h2a1 1 0 011 1v4m-6 0h.01M6 20h12"/></svg>Hero Section</a></li>
+                        <li><a href="#" data-section="about-management" class="sidebar-link flex items-center py-3 px-4 rounded-xl transition-all duration-300 border border-transparent hover:bg-slate-800/80 hover:border-slate-700/50 group text-slate-400 font-medium"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0h4m-4 0H5m0 0h.01M17 12h.01M17 16h.01"/></svg>About Me</a></li>
+                        <li><a href="#" data-section="experience-management" class="sidebar-link flex items-center py-3 px-4 rounded-xl transition-all duration-300 border border-transparent hover:bg-slate-800/80 hover:border-slate-700/50 group text-slate-400 font-medium"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.564 23.564 0 0112 15c-1.864 0-3.614-.38-5.255-1.045M15 13.5l-3-3m0 0l-3 3m3-3v5.25mH12V3.75m0 0L2.25 9m9.75-5.25V21.75m0 0H2.25m9.75 0h19.5"/></svg>Experience</a></li>
+                        <li><a href="#" data-section="projects-management" class="sidebar-link flex items-center py-3 px-4 rounded-xl transition-all duration-300 border border-transparent hover:bg-slate-800/80 hover:border-slate-700/50 group text-slate-400 font-medium"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>Projects</a></li>
+                        <li><a href="#" data-section="services-management" class="sidebar-link flex items-center py-3 px-4 rounded-xl transition-all duration-300 border border-transparent hover:bg-slate-800/80 hover:border-slate-700/50 group text-slate-400 font-medium"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c1.333 0 2.5.567 3.5 1.5M12 8l4-4 4 4m-4-4v12a2 2 0 01-2 2H6a2 2 0 01-2-2V8m4-4L8 4m4 0V3m-4 5h8"/></svg>Services</a></li>
+                        <li><a href="#" data-section="resume-management" class="sidebar-link flex items-center py-3 px-4 rounded-xl transition-all duration-300 border border-transparent hover:bg-slate-800/80 hover:border-slate-700/50 group text-slate-400 font-medium"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>Resume Builder</a></li>
+                        <li><a href="#" data-section="bookings-management" class="sidebar-link flex items-center py-3 px-4 rounded-xl transition-all duration-300 border border-transparent hover:bg-slate-800/80 hover:border-slate-700/50 group text-slate-400 font-medium"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>Bookings</a></li>
+                        <li><a href="#" data-section="messages-management" class="sidebar-link flex items-center py-3 px-4 rounded-xl transition-all duration-300 border border-transparent hover:bg-slate-800/80 hover:border-slate-700/50 group text-slate-400 font-medium"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>Contact Messages</a></li>
+                        <li><a href="#" data-section="admin-settings" class="sidebar-link flex items-center py-3 px-4 rounded-xl transition-all duration-300 border border-transparent hover:bg-slate-800/80 hover:border-slate-700/50 group text-slate-400 font-medium"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Admin Settings</a></li>
+                        <li><a href="#" data-section="email-templates" class="sidebar-link flex items-center py-3 px-4 rounded-xl transition-all duration-300 border border-transparent hover:bg-slate-800/80 hover:border-slate-700/50 group text-slate-400 font-medium"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.25m8.25 8.25v-8.25m8.25 8.25v-8.25m0 0l-8.25-8.25L3 10.75m18 0l-8.25 8.25L3 10.75m18 0l-8.25-8.25L3 10.75"/></svg>Email Templates</a></li>
 
                     </ul>
                 </nav>
@@ -87,17 +149,17 @@
                 <!-- Each management section is wrapped in a div with a unique ID and common class -->
                 
                  
-                <div id="hero-management-container" class="admin-section hidden bg-slate-800 p-6 rounded-lg mb-8 shadow-xl">
-                    <h2 class="text-3xl font-bold text-white mb-6 border-l-4 border-teal-400 pl-4">Manage Hero Section</h2>
+                <div id="hero-management-container" class="admin-section hidden glass-panel p-6 md:p-8 rounded-2xl mb-8 border border-slate-700/50 relative overflow-hidden">
+                    <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 mb-8 border-l-4 border-teal-500 pl-4 tracking-tight shadow-sm inline-block">Manage Hero Section</h2>
                     <form id="hero-form" enctype="multipart/form-data">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div class="md:col-span-2 space-y-4">
-                                <div><label for="hero-greeting" class="block mb-2 text-slate-300">Greeting Text</label><input type="text" id="hero-greeting" name="greeting" required class="w-full bg-slate-700 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"></div>
-                                <div><label for="hero-headline" class="block mb-2 text-slate-300">Main Headline</label><input type="text" id="hero-headline" name="headline" required class="w-full bg-slate-700 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"></div>
-                                <div><label for="hero-bio" class="block mb-2 text-slate-300">Bio Paragraph</label><textarea id="hero-bio" name="bio" rows="4" required class="w-full bg-slate-700 p-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea></div>
+                                <div><label for="hero-greeting" class="block mb-2 text-sm font-semibold text-slate-300 tracking-wide uppercase">Greeting Text</label><input type="text" id="hero-greeting" name="greeting" required class="w-full bg-slate-900/50 border border-slate-700/80 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-400 text-slate-200 w-full placeholder-slate-500 shadow-inner"></div>
+                                <div><label for="hero-headline" class="block mb-2 text-sm font-semibold text-slate-300 tracking-wide uppercase">Main Headline</label><input type="text" id="hero-headline" name="headline" required class="w-full bg-slate-900/50 border border-slate-700/80 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-400 text-slate-200 w-full placeholder-slate-500 shadow-inner"></div>
+                                <div><label for="hero-bio" class="block mb-2 text-sm font-semibold text-slate-300 tracking-wide uppercase">Bio Paragraph</label><textarea id="hero-bio" name="bio" rows="4" required class="w-full bg-slate-700 p-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea></div>
                             </div>
                             <div class="text-center">
-                                <label class="block mb-2 text-slate-300">Profile Photo</label>
+                                <label class="block mb-2 text-sm font-semibold text-slate-300 tracking-wide uppercase">Profile Photo</label>
                                 <div id="hero-photo-preview-container" class="w-40 h-40 mx-auto bg-slate-700 rounded-full overflow-hidden mb-4 border-2 border-slate-600">
                                     <img id="hero-photo-preview" src="" alt="Current Profile Photo" class="w-full h-full object-cover">
                                 </div>
@@ -105,60 +167,60 @@
                                 <p class="text-xs text-slate-500 mt-1">Leave empty to keep current photo.</p>
                             </div>
                         </div>
-                        <button type="submit" class="w-full mt-6 bg-teal-500 text-white font-semibold py-3 rounded-md hover:bg-teal-600 transition-colors">Save Hero Section</button>
+                        <button type="submit" class="w-full mt-6 bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold py-3 px-6 rounded-xl hover:from-teal-400 hover:to-emerald-400 shadow-[0_4px_15px_rgba(20,184,166,0.3)] hover:shadow-[0_8px_25px_rgba(20,184,166,0.5)] border border-teal-400/20 animated-button w-full">Save Hero Section</button>
                     </form>
                 </div>
 
-                <div id="about-management-container" class="admin-section hidden bg-slate-800 p-6 rounded-lg mb-8 shadow-xl">
-                    <h2 class="text-3xl font-bold text-white mb-6 border-l-4 border-teal-400 pl-4">Manage About Section</h2>
+                <div id="about-management-container" class="admin-section hidden glass-panel p-6 md:p-8 rounded-2xl mb-8 border border-slate-700/50 relative overflow-hidden">
+                    <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 mb-8 border-l-4 border-teal-500 pl-4 tracking-tight shadow-sm inline-block">Manage About Section</h2>
                     <form id="about-form" class="space-y-4">
-                        <div><label for="about-p1" class="block mb-2 text-slate-300">Bio Paragraph 1</label><textarea id="about-p1" name="bioParagraph1" rows="4" required class="w-full bg-slate-700 p-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea></div>
-                        <div><label for="about-p2" class="block mb-2 text-slate-300">Bio Paragraph 2</label><textarea id="about-p2" name="bioParagraph2" rows="4" required class="w-full bg-slate-700 p-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea></div>
-                        <div><label for="about-skills" class="block mb-2 text-slate-300">Skills (comma-separated)</label><textarea id="about-skills" name="skills" rows="4" required class="w-full bg-slate-700 p-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea></div>
-                        <button type="submit" class="w-full bg-teal-500 text-white font-semibold py-3 rounded-md hover:bg-teal-600 transition-colors">Save About Info</button>
+                        <div><label for="about-p1" class="block mb-2 text-sm font-semibold text-slate-300 tracking-wide uppercase">Bio Paragraph 1</label><textarea id="about-p1" name="bioParagraph1" rows="4" required class="w-full bg-slate-700 p-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea></div>
+                        <div><label for="about-p2" class="block mb-2 text-sm font-semibold text-slate-300 tracking-wide uppercase">Bio Paragraph 2</label><textarea id="about-p2" name="bioParagraph2" rows="4" required class="w-full bg-slate-700 p-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea></div>
+                        <div><label for="about-skills" class="block mb-2 text-sm font-semibold text-slate-300 tracking-wide uppercase">Skills (comma-separated)</label><textarea id="about-skills" name="skills" rows="4" required class="w-full bg-slate-700 p-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea></div>
+                        <button type="submit" class="w-full bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold py-3 px-6 rounded-xl hover:from-teal-400 hover:to-emerald-400 shadow-[0_4px_15px_rgba(20,184,166,0.3)] hover:shadow-[0_8px_25px_rgba(20,184,166,0.5)] border border-teal-400/20 animated-button w-full">Save About Info</button>
                     </form>
                 </div>
 
-                <div id="experience-management-container" class="admin-section hidden bg-slate-800 p-6 rounded-lg mb-8 shadow-xl">
-                    <h2 class="text-3xl font-bold text-white mb-6 border-l-4 border-teal-400 pl-4">Manage Experience</h2>
+                <div id="experience-management-container" class="admin-section hidden glass-panel p-6 md:p-8 rounded-2xl mb-8 border border-slate-700/50 relative overflow-hidden">
+                    <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 mb-8 border-l-4 border-teal-500 pl-4 tracking-tight shadow-sm inline-block">Manage Experience</h2>
                     <form id="experience-form" class="space-y-4">
                         <input type="hidden" id="experience-id" name="id">
-                        <div><label for="experience-title" class="block mb-2 text-slate-300">Job Title</label><input type="text" id="experience-title" name="title" required class="w-full bg-slate-700 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"></div>
-                        <div><label for="experience-company" class="block mb-2 text-slate-300">Company & Location</label><input type="text" id="experience-company" name="company" required class="w-full bg-slate-700 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"></div>
-                        <div><label for="experience-dateRange" class="block mb-2 text-slate-300">Date Range (e.g., 05/2025 - Present)</label><input type="text" id="experience-dateRange" name="dateRange" required class="w-full bg-slate-700 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"></div>
-                        <div><label for="experience-description" class="block mb-2 text-slate-300">Description</label><textarea id="experience-description" name="description" rows="4" required class="w-full bg-slate-700 p-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea></div>
+                        <div><label for="experience-title" class="block mb-2 text-sm font-semibold text-slate-300 tracking-wide uppercase">Job Title</label><input type="text" id="experience-title" name="title" required class="w-full bg-slate-900/50 border border-slate-700/80 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-400 text-slate-200 w-full placeholder-slate-500 shadow-inner"></div>
+                        <div><label for="experience-company" class="block mb-2 text-sm font-semibold text-slate-300 tracking-wide uppercase">Company & Location</label><input type="text" id="experience-company" name="company" required class="w-full bg-slate-900/50 border border-slate-700/80 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-400 text-slate-200 w-full placeholder-slate-500 shadow-inner"></div>
+                        <div><label for="experience-dateRange" class="block mb-2 text-sm font-semibold text-slate-300 tracking-wide uppercase">Date Range (e.g., 05/2025 - Present)</label><input type="text" id="experience-dateRange" name="dateRange" required class="w-full bg-slate-900/50 border border-slate-700/80 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-400 text-slate-200 w-full placeholder-slate-500 shadow-inner"></div>
+                        <div><label for="experience-description" class="block mb-2 text-sm font-semibold text-slate-300 tracking-wide uppercase">Description</label><textarea id="experience-description" name="description" rows="4" required class="w-full bg-slate-700 p-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea></div>
                         <div class="flex space-x-4">
-                            <button type="submit" class="flex-1 bg-teal-500 text-white font-semibold py-3 rounded-md hover:bg-teal-600 transition-colors">Save Experience</button>
-                            <button type="button" id="clear-experience-form" class="flex-1 bg-slate-600 text-white font-semibold py-3 rounded-md hover:bg-slate-700 transition-colors">Clear Form</button>
+                            <button type="submit" class="flex-1 bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold py-3 px-6 rounded-xl hover:from-teal-400 hover:to-emerald-400 shadow-[0_4px_15px_rgba(20,184,166,0.3)] hover:shadow-[0_8px_25px_rgba(20,184,166,0.5)] border border-teal-400/20 animated-button">Save Experience</button>
+                            <button type="button" id="clear-experience-form" class="flex-1 bg-slate-700 text-white font-bold py-3 px-6 rounded-xl border border-slate-600 hover:bg-slate-600 hover:border-slate-500 shadow-md hover:shadow-lg animated-button">Clear Form</button>
                         </div>
                     </form>
-                    <div class="mt-8 bg-slate-800 rounded-lg overflow-x-auto">
+                    <div class="mt-8 bg-slate-900/60 rounded-2xl border border-slate-700/50 overflow-x-auto shadow-[inset_0_2px_15px_rgba(0,0,0,0.2)]">
                         <table class="w-full text-left">
-                            <thead class="bg-slate-700 text-white"><tr><th class="p-4">Title</th><th class="p-4">Company</th><th class="p-4">Actions</th></tr></thead>
+                            <thead class="bg-slate-800/90 text-teal-400 uppercase text-xs font-bold tracking-widest"><tr><th class="p-4 md:p-5 whitespace-nowrap">Title</th><th class="p-4 md:p-5 whitespace-nowrap">Company</th><th class="p-4 md:p-5 whitespace-nowrap">Actions</th></tr></thead>
                             <tbody id="experiences-table-body"></tbody>
                         </table>
                     </div>
                 </div>
 
                 <!-- Projects Section (UPDATED) -->
-                <div id="projects-management-container" class="admin-section hidden bg-slate-800 p-6 rounded-lg mb-8 shadow-xl">
-                    <h2 class="text-3xl font-bold text-white mb-6 border-l-4 border-teal-400 pl-4">Manage Projects</h2>
+                <div id="projects-management-container" class="admin-section hidden glass-panel p-6 md:p-8 rounded-2xl mb-8 border border-slate-700/50 relative overflow-hidden">
+                    <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 mb-8 border-l-4 border-teal-500 pl-4 tracking-tight shadow-sm inline-block">Manage Projects</h2>
                     <form id="project-form" class="grid grid-cols-1 md:grid-cols-3 gap-6" enctype="multipart/form-data">
                         <input type="hidden" id="project-id" name="id">
                         <!-- Left Column: Inputs -->
                         <div class="md:col-span-2">
-                            <div class="mb-4"><label for="project-name" class="block mb-2 text-slate-300">Project Name</label><input type="text" id="project-name" name="name" required class="w-full bg-slate-700 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"></div>
-                            <div class="mb-4"><label for="project-tags" class="block mb-2 text-slate-300">Tags (comma-separated)</label><input type="text" id="project-tags" name="tags" required class="w-full bg-slate-700 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"></div>
-                            <div class="mb-4"><label for="project-liveUrl" class="block mb-2 text-slate-300">Live Demo URL</label><input type="text" id="project-liveUrl" name="liveUrl" class="w-full bg-slate-700 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"></div>
-                            <div class="mb-4"><label for="project-sourceUrl" class="block mb-2 text-slate-300">Source Code URL</label><input type="text" id="project-sourceUrl" name="sourceUrl" class="w-full bg-slate-700 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"></div>
+                            <div class="mb-4"><label for="project-name" class="block mb-2 text-sm font-semibold text-slate-300 tracking-wide uppercase">Project Name</label><input type="text" id="project-name" name="name" required class="w-full bg-slate-900/50 border border-slate-700/80 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-400 text-slate-200 w-full placeholder-slate-500 shadow-inner"></div>
+                            <div class="mb-4"><label for="project-tags" class="block mb-2 text-sm font-semibold text-slate-300 tracking-wide uppercase">Tags (comma-separated)</label><input type="text" id="project-tags" name="tags" required class="w-full bg-slate-900/50 border border-slate-700/80 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-400 text-slate-200 w-full placeholder-slate-500 shadow-inner"></div>
+                            <div class="mb-4"><label for="project-liveUrl" class="block mb-2 text-sm font-semibold text-slate-300 tracking-wide uppercase">Live Demo URL</label><input type="text" id="project-liveUrl" name="liveUrl" class="w-full bg-slate-900/50 border border-slate-700/80 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-400 text-slate-200 w-full placeholder-slate-500 shadow-inner"></div>
+                            <div class="mb-4"><label for="project-sourceUrl" class="block mb-2 text-sm font-semibold text-slate-300 tracking-wide uppercase">Source Code URL</label><input type="text" id="project-sourceUrl" name="sourceUrl" class="w-full bg-slate-900/50 border border-slate-700/80 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-400 text-slate-200 w-full placeholder-slate-500 shadow-inner"></div>
                             <div>
-                                <label for="project-description" class="block mb-2 text-slate-300">Description</label>
+                                <label for="project-description" class="block mb-2 text-sm font-semibold text-slate-300 tracking-wide uppercase">Description</label>
                                 <textarea id="project-description" name="description" rows="5" required class="w-full bg-slate-700 p-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
                             </div>
                         </div>
                         <!-- Right Column: Image Upload & Preview -->
                         <div class="text-center">
-                            <label class="block mb-2 text-slate-300">Project Image</label>
+                            <label class="block mb-2 text-sm font-semibold text-slate-300 tracking-wide uppercase">Project Image</label>
                             <div id="project-image-preview-container" class="w-full h-40 bg-slate-700 rounded-lg overflow-hidden mb-4 border-2 border-slate-600 flex items-center justify-center">
                                 <img id="project-image-preview" src="" alt="Project Image Preview" class="w-full h-full object-cover hidden">
                                 <span id="project-image-placeholder" class="text-slate-500">Image Preview</span>
@@ -168,43 +230,247 @@
                             <p class="text-xs text-slate-500 mt-1">Leave empty if you don't want to change the existing image.</p>
                         </div>
                         <div class="md:col-span-3 flex space-x-4 mt-4">
-                            <button type="submit" class="flex-1 bg-teal-500 text-white font-semibold py-3 rounded-md hover:bg-teal-600 transition-colors">Save Project</button>
-                            <button type="button" id="clear-project-form" class="flex-1 bg-slate-600 text-white font-semibold py-3 rounded-md hover:bg-slate-700 transition-colors">Clear Form</button>
+                            <button type="submit" class="flex-1 bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold py-3 px-6 rounded-xl hover:from-teal-400 hover:to-emerald-400 shadow-[0_4px_15px_rgba(20,184,166,0.3)] hover:shadow-[0_8px_25px_rgba(20,184,166,0.5)] border border-teal-400/20 animated-button">Save Project</button>
+                            <button type="button" id="clear-project-form" class="flex-1 bg-slate-700 text-white font-bold py-3 px-6 rounded-xl border border-slate-600 hover:bg-slate-600 hover:border-slate-500 shadow-md hover:shadow-lg animated-button">Clear Form</button>
                         </div>
                     </form>
-                    <div class="mt-8 bg-slate-800 rounded-lg overflow-x-auto">
+                    <div class="mt-8 bg-slate-900/60 rounded-2xl border border-slate-700/50 overflow-x-auto shadow-[inset_0_2px_15px_rgba(0,0,0,0.2)]">
                         <table class="w-full text-left">
-                            <thead class="bg-slate-700 text-white"><tr><th class="p-4">Name</th><th class="p-4">Description</th><th class="p-4">Actions</th></tr></thead>
+                            <thead class="bg-slate-800/90 text-teal-400 uppercase text-xs font-bold tracking-widest"><tr><th class="p-4 md:p-5 whitespace-nowrap">Name</th><th class="p-4 md:p-5 whitespace-nowrap">Description</th><th class="p-4 md:p-5 whitespace-nowrap">Actions</th></tr></thead>
                             <tbody id="projects-table-body"></tbody>
                         </table>
                     </div>
                 </div>
 
-                <div id="services-management-container" class="admin-section hidden bg-slate-800 p-6 rounded-lg mb-8 shadow-xl">
-                    <h2 class="text-3xl font-bold text-white mb-6 border-l-4 border-teal-400 pl-4">Manage Services</h2>
+                <div id="services-management-container" class="admin-section hidden glass-panel p-6 md:p-8 rounded-2xl mb-8 border border-slate-700/50 relative overflow-hidden">
+                    <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 mb-8 border-l-4 border-teal-500 pl-4 tracking-tight shadow-sm inline-block">Manage Services</h2>
                     <form id="service-form" class="space-y-4">
                         <input type="hidden" id="service-id" name="id">
-                        <div><label for="service-title" class="block mb-2 text-slate-300">Service Title</label><input type="text" id="service-title" name="title" required class="w-full bg-slate-700 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"></div>
-                        <div><label for="service-description" class="block mb-2 text-slate-300">Description</label><textarea id="service-description" name="description" rows="4" required class="w-full bg-slate-700 p-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea></div>
-                        <div><label for="service-iconSvg" class="block mb-2 text-slate-300">Icon SVG Code</label><textarea id="service-iconSvg" name="iconSvg" rows="4" required class="w-full bg-slate-700 p-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea></div>
+                        <div><label for="service-title" class="block mb-2 text-sm font-semibold text-slate-300 tracking-wide uppercase">Service Title</label><input type="text" id="service-title" name="title" required class="w-full bg-slate-900/50 border border-slate-700/80 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-400 text-slate-200 w-full placeholder-slate-500 shadow-inner"></div>
+                        <div><label for="service-description" class="block mb-2 text-sm font-semibold text-slate-300 tracking-wide uppercase">Description</label><textarea id="service-description" name="description" rows="4" required class="w-full bg-slate-700 p-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea></div>
+                        <div><label for="service-iconSvg" class="block mb-2 text-sm font-semibold text-slate-300 tracking-wide uppercase">Icon SVG Code</label><textarea id="service-iconSvg" name="iconSvg" rows="4" required class="w-full bg-slate-700 p-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea></div>
                         <div class="flex space-x-4">
-                            <button type="submit" class="flex-1 bg-teal-500 text-white font-semibold py-3 rounded-md hover:bg-teal-600 transition-colors">Save Service</button>
-                            <button type="button" id="clear-service-form" class="flex-1 bg-slate-600 text-white font-semibold py-3 rounded-md hover:bg-slate-700 transition-colors">Clear Form</button>
+                            <button type="submit" class="flex-1 bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold py-3 px-6 rounded-xl hover:from-teal-400 hover:to-emerald-400 shadow-[0_4px_15px_rgba(20,184,166,0.3)] hover:shadow-[0_8px_25px_rgba(20,184,166,0.5)] border border-teal-400/20 animated-button">Save Service</button>
+                            <button type="button" id="clear-service-form" class="flex-1 bg-slate-700 text-white font-bold py-3 px-6 rounded-xl border border-slate-600 hover:bg-slate-600 hover:border-slate-500 shadow-md hover:shadow-lg animated-button">Clear Form</button>
                         </div>
                     </form>
-                    <div class="mt-8 bg-slate-800 rounded-lg overflow-x-auto">
+                    <div class="mt-8 bg-slate-900/60 rounded-2xl border border-slate-700/50 overflow-x-auto shadow-[inset_0_2px_15px_rgba(0,0,0,0.2)]">
                         <table class="w-full text-left">
-                            <thead class="bg-slate-700 text-white"><tr><th class="p-4">Title</th><th class="p-4">Description</th><th class="p-4">Actions</th></tr></thead>
+                            <thead class="bg-slate-800/90 text-teal-400 uppercase text-xs font-bold tracking-widest"><tr><th class="p-4 md:p-5 whitespace-nowrap">Title</th><th class="p-4 md:p-5 whitespace-nowrap">Description</th><th class="p-4 md:p-5 whitespace-nowrap">Actions</th></tr></thead>
                             <tbody id="services-table-body"></tbody>
                         </table>
                     </div>
                 </div>
 
+
+                <!-- ============================================== -->
+                <!-- RESUME MANAGEMENT SECTION (NEW) -->
+                <!-- ============================================== -->
+                <div id="resume-management-container" class="admin-section hidden glass-panel p-6 md:p-8 rounded-2xl mb-8 border border-slate-700/50 relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-8 border-l-4 border-teal-500 pl-4">
+                        <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 tracking-tight shadow-sm inline-block m-0 border-0 mb-0">Manage Resume</h2>
+                        <a href="/resume.html" target="_blank" class="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-6 rounded-xl shadow-lg hover:from-indigo-400 hover:to-blue-400 transition-all duration-300 flex items-center space-x-2 border border-indigo-400/20">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                            <span>Preview</span>
+                        </a>
+                    </div>
+                    
+                    <form id="resume-form" class="space-y-8">
+                        <!-- NEW: Template Selection -->
+                        <div class="bg-slate-900/50 p-6 rounded-xl border border-slate-700/80 shadow-inner">
+                            <h3 class="text-xl font-bold text-teal-400 mb-4 pb-2 border-b border-slate-700/50">0. Select Template</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="resume-template-selection">
+                                <label class="relative block cursor-pointer group">
+                                    <input type="radio" name="selectedTemplate" value="classic" checked class="peer sr-only">
+                                    <div class="p-4 bg-slate-800 border-2 border-slate-700 rounded-xl transition-all peer-checked:border-teal-500 peer-checked:bg-teal-500/10 hover:border-slate-600">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center text-teal-400">
+                                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                            </div>
+                                            <div>
+                                                <p class="font-bold text-slate-200">Classic Professional</p>
+                                                <p class="text-xs text-slate-500">Serif, Divider lines, Top Photo</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="absolute -top-2 -right-2 hidden peer-checked:block">
+                                        <span class="bg-teal-500 text-slate-900 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter">Active</span>
+                                    </div>
+                                </label>
+
+                                <label class="relative block cursor-pointer group">
+                                    <input type="radio" name="selectedTemplate" value="modern" class="peer sr-only">
+                                    <div class="p-4 bg-slate-800 border-2 border-slate-700 rounded-xl transition-all peer-checked:border-teal-500 peer-checked:bg-teal-500/10 hover:border-slate-600">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center text-teal-400">
+                                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                                            </div>
+                                            <div>
+                                                <p class="font-bold text-slate-200">Modern Sidebar</p>
+                                                <p class="text-xs text-slate-500">Split layout, Dark Sidebar</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="absolute -top-2 -right-2 hidden peer-checked:block">
+                                        <span class="bg-teal-500 text-slate-900 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter">Active</span>
+                                    </div>
+                                </label>
+
+                                <label class="relative block cursor-pointer group">
+                                    <input type="radio" name="selectedTemplate" value="minimal" class="peer sr-only">
+                                    <div class="p-4 bg-slate-800 border-2 border-slate-700 rounded-xl transition-all peer-checked:border-teal-500 peer-checked:bg-teal-500/10 hover:border-slate-600">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center text-teal-400">
+                                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                                            </div>
+                                            <div>
+                                                <p class="font-bold text-slate-200">Minimalist Sleek</p>
+                                                <p class="text-xs text-slate-500">Clean, Sans-serif, High spacing</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="absolute -top-2 -right-2 hidden peer-checked:block">
+                                        <span class="bg-teal-500 text-slate-900 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-tighter">Active</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        <!-- NEW: Section Configuration (Ordering & Visibility) -->
+                        <div class="bg-slate-900/50 p-6 rounded-xl border border-slate-700/80 shadow-inner">
+                            <h3 class="text-xl font-bold text-teal-400 mb-4 pb-2 border-b border-slate-700/50">1. Section Configuration</h3>
+                            <p class="text-xs text-slate-500 mb-4">Use the arrows to reorder sections. Toggle visibility to hide/show sections on the final resume.</p>
+                            <div id="resume-sections-config" class="space-y-3">
+                                <!-- Dynamic sections configuration rows go here -->
+                            </div>
+                        </div>
+
+                        <!-- Personal Info -->
+                        <div class="bg-slate-900/50 p-6 rounded-xl border border-slate-700/80 shadow-inner">
+                            <h3 class="text-xl font-bold text-teal-400 mb-4 pb-2 border-b border-slate-700/50">2. Personal Information</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <!-- Photo Upload -->
+                                <div class="md:col-span-1 text-center">
+                                    <label class="block mb-2 text-xs font-semibold text-slate-400 uppercase tracking-wide">Profile Photo</label>
+                                    <div id="resume-photo-preview-container" class="w-32 h-32 mx-auto bg-slate-800 rounded-lg overflow-hidden mb-3 border-2 border-slate-700 flex items-center justify-center">
+                                        <img id="resume-photo-preview" src="" alt="Photo Preview" class="w-full h-full object-cover hidden">
+                                        <svg id="resume-photo-placeholder" class="w-12 h-12 text-slate-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                    </div>
+                                    <input type="file" id="resume-photo-file" name="resumePhoto" class="hidden" accept="image/*">
+                                    <button type="button" onclick="document.getElementById('resume-photo-file').click()" class="text-xs bg-slate-700 hover:bg-slate-600 text-white py-1.5 px-3 rounded-lg transition-colors">Choose Photo</button>
+                                    <input type="hidden" id="resume-photoUrl">
+                                    
+                                    <!-- Photo Shape Selector -->
+                                    <div class="mt-4 px-4 text-left">
+                                        <label class="block mb-1 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Photo Shape</label>
+                                        <select id="resume-photo-shape" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-xs text-slate-300 focus:border-teal-500 outline-none">
+                                            <option value="square">Square Corners</option>
+                                            <option value="circle">Perfect Circle</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <!-- Text Fields -->
+                                <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div><label class="block mb-1 text-xs font-semibold text-slate-400 uppercase tracking-wide">Full Name</label><input type="text" id="resume-name" required class="w-full bg-slate-800 border border-slate-600 p-2.5 rounded-lg text-white focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"></div>
+                                    <div><label class="block mb-1 text-xs font-semibold text-slate-400 uppercase tracking-wide">Professional Title</label><input type="text" id="resume-title" required class="w-full bg-slate-800 border border-slate-600 p-2.5 rounded-lg text-white focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"></div>
+                                    <div><label class="block mb-1 text-xs font-semibold text-slate-400 uppercase tracking-wide">Email Address</label><input type="email" id="resume-email" required class="w-full bg-slate-800 border border-slate-600 p-2.5 rounded-lg text-white focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"></div>
+                                    <div><label class="block mb-1 text-xs font-semibold text-slate-400 uppercase tracking-wide">Phone Number</label><input type="text" id="resume-phone" class="w-full bg-slate-800 border border-slate-600 p-2.5 rounded-lg text-white focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"></div>
+                                    <div><label class="block mb-1 text-xs font-semibold text-slate-400 uppercase tracking-wide">Location / Address</label><input type="text" id="resume-address" class="w-full bg-slate-800 border border-slate-600 p-2.5 rounded-lg text-white focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"></div>
+                                    <div><label class="block mb-1 text-xs font-semibold text-slate-400 uppercase tracking-wide">LinkedIn profile URL</label><input type="url" id="resume-linkedin" class="w-full bg-slate-800 border border-slate-600 p-2.5 rounded-lg text-white focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"></div>
+                                    <div class="md:col-span-2"><label class="block mb-1 text-xs font-semibold text-slate-400 uppercase tracking-wide">GitHub profile URL</label><input type="url" id="resume-github" class="w-full bg-slate-800 border border-slate-600 p-2.5 rounded-lg text-white focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"></div>
+                                </div>
+                                <div class="md:col-span-3 mt-8 pt-6 border-t border-slate-700/30">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="flex items-center gap-2">
+                                            <label class="block text-sm font-bold text-teal-400 uppercase tracking-widest">Professional Summary / About You</label>
+                                            <div class="group relative">
+                                                <svg class="w-4 h-4 text-slate-500 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-slate-800 text-[10px] rounded shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 border border-slate-700">
+                                                    Highlight your key strengths and career goals in 2-4 sentences.
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span id="summary-counter" class="text-[10px] text-slate-500 font-mono bg-slate-800/50 px-2 py-1 rounded">0 characters | 0 words</span>
+                                    </div>
+                                    <div id="resume-summary-editor" class="quill-editor-container"></div>
+                                    <input type="hidden" id="resume-summary">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Skills -->
+                        <div class="bg-slate-900/50 p-6 rounded-xl border border-slate-700/80 shadow-inner">
+                            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-700/50">
+                                <h3 class="text-xl font-bold text-teal-400">3. Skills</h3>
+                                <button type="button" id="add-resume-skill" class="bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold py-1.5 px-3 rounded-lg flex items-center transition-colors">
+                                    <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>Add Skill
+                                </button>
+                            </div>
+                            <div id="resume-skills-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                <!-- Dynamic individual skill inputs will be here -->
+                            </div>
+                        </div>
+
+                        <!-- Experience -->
+                        <div class="bg-slate-900/50 p-6 rounded-xl border border-slate-700/80 shadow-inner">
+                            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-700/50">
+                                <h3 class="text-xl font-bold text-teal-400">4. Work Experience</h3>
+                                <button type="button" id="add-resume-experience" class="bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold py-1.5 px-3 rounded-lg flex items-center transition-colors"><svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>Add Job</button>
+                            </div>
+                            <div id="resume-experience-container" class="space-y-6">
+                                <!-- Dynamic experience rows go here -->
+                            </div>
+                        </div>
+
+                        <!-- Projects -->
+                        <div class="bg-slate-900/50 p-6 rounded-xl border border-slate-700/80 shadow-inner">
+                            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-700/50">
+                                <h3 class="text-xl font-bold text-teal-400">5. Projects</h3>
+                                <button type="button" id="add-resume-project" class="bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold py-1.5 px-3 rounded-lg flex items-center transition-colors"><svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>Add Project</button>
+                            </div>
+                            <div id="resume-project-container" class="space-y-6">
+                                <!-- Dynamic project rows go here -->
+                            </div>
+                        </div>
+
+                        <!-- Education -->
+                        <div class="bg-slate-900/50 p-6 rounded-xl border border-slate-700/80 shadow-inner">
+                            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-700/50">
+                                <h3 class="text-xl font-bold text-teal-400">6. Education</h3>
+                                <button type="button" id="add-resume-education" class="bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold py-1.5 px-3 rounded-lg flex items-center transition-colors"><svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>Add Education</button>
+                            </div>
+                            <div id="resume-education-container" class="space-y-6">
+                                <!-- Dynamic education rows go here -->
+                            </div>
+                        </div>
+
+                        <!-- Languages -->
+                        <div class="bg-slate-900/50 p-6 rounded-xl border border-slate-700/80 shadow-inner">
+                            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-700/50">
+                                <h3 class="text-xl font-bold text-teal-400">7. Languages</h3>
+                                <button type="button" id="add-resume-language" class="bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold py-1.5 px-3 rounded-lg flex items-center transition-colors"><svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>Add Language</button>
+                            </div>
+                            <div id="resume-language-container" class="space-y-4">
+                                <!-- Dynamic language rows go here -->
+                            </div>
+                        </div>
+
+                        <div class="mt-8">
+                            <button type="submit" class="w-full bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold py-4 px-6 rounded-xl hover:scale-[1.01] shadow-[0_4px_20px_rgba(20,184,166,0.3)] hover:shadow-[0_8px_30px_rgba(20,184,166,0.5)] border border-teal-400/20 transition-all duration-300 flex items-center justify-center">
+                                <svg class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
+                                Save Resume Updates
+                            </button>
+                            <p id="resume-status-message" class="text-center mt-4 h-6 text-sm font-semibold"></p>
+                        </div>
+                    </form>
+                </div>
+
+
                 <!-- ============================================== -->
                 <!-- BOOKINGS MANAGEMENT SECTION (NEW) -->
                 <!-- ============================================== -->
-                <div id="bookings-management-container" class="admin-section hidden bg-slate-800 p-6 rounded-lg mb-8 shadow-xl">
-                    <h2 class="text-3xl font-bold text-white mb-6 border-l-4 border-teal-400 pl-4">Meeting Bookings</h2>
+                <div id="bookings-management-container" class="admin-section hidden glass-panel p-6 md:p-8 rounded-2xl mb-8 border border-slate-700/50 relative overflow-hidden">
+                    <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 mb-8 border-l-4 border-teal-500 pl-4 tracking-tight shadow-sm inline-block">Meeting Bookings</h2>
                     
                     <div class="mb-6 flex justify-between items-center bg-slate-700/50 p-4 rounded-lg border border-slate-600">
                         <div class="flex items-center space-x-4">
@@ -249,7 +515,7 @@
                 <!-- THIS IS THE FIX: This section is now moved out -->
                 <!-- ============================================== -->
                 <div id="messages-management-container" class="admin-section hidden">
-                    <h2 class="text-3xl font-bold text-white mb-6 border-l-4 border-teal-400 pl-4">Contact Messages</h2>
+                    <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 mb-8 border-l-4 border-teal-500 pl-4 tracking-tight shadow-sm inline-block">Contact Messages</h2>
                     <div id="messages-list" class="space-y-4">
                         <!-- Message cards will be injected by JS -->
                     </div>
@@ -260,7 +526,7 @@
 
                  <!-- NEW: EMAIL TEMPLATE BUILDER SECTION -->
             <div id="email-templates-container" class="admin-section hidden">
-                <h2 class="text-3xl font-bold text-white mb-6 border-l-4 border-teal-400 pl-4">Email Template Builder</h2>
+                <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 mb-8 border-l-4 border-teal-500 pl-4 tracking-tight shadow-sm inline-block">Email Template Builder</h2>
                 <div id="email-templates-list" class="space-y-8">
                     <!-- The builder will be loaded here by JS -->
                 </div>
@@ -269,15 +535,15 @@
 
 
                 <!-- Admin Settings Section (Corrected) -->
-                <div id="admin-settings-container" class="admin-section hidden bg-slate-800 p-6 rounded-lg mb-8 shadow-xl">
-                    <h2 class="text-3xl font-bold text-white mb-6 border-l-4 border-teal-400 pl-4">Admin Settings</h2>
+                <div id="admin-settings-container" class="admin-section hidden glass-panel p-6 md:p-8 rounded-2xl mb-8 border border-slate-700/50 relative overflow-hidden">
+                    <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 mb-8 border-l-4 border-teal-500 pl-4 tracking-tight shadow-sm inline-block">Admin Settings</h2>
 
 <!-- View for Normal Admins -->
                     <div id="normal-admin-view" class="hidden">
                     <!-- OTP Request View -->
                     <div id="otp-request-view">
                         <p class="mb-4">For security, you must verify your identity to access these settings.</p>
-                        <button id="request-otp-btn" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-700">Send Verification Code</button>
+                        <button id="request-otp-btn" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:from-blue-500 hover:to-indigo-500 shadow-[0_4px_15px_rgba(37,99,235,0.3)] hover:shadow-[0_8px_25px_rgba(37,99,235,0.5)] border border-blue-400/20 animated-button">Send Verification Code</button>
                         <p id="otp-request-status" class="mt-4 h-6"></p>
                     </div>
 
@@ -285,7 +551,7 @@
                     <div id="otp-verify-view" class="hidden">
                         <form id="otp-verify-form" class="space-y-4 max-w-sm">
                             <label for="otp-input" class="block text-slate-300">An OTP has been sent to your email. Please enter it below.</label>
-                            <input type="text" id="otp-input" name="otp" required class="w-full bg-slate-700 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="6-digit code">
+                            <input type="text" id="otp-input" name="otp" required class="w-full bg-slate-900/50 border border-slate-700/80 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-400 text-slate-200 w-full placeholder-slate-500 shadow-inner" placeholder="6-digit code">
                             <button type="submit" class="w-full bg-teal-500 text-white font-semibold py-3 rounded-md hover:bg-teal-600">Verify</button>
                             <p id="otp-verify-status" class="mt-4 h-6"></p>
                         </form>
@@ -305,7 +571,7 @@
                             <h3 class="text-2xl font-semibold text-white">Change Your Password</h3>
                             <div><label for="current-password" class="block mb-2">Current Password</label><input type="password" id="current-password" name="currentPassword" required class="w-full bg-slate-700 p-2 rounded-md"></div>
                             <div><label for="new-password" class="block mb-2">New Password (min. 8 characters)</label><input type="password" id="new-password" name="newPassword" required class="w-full bg-slate-700 p-2 rounded-md"></div>
-                            <button type="submit" class="bg-yellow-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-yellow-600">Update Password</button>
+                            <button type="submit" class="bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-bold py-3 px-6 rounded-xl hover:from-amber-400 hover:to-yellow-400 shadow-[0_4px_15px_rgba(245,158,11,0.3)] hover:shadow-[0_8px_25px_rgba(245,158,11,0.5)] border border-yellow-400/20 animated-button">Update Password</button>
                             <p id="change-password-status" class="mt-4 h-6"></p>
                         </form>
                         
@@ -315,7 +581,7 @@
                              <div><label for="new-username" class="block mb-2">New Username</label><input type="text" id="new-username" name="newUsername" required class="w-full bg-slate-700 p-2 rounded-md"></div>
                              <div><label for="new-email" class="block mb-2">New Admin's Email</label><input type="email" id="new-email" name="newEmail" required class="w-full bg-slate-700 p-2 rounded-md"></div>
                              <div><label for="new-admin-password" class="block mb-2">New Password (min. 8 characters)</label><input type="password" id="new-admin-password" name="newPassword" required class="w-full bg-slate-700 p-2 rounded-md"></div>
-                             <button type="submit" class="bg-green-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-700">Create Admin</button>
+                             <button type="submit" class="bg-gradient-to-r from-emerald-600 to-green-600 text-white font-bold py-3 px-6 rounded-xl hover:from-emerald-500 hover:to-green-500 shadow-[0_4px_15px_rgba(5,150,105,0.3)] hover:shadow-[0_8px_25px_rgba(5,150,105,0.5)] border border-green-400/20 animated-button">Create Admin</button>
                              <p id="create-admin-status" class="mt-4 h-6"></p>
                         </form>
                     </div>
@@ -339,7 +605,7 @@
                              <div><label for="new-username" class="block mb-2">New Username</label><input type="text" id="new-username" name="newUsername" required class="w-full bg-slate-700 p-2 rounded-md"></div>
                              <div><label for="new-email" class="block mb-2">New Admin's Email</label><input type="email" id="new-email" name="newEmail" required class="w-full bg-slate-700 p-2 rounded-md"></div>
                              <div><label for="new-admin-password" class="block mb-2">New Password (min. 8 characters)</label><input type="password" id="new-admin-password" name="newPassword" required class="w-full bg-slate-700 p-2 rounded-md"></div>
-                             <button type="submit" class="bg-green-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-700">Create Admin</button>
+                             <button type="submit" class="bg-gradient-to-r from-emerald-600 to-green-600 text-white font-bold py-3 px-6 rounded-xl hover:from-emerald-500 hover:to-green-500 shadow-[0_4px_15px_rgba(5,150,105,0.3)] hover:shadow-[0_8px_25px_rgba(5,150,105,0.5)] border border-green-400/20 animated-button">Create Admin</button>
                              <p id="create-admin-status" class="mt-4 h-6"></p>
                         </form>
                           </div>
@@ -351,7 +617,7 @@
     
 <!-- NEW: Edit User Modal (add this with your other modals) -->
 <div id="edit-user-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-    <div class="bg-slate-800 p-6 rounded-lg shadow-2xl w-full max-w-md">
+    <div class="glass-panel p-6 md:p-8 rounded-2xl shadow-[0_15px_50px_-12px_rgba(0,0,0,0.8)] border border-slate-700/50 w-full max-w-md">
         <h3 class="text-2xl font-bold text-white mb-4">Edit Admin User</h3>
         <form id="edit-user-form" class="space-y-4">
             <input type="hidden" id="edit-user-id">
@@ -369,19 +635,19 @@
     
     <!-- Delete Confirmation Modal -->
     <div id="delete-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-        <div class="bg-slate-800 p-8 rounded-lg text-center shadow-2xl">
+        <div class="glass-panel p-8 md:p-10 rounded-2xl text-center shadow-[0_15px_50px_-12px_rgba(0,0,0,0.8)] border border-slate-700/50">
             <h3 class="text-2xl font-bold text-white mb-4">Are you sure?</h3>
             <p class="text-slate-400 mb-6">This action cannot be undone.</p>
             <div class="flex space-x-4">
-                <button id="confirm-delete-button" class="flex-1 bg-red-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-red-700">Delete</button>
-                <button id="cancel-delete-button" class="flex-1 bg-slate-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-slate-700">Cancel</button>
+                <button id="confirm-delete-button" class="flex-1 bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold py-3 px-6 rounded-xl hover:from-red-500 hover:to-rose-500 shadow-[0_4px_15px_rgba(225,29,72,0.3)] hover:shadow-[0_8px_25px_rgba(225,29,72,0.5)] border border-rose-400/20 animated-button">Delete</button>
+                <button id="cancel-delete-button" class="flex-1 bg-slate-700 text-white font-bold py-3 px-6 rounded-xl border border-slate-600 hover:bg-slate-600 hover:border-slate-500 shadow-md hover:shadow-lg animated-button">Cancel</button>
             </div>
         </div>
     </div>
 
     <!-- NEW: Reply Modal -->
 <div id="reply-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-    <div class="bg-slate-800 p-6 rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+    <div class="glass-panel p-6 md:p-8 rounded-2xl shadow-[0_15px_50px_-12px_rgba(0,0,0,0.8)] border border-slate-700/50 w-full max-w-2xl max-h-[90vh] flex flex-col">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-2xl font-bold text-white">Reply to Message</h3>
             <button id="close-reply-modal" class="text-slate-400 hover:text-white">×</button>
@@ -396,7 +662,7 @@
             </div>
             <form id="reply-form">
                 <input type="hidden" id="reply-message-id">
-                <label for="reply-textarea" class="block mb-2 text-slate-300">Your Reply</label>
+                <label for="reply-textarea" class="block mb-2 text-sm font-semibold text-slate-300 tracking-wide uppercase">Your Reply</label>
                 <textarea id="reply-textarea" name="replyMessage" rows="6" required class="w-full bg-slate-700 p-2 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
                 <div class="mt-4 flex justify-end">
                     <button type="submit" class="bg-teal-500 text-white font-semibold py-2 px-6 rounded-md hover:bg-teal-600">Send Reply</button>
@@ -411,7 +677,7 @@
 
      <!-- NEW: Email Preview Modal -->
     <div id="email-preview-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-        <div class="bg-slate-800 p-4 rounded-lg shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col">
+        <div class="glass-panel p-6 rounded-2xl shadow-[0_15px_50px_-12px_rgba(0,0,0,0.8)] border border-slate-700/50 w-full max-w-3xl max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center mb-4 pb-4 border-b border-slate-700">
                 <h3 class="text-2xl font-bold text-white">Email Preview</h3>
                 <button id="close-preview-modal" class="text-slate-400 hover:text-white text-3xl">×</button>

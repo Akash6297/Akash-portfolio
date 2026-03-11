@@ -26,7 +26,37 @@
     #mobile-menu-button.menu-open .line-3 { transform: translateY(-9px) rotate(-45deg); }
 
     @keyframes ripple-effect { to { transform: scale(4); opacity: 0; } }
-    .ripple { position: fixed; border-radius: 50%; background-color: rgba(20, 184, 166, 0.4); width: 100px; height: 100px; transform: translate(-50%, -50%); animation: ripple-effect 0.7s ease-out forwards; pointer-events: none; z-index: -1; }
+    .ripple { position: fixed; border-radius: 50%; background: radial-gradient(circle, rgba(20, 184, 166, 0.5) 0%, rgba(20, 184, 166, 0) 70%); width: 150px; height: 150px; transform: translate(-50%, -50%); animation: ripple-effect 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards; pointer-events: none; z-index: -1; }
+    
+    .glass-card {
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+    }
+    .neon-text {
+        text-shadow: 0 0 10px rgba(45, 212, 191, 0.3), 0 0 20px rgba(45, 212, 191, 0.1);
+    }
+    
+    .gradient-border-button {
+      position: relative;
+      background: #0f172a;
+      background-clip: padding-box;
+      border: solid 2px transparent;
+      border-radius: 0.75rem;
+    }
+    .gradient-border-button::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      z-index: -1;
+      margin: -2px;
+      border-radius: inherit;
+      background: linear-gradient(to right, #14b8a6, #0ea5e9);
+    }
+    
     
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .animate-spin-fast { animation: spin 0.5s linear infinite; }
@@ -75,10 +105,14 @@
   <!-- ============================================ -->
   <!-- UNIFIED "AURORA GLOW" BACKGROUND -->
   <!-- ============================================ -->
-  <div class="fixed top-0 left-0 w-full h-full -z-10">
-      <div class="absolute w-[40rem] h-[40rem] bg-teal-500/10 rounded-full blur-3xl animate-pulse-slow -top-20 -left-40"></div>
-      <div class="absolute w-[30rem] h-[30rem] bg-teal-500/10 rounded-full blur-3xl animate-pulse-slow bottom-0 -right-40" style="animation-delay: 1s;"></div>
-      <div class="absolute w-[20rem] h-[20rem] bg-teal-500/10 rounded-full blur-3xl animate-pulse-slow bottom-40 right-40" style="animation-delay: 2s;"></div>
+    <div class="fixed top-0 left-0 w-full h-full -z-10 bg-slate-950 overflow-hidden">
+      <!-- Advanced Aurora Background -->
+      <div class="absolute w-[50rem] h-[50rem] bg-teal-500/10 rounded-full blur-[120px] animate-pulse-slow -top-40 -left-40 mix-blend-screen opacity-60"></div>
+      <div class="absolute w-[40rem] h-[40rem] bg-indigo-500/10 rounded-full blur-[120px] animate-pulse-slow bottom-0 -right-20 mix-blend-screen opacity-60" style="animation-delay: 2s;"></div>
+      <div class="absolute w-[30rem] h-[30rem] bg-emerald-500/10 rounded-full blur-[100px] animate-pulse-slow bottom-40 left-1/3 mix-blend-screen opacity-50" style="animation-delay: 4s;"></div>
+      
+      <!-- Subtle Pattern Overlay -->
+      <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTTAgNDBoNDBWMEgweiIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik0wIDQwaDQwVjBIMHoiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjAyKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-40"></div>
   </div>
 
   <!-- Preloader -->
@@ -90,7 +124,7 @@
   <!-- FINAL, CORRECTED & MODERN HEADER -->
   <!-- This header has a z-index of 40 -->
   <!-- ============================================ -->
-  <header id="main-header" class="fixed top-0 left-0 w-full z-40 transition-all duration-300 z-40">
+  <header id="main-header" class="fixed top-0 left-0 w-full z-[100] transition-all duration-500">
       <nav class="container mx-auto flex items-center justify-between p-4">
           <a href="#" class="text-2xl font-bold text-white hover:text-teal-400 transition-colors duration-300">
               Akash Mandal
@@ -142,11 +176,21 @@
     <!-- Text Content -->
     <div class="text-center md:text-left">
       <span id="hero-greeting" class="text-teal-400 font-semibold text-lg"></span>
-      <h1 id="hero-headline" class="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400 mt-2"></h1>
-      <p id="hero-bio" class="mt-4 text-slate-300 text-lg reveal"></p>
-      <div class="mt-8 flex justify-center md:justify-start space-x-4 reveal">
-        <a href="#contact" class="bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold py-3 px-6 rounded-lg hover:scale-105 shadow-lg shadow-teal-500/25 transition-all duration-300">Hire Me</a>
-        <a href="#projects" class="border border-slate-600 hover:border-teal-500/50 hover:bg-slate-800/50 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 backdrop-blur-sm">View Projects</a>
+      <h1 id="hero-headline" class="text-5xl md:text-7xl lg:text-8xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-emerald-300 to-cyan-300 mt-2 tracking-tighter neon-text drop-shadow-md pb-2"></h1>
+      <p id="hero-bio" class="mt-6 text-slate-400 text-lg md:text-xl font-light reveal max-w-2xl leading-relaxed"></p>
+      <div class="mt-8 flex justify-center md:justify-start space-x-4 flex-wrap gap-y-4 reveal">
+        <a href="#contact" class="group relative inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-white transition-all duration-300 bg-gradient-to-r from-teal-500 to-emerald-500 border border-transparent rounded-xl overflow-hidden shadow-[0_0_20px_rgba(20,184,166,0.2)] hover:shadow-[0_0_30px_rgba(20,184,166,0.6)] hover:scale-105">
+          <span class="absolute w-0 h-0 transition-all duration-500 ease-out bg-white rounded-full group-hover:w-56 group-hover:h-56 opacity-10"></span>
+          <span class="relative">Hire Me</span>
+          <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+        </a>
+        <a href="#projects" class="gradient-border-button inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-slate-200 transition-all duration-300 hover:text-white shadow-lg shadow-teal-500/5 hover:shadow-teal-400/20 hover:-translate-y-1">
+          <span class="relative z-10">View Projects</span>
+        </a>
+        <a href="/resume.html" target="_blank" class="gradient-border-button inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-teal-300 transition-all duration-300 hover:text-white shadow-lg shadow-teal-500/5 hover:shadow-teal-400/20 hover:-translate-y-1">
+          <span class="relative z-10">Resume</span>
+          <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        </a>
       </div>
     </div>
     
@@ -154,8 +198,10 @@
     <div class="flex justify-center p-4">
       <div class="relative w-64 h-64 md:w-80 md:h-80">
         <!-- The spinning ring -->
-        <div class="absolute inset-0 border-2 border-teal-500/30 rounded-full animate-spin [animation-duration:8s]"></div>
-        <div class="absolute inset-2 border-t-2 border-teal-500/80 rounded-full animate-spin [animation-duration:6s]"></div>
+        <div class="absolute -inset-4 rounded-full bg-gradient-to-r from-teal-500 to-cyan-500 opacity-20 blur-2xl animate-pulse-slow"></div>
+        <div class="absolute inset-0 border-[2px] border-dashed border-teal-500/40 rounded-full animate-spin [animation-duration:20s] hover:[animation-duration:5s] transition-all"></div>
+        <div class="absolute inset-2 border-[1px] border-solid border-teal-500/20 rounded-full"></div>
+        <div class="absolute inset-3 border-t-[3px] border-l-[3px] border-transparent border-t-teal-400 border-l-cyan-400 rounded-full animate-spin [animation-duration:8s] mix-blend-screen" style="animation-direction: reverse;"></div>
         <!-- Image container -->
         <div class="relative w-full h-full bg-slate-800 rounded-full flex items-center justify-center overflow-hidden shadow-2xl">
           <img id="hero-photo" src="" alt="Akash Mandal" class="object-cover w-full h-full">
@@ -171,7 +217,7 @@
 <section id="about" class="py-20">
   <div class="container mx-auto px-4">
     <div class="text-center mb-16 reveal">
-      <h2 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-white">About Me</h2>
+      <h2 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-teal-100 to-teal-400 tracking-tight drop-shadow-sm pb-2">About Me</h2>
       <p class="text-teal-400">My journey and expertise</p>
     </div>
 
@@ -226,7 +272,7 @@
 <section id="experience" class="py-20">
   <div class="container mx-auto px-4">
     <div class="text-center mb-16 reveal">
-      <h2 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-white">My Experience</h2>
+      <h2 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-teal-100 to-teal-400 tracking-tight drop-shadow-sm pb-2">My Experience</h2>
       <p class="text-teal-400">A look at my professional journey</p>
     </div>
     <!-- The timeline will be injected here by JavaScript -->
@@ -244,7 +290,7 @@
   
   <div class="container mx-auto px-4">
     <div class="text-center mb-12 reveal">
-      <h2 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-white">My Projects</h2>
+      <h2 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-teal-100 to-teal-400 tracking-tight drop-shadow-sm pb-2">My Projects</h2>
       <p class="text-teal-400">A selection of my work</p>
     </div>
     <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -261,7 +307,7 @@
 
   <div class="container mx-auto px-4 relative z-10">
     <div class="text-center mb-12 reveal">
-      <h2 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-white">What I Offer</h2>
+      <h2 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-teal-100 to-teal-400 tracking-tight drop-shadow-sm pb-2">What I Offer</h2>
       <p class="text-teal-400">Services to help you build your vision</p>
     </div>
     <div id="services-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -270,7 +316,7 @@
 
     <!-- CUSTOM MEETING BOOKING SYSTEM -->
     <div class="text-center mt-16">
-        <button id="open-booking-modal" class="inline-block bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold text-lg py-4 px-8 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300">
+        <button id="open-booking-modal" class="inline-block bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold text-lg py-4 px-10 rounded-2xl shadow-[0_0_20px_rgba(20,184,166,0.4)] hover:shadow-[0_0_40px_rgba(20,184,166,0.6)] hover:-translate-y-1 transition-all duration-300 border border-teal-400/30 neon-text">
             Book a Free Discovery Call
         </button>
     </div>
@@ -281,9 +327,9 @@
 <!-- CUSTOM BOOKING MODAL -->
 <!-- ============================================ -->
 <div id="booking-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 opacity-0 transition-opacity duration-300">
-    <div class="bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform scale-95 transition-transform duration-300">
+    <div class="glass-card bg-slate-900/95 rounded-3xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] border border-slate-700 w-full max-w-2xl overflow-hidden transform scale-95 transition-transform duration-300">
         <!-- Modal Header -->
-        <div class="bg-slate-750 border-b border-slate-700/50 p-6 flex justify-between items-center">
+        <div class="bg-slate-800/80 border-b border-slate-700/50 p-6 md:p-8 backdrop-blur-xl flex justify-between items-center">
             <div>
                 <h3 class="text-2xl font-bold text-white">Book a Discovery Call</h3>
                 <p class="text-teal-400 text-sm mt-1">30 Minute Meeting</p>
@@ -304,7 +350,7 @@
                             <label for="booking-date" class="block text-sm font-medium text-slate-300 mb-2">Select Date</label>
                             <!-- We set min attribute via JS to today -->
                             <input type="date" id="booking-date" name="date" required 
-                                class="w-full bg-slate-700/50 border border-slate-600 rounded-md py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert">
+                                class="w-full bg-slate-900/40 border border-slate-700/60 rounded-xl py-3.5 px-5 text-white focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all shadow-inner placeholder-slate-500 backdrop-blur-md [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert">
                             <p class="text-xs text-slate-500 mt-1">Available Monday - Friday</p>
                         </div>
                         
@@ -316,7 +362,7 @@
                                 </span>
                             </label>
                             <select id="booking-time" name="time" required disabled
-                                class="w-full bg-slate-700/50 border border-slate-600 rounded-md py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed appearance-none">
+                                class="w-full bg-slate-900/40 border border-slate-700/60 rounded-xl py-3.5 px-5 text-white focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all shadow-inner placeholder-slate-500 backdrop-blur-md disabled:opacity-50 disabled:cursor-not-allowed appearance-none">
                                 <option value="" disabled selected>Please select a date first</option>
                                 <!-- Time options populated by JS -->
                             </select>
@@ -331,11 +377,11 @@
                     <div class="space-y-4">
                         <div>
                             <label for="booking-name" class="block text-sm font-medium text-slate-300 mb-2">Your Name</label>
-                            <input type="text" id="booking-name" name="name" required class="w-full bg-slate-700/50 border border-slate-600 rounded-md py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all">
+                            <input type="text" id="booking-name" name="name" required class="w-full bg-slate-900/40 border border-slate-700/60 rounded-xl py-3.5 px-5 text-white focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all shadow-inner placeholder-slate-500 backdrop-blur-md">
                         </div>
                         <div>
                             <label for="booking-email" class="block text-sm font-medium text-slate-300 mb-2">Your Email</label>
-                            <input type="email" id="booking-email" name="email" required class="w-full bg-slate-700/50 border border-slate-600 rounded-md py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all">
+                            <input type="email" id="booking-email" name="email" required class="w-full bg-slate-900/40 border border-slate-700/60 rounded-xl py-3.5 px-5 text-white focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all shadow-inner placeholder-slate-500 backdrop-blur-md">
                         </div>
                         <div>
                             <label for="booking-message" class="block text-sm font-medium text-slate-300 mb-2">Topic of Discussion (Optional)</label>
@@ -365,12 +411,12 @@
   <div class="container mx-auto px-4">
     <!-- Section Title -->
     <div class="text-center mb-12 reveal">
-      <h2 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-white">Let's Connect</h2>
+      <h2 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-teal-100 to-teal-400 tracking-tight drop-shadow-sm pb-2">Let's Connect</h2>
       <p class="text-teal-400">Have a project in mind? I'd love to hear from you.</p>
     </div>
 
     <!-- CHANGED: Added animation style for fade-in-up effect -->
-    <div class="max-w-4xl mx-auto bg-slate-800/50 rounded-2xl shadow-lg backdrop-blur-sm overflow-hidden" style="animation: fadeInUp 0.7s ease-out forwards; opacity: 0;">
+    <div class="max-w-5xl mx-auto glass-card rounded-[2rem] overflow-hidden" style="animation: fadeInUp 0.7s ease-out forwards; opacity: 0;">
       <div class="grid md:grid-cols-2">
         
         <!-- Left Side: Contact Info & Illustration -->
@@ -423,17 +469,17 @@
           <form id="contact-form" class="space-y-6">
             <div>
               <label for="name" class="block text-sm font-medium text-slate-300 mb-2">Your Name</label>
-              <input type="text" id="name" name="name" required class="w-full bg-slate-700/50 border border-slate-600 rounded-md py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all">
+              <input type="text" id="name" name="name" required class="w-full bg-slate-900/40 border border-slate-700/60 rounded-xl py-3.5 px-5 text-white focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all shadow-inner placeholder-slate-500 backdrop-blur-md">
             </div>
             <div>
               <label for="email" class="block text-sm font-medium text-slate-300 mb-2">Your Email</label>
-              <input type="email" id="email" name="email" required class="w-full bg-slate-700/50 border border-slate-600 rounded-md py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all">
+              <input type="email" id="email" name="email" required class="w-full bg-slate-900/40 border border-slate-700/60 rounded-xl py-3.5 px-5 text-white focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all shadow-inner placeholder-slate-500 backdrop-blur-md">
             </div>
             <div>
               <label for="message" class="block text-sm font-medium text-slate-300 mb-2">Message</label>
               <textarea id="message" name="message" rows="5" required class="w-full bg-slate-700/50 border border-slate-600 rounded-md py-3 px-4 text-white resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"></textarea>
             </div>
-            <button id="submit-button" type="submit" class="w-full bg-teal-500 text-white font-semibold py-3 px-6 rounded-md hover:bg-teal-600 transition-all duration-300 flex items-center justify-center disabled:opacity-50">
+            <button id="submit-button" type="submit" class="w-full bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold py-4 px-6 rounded-xl hover:scale-[1.02] shadow-[0_4px_20px_rgba(20,184,166,0.3)] hover:shadow-[0_8px_30px_rgba(20,184,166,0.5)] transition-all duration-300 flex items-center justify-center disabled:opacity-50 border border-teal-400/20">
               <span id="button-text">Send Message</span>
               <svg id="button-spinner" class="hidden w-5 h-5 animate-spin-fast" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
             </button>
@@ -713,7 +759,7 @@ const menuButton = document.getElementById("mobile-menu-button");
         projectsGrid.innerHTML = '';
         projects.forEach(project => {
           const projectCard = `
-            <div class="flex flex-col h-full bg-slate-800/80 backdrop-blur-sm border border-slate-700/50 rounded-xl overflow-hidden group hover:-translate-y-2 transition-all duration-300 hover:shadow-xl hover:shadow-teal-500/10 reveal">
+            <div class="flex flex-col h-full glass-card border border-slate-700/50 rounded-xl overflow-hidden group hover:-translate-y-2 transition-all duration-300 hover:shadow-xl hover:shadow-teal-500/20 transform hover:-translate-y-3 transition-all duration-500 reveal">
               <div class="relative overflow-hidden w-full aspect-video">
                 <img src="${project.imageUrl}" alt="${project.name}" class="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110">
                 <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent opacity-0 group-hover:opacity-80 transition-opacity duration-300 pointer-events-none"></div>
@@ -722,7 +768,7 @@ const menuButton = document.getElementById("mobile-menu-button");
                 <h3 class="text-xl font-bold text-white mb-2 group-hover:text-teal-400 transition-colors">${project.name}</h3>
                 <p class="text-slate-400 mb-4 line-clamp-3">${project.description}</p>
                 <div class="flex flex-wrap gap-2 mb-6">
-                  ${project.tags.map(tag => `<span class="bg-slate-700/50 text-teal-400 font-medium py-1 px-3 rounded-full text-xs border border-teal-500/20">${tag}</span>`).join('')}
+                  ${project.tags.map(tag => `<span class="bg-teal-500/10 text-teal-300 font-semibold py-1.5 px-3.5 rounded-full text-[0.65rem] uppercase tracking-wider border border-teal-500/30 backdrop-blur-md">${tag}</span>`).join('')}
                 </div>
                 <div class="flex space-x-4 mt-auto pt-4 border-t border-slate-700/50">
                   <a href="${project.liveUrl}" target="_blank" rel="noopener noreferrer" class="flex items-center text-sm font-semibold text-white hover:text-teal-400 transition-colors">
@@ -754,12 +800,12 @@ const menuButton = document.getElementById("mobile-menu-button");
 
       services.forEach(service => {
         const serviceCard = `
-          <div class="bg-slate-800/80 backdrop-blur-sm border border-slate-700/50 p-8 rounded-xl text-center transform hover:-translate-y-2 transition-all duration-300 hover:shadow-xl hover:shadow-teal-500/10 reveal">
+          <div class="glass-card border border-slate-700/50 p-8 rounded-xl text-center transform hover:-translate-y-2 transition-all duration-300 hover:shadow-xl hover:shadow-teal-500/20 transform hover:-translate-y-3 transition-all duration-500 reveal">
             <!-- THIS IS THE UPDATED LINE -->
-            <div class="inline-block bg-slate-700 p-4 rounded-full mb-4 w-16 h-16 flex items-center justify-center text-teal-400">
+            <div class="inline-block bg-slate-700 p-4 rounded-full mb-4 w-16 h-16 flex items-center justify-center text-teal-300 bg-gradient-to-br from-slate-700 to-slate-800 border border-slate-600 shadow-[inset_0_2px_4px_rgba(255,255,255,0.05)]">
               ${service.iconSvg}
             </div>
-            <h3 class="text-2xl font-bold text-white mb-2">${service.title}</h3>
+            <h3 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-300 mb-3 tracking-tight">${service.title}</h3>
             <p class="text-slate-400">${service.description}</p>
           </div>`;
         servicesGrid.innerHTML += serviceCard;
@@ -809,7 +855,7 @@ const menuButton = document.getElementById("mobile-menu-button");
                         </div>
                         <!-- Card -->
                         <div class="mt-6 md:mt-4 ml-10 md:ml-0 ${cardMargin}">
-                            <div class="bg-slate-800/80 backdrop-blur-sm border border-slate-700/50 p-6 rounded-xl shadow-lg hover:shadow-teal-500/10 transition-shadow duration-300 ${alignmentClasses} reveal">
+                            <div class="glass-card border border-slate-700/50 p-6 rounded-xl shadow-lg hover:shadow-teal-500/10 transition-shadow duration-300 ${alignmentClasses} reveal">
                                 <p class="md:hidden text-teal-400 font-medium text-sm mb-2">${exp.dateRange}</p>
                                 <h3 class="text-xl font-bold text-white">${exp.title}</h3>
                                 <p class="text-teal-400/80 font-semibold mb-2">${exp.company}</p>

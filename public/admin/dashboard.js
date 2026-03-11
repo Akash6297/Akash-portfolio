@@ -7,6 +7,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const adminSections = document.querySelectorAll('.admin-section');
     
     // Forms and Tables
+    const navLinks = {
+        'dashboard-link': document.getElementById('dashboard-container'),
+        'projects-management': document.getElementById('projects-management-container'),
+        'services-management': document.getElementById('services-management-container'),
+        'resume-management': document.getElementById('resume-management-container'),
+        'experience-management': document.getElementById('experience-management-container'),
+        'about-management': document.getElementById('about-management-container'),
+        'messages-management': document.getElementById('messages-management-container'),
+        'booking-management': document.getElementById('booking-management-container'),
+        'email-templates-management': document.getElementById('email-templates-management-container'),
+        'settings-management': document.getElementById('settings-management-container')
+    };
     const heroForm = document.getElementById('hero-form');
     const projectForm = document.getElementById('project-form');
     const projectsTableBody = document.getElementById('projects-table-body');
@@ -72,8 +84,34 @@ document.addEventListener('DOMContentLoaded', () => {
  let currentUserIsSuperAdmin = false;
     let allUsers = [];
 
+    // --- API REQUEST HELPER (UPDATED) ---
+    const apiRequest = async (method, url, body = null) => {
+        try {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            if (body) options.body = JSON.stringify(body);
+            const response = await fetch(url, options);
+            if (response.status === 401) {
+                window.location.href = '/login.html';
+                return null;
+            }
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Something went wrong');
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('API Request Error:', error);
+            showToast(error.message, 'error');
+            return null;
+        }
+    };
+
     // --- CHECK ADMIN STATUS ---
-   
     const checkAdminStatus = async () => {
         const status = await apiRequest('GET', '/api/admin/status');
         if (status) {
@@ -91,30 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
             showSection(link.dataset.section);
         });
     });
-
- // --- API REQUEST HELPER (UPDATED) ---
-    const apiRequest = async (method, url, body = null) => {
-        try {
-            const options = {
-                method,
-                headers: { 'Content-Type': 'application/json' }
-            };
-            if (body) {
-                options.body = JSON.stringify(body);
-            }
-            const response = await fetch(url, options);
-            const result = await response.json();
-            if (!response.ok) {
-                if (response.status === 401) window.location.href = '/admin/login.html';
-                throw new Error(result.message || `HTTP error! status: ${response.status}`);
-            }
-            return result;
-        } catch (error) {
-            console.error(`API request failed: ${method} ${url}`, error);
-            showToast(error.message, 'error');
-            return null;
-        }
-    };
 
 
     // --- HERO MANAGEMENT ---
@@ -798,6 +812,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } else if (sectionId === 'hero-management') fetchHeroData();
             else if (sectionId === 'about-management') fetchAboutData();
+            else if (sectionId === 'resume-management') loadResume();
             else if (sectionId === 'experience-management') fetchExperiences();
             else if (sectionId === 'projects-management') fetchProjects();
             else if (sectionId === 'services-management') fetchServices();
@@ -866,4 +881,425 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     initializeDashboard();
+
+    // ==========================================
+    // RESUME MANAGEMENT LOGIC (ADVANCED)
+    // ==========================================
+
+    let resumeSections = [];
+    let summaryQuill;
+    const quillModules = {
+        toolbar: [
+            ['bold', 'italic', 'underline'],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            ['clean']
+        ]
+    };
+
+    function initQuill(selector, placeholder = '') {
+        const quill = new Quill(selector, {
+            theme: 'snow',
+            placeholder: placeholder || 'Start typing...',
+            modules: {
+                toolbar: [
+                    ['bold', 'italic', 'underline'],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                    ['clean']
+                ]
+            }
+        });
+        return quill;
+    }
+
+    function updateSummaryCounter(quill) {
+        const text = quill.getText().trim();
+        const charCount = text.length;
+        const wordCount = text.split(/\s+/).filter(w => w).length;
+        const counterEl = document.getElementById('summary-counter');
+        if (counterEl) {
+            counterEl.innerText = `${charCount} characters | ${wordCount} words`;
+        }
+    }
+
+    async function loadResume() {
+        try {
+            const res = await fetch('/api/resume');
+            if (!res.ok) throw new Error('Failed to load resume');
+            const resume = await res.json();
+            
+            // Populate Personal Info
+            if (resume.personalInfo) {
+                document.getElementById('resume-name').value = resume.personalInfo.name || '';
+                document.getElementById('resume-title').value = resume.personalInfo.title || '';
+                document.getElementById('resume-email').value = resume.personalInfo.email || '';
+                document.getElementById('resume-phone').value = resume.personalInfo.phone || '';
+                document.getElementById('resume-address').value = resume.personalInfo.address || '';
+                document.getElementById('resume-linkedin').value = resume.personalInfo.linkedin || '';
+                document.getElementById('resume-github').value = resume.personalInfo.github || '';
+                
+                // Initialize/Update Summary Quill
+                if (!summaryQuill) {
+                    summaryQuill = initQuill('#resume-summary-editor');
+                }
+                if (summaryQuill) {
+                    summaryQuill.root.innerHTML = resume.personalInfo.summary || '';
+                    updateSummaryCounter(summaryQuill);
+                    summaryQuill.on('text-change', () => updateSummaryCounter(summaryQuill));
+                }
+                if (resume.personalInfo.photoShape) {
+                document.getElementById('resume-photo-shape').value = resume.personalInfo.photoShape;
+            }
+            document.getElementById('resume-summary').value = resume.personalInfo.summary || '';
+                
+                // Photo Preview
+                const previewImg = document.getElementById('resume-photo-preview');
+                const placeholder = document.getElementById('resume-photo-placeholder');
+                if (resume.personalInfo.photoUrl) {
+                    previewImg.src = resume.personalInfo.photoUrl;
+                    previewImg.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                    document.getElementById('resume-photoUrl').value = resume.personalInfo.photoUrl;
+                }
+            }
+
+            // NEW: Populate Template Selection
+            if (resume.selectedTemplate) {
+                const radio = document.querySelector(`input[name="selectedTemplate"][value="${resume.selectedTemplate}"]`);
+                if (radio) radio.checked = true;
+            }
+
+            // Populate Skills (Dynamic)
+            populateDynamicArray('resume-skills-container', resume.skills || [], createSkillRow);
+
+            // Populate Dynamic Arrays
+            populateDynamicArray('resume-experience-container', resume.experience || [], createExperienceRow);
+            populateDynamicArray('resume-education-container', resume.education || [], createEducationRow);
+            populateDynamicArray('resume-project-container', resume.projects || [], createResumeProjectRow);
+            populateDynamicArray('resume-language-container', resume.languages || [], createLanguageRow);
+            
+            // Populate Section Config
+            resumeSections = resume.sections && resume.sections.length > 0 ? resume.sections : [
+                { id: 'summary', name: 'Summary', order: 0, isVisible: true },
+                { id: 'experience', name: 'Experience', order: 1, isVisible: true },
+                { id: 'projects', name: 'Projects', order: 2, isVisible: true },
+                { id: 'education', name: 'Education', order: 3, isVisible: true },
+                { id: 'skills', name: 'Skills', order: 4, isVisible: true },
+                { id: 'languages', name: 'Languages', order: 5, isVisible: true }
+            ];
+            renderSectionConfig();
+            
+        } catch (error) {
+            console.error('Error loading resume:', error);
+        }
+    }
+
+    // Photo Preview Logic
+    const resumePhotoInput = document.getElementById('resume-photo-file');
+    if (resumePhotoInput) {
+        resumePhotoInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewImg = document.getElementById('resume-photo-preview');
+                    const placeholder = document.getElementById('resume-photo-placeholder');
+                    previewImg.src = e.target.result;
+                    previewImg.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // Section Config Logic
+    function renderSectionConfig() {
+        const container = document.getElementById('resume-sections-config');
+        if (!container) return;
+        container.innerHTML = '';
+        
+        // Sort sections by order
+        resumeSections.sort((a, b) => a.order - b.order);
+        
+        resumeSections.forEach((section, index) => {
+            const div = document.createElement('div');
+            div.className = 'flex items-center justify-between p-3 bg-slate-800 border border-slate-700 rounded-lg group';
+            div.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <div class="flex flex-col space-y-1">
+                        <button type="button" class="text-slate-500 hover:text-teal-400 p-0.5" onclick="moveSection(${index}, -1)" ${index === 0 ? 'disabled' : ''}>
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                        </button>
+                        <button type="button" class="text-slate-500 hover:text-teal-400 p-0.5" onclick="moveSection(${index}, 1)" ${index === resumeSections.length - 1 ? 'disabled' : ''}>
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                    </div>
+                    <span class="font-bold text-slate-300">${section.name}</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" value="" class="sr-only peer" ${section.isVisible ? 'checked' : ''} onchange="toggleSectionVisibility(${index})">
+                    <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-500"></div>
+                </label>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    window.moveSection = (index, direction) => {
+        const targetIndex = index + direction;
+        if (targetIndex < 0 || targetIndex >= resumeSections.length) return;
+        
+        const temp = resumeSections[index];
+        resumeSections[index] = resumeSections[targetIndex];
+        resumeSections[targetIndex] = temp;
+        
+        // Update orders
+        resumeSections.forEach((s, i) => s.order = i);
+        renderSectionConfig();
+    };
+
+    window.toggleSectionVisibility = (index) => {
+        resumeSections[index].isVisible = !resumeSections[index].isVisible;
+    };
+
+    // Helper to populate arrays
+    function populateDynamicArray(containerId, items, rowCreator) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        if (items.length > 0) {
+            items.forEach(item => container.appendChild(rowCreator(item)));
+        }
+    }
+
+    // HTML Row Creators
+    function createExperienceRow(data = {}) {
+        const div = document.createElement('div');
+        div.className = 'resume-experience-item flex flex-col md:flex-row gap-4 p-4 border border-slate-700/50 rounded-lg bg-slate-800/50 relative';
+        const uniqueId = 'exp-editor-' + Date.now() + Math.random().toString(36).substr(2, 9);
+        div.innerHTML = `
+            <button type="button" class="absolute top-2 right-2 text-red-400 hover:text-red-300 transition z-10" onclick="this.parentElement.remove()">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <div class="flex-1 space-y-3">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <input type="text" placeholder="Company/Organization" value="${data.company || ''}" required class="exp-company w-full bg-slate-900 border border-slate-600 p-2 rounded text-white focus:outline-none focus:border-teal-400 text-sm">
+                    <input type="text" placeholder="Job Title/Position" value="${data.position || ''}" required class="exp-position w-full bg-slate-900 border border-slate-600 p-2 rounded text-white focus:outline-none focus:border-teal-400 text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="text" placeholder="Start Date" value="${data.startDate || ''}" required class="exp-start w-full bg-slate-900 border border-slate-600 p-2 rounded text-white focus:outline-none focus:border-teal-400 text-sm">
+                    <input type="text" placeholder="End Date" value="${data.endDate || ''}" required class="exp-end w-full bg-slate-900 border border-slate-600 p-2 rounded text-white focus:outline-none focus:border-teal-400 text-sm">
+                </div>
+                <div class="relative">
+                    <label class="block mb-1 text-[10px] font-bold text-slate-500 uppercase tracking-widest italic">Experience Description / Key Responsibilities</label>
+                    <div id="${uniqueId}" class="quill-editor-container exp-desc-editor"></div>
+                </div>
+            </div>
+        `;
+        // Delay Quill initialization until the element is in the DOM
+        setTimeout(() => {
+            const quill = initQuill('#' + uniqueId);
+            quill.root.innerHTML = data.description || '';
+            div.dataset.quillId = uniqueId;
+            div.quillInstance = quill;
+        }, 0);
+        return div;
+    }
+
+    function createEducationRow(data = {}) {
+        const div = document.createElement('div');
+        div.className = 'resume-education-item flex flex-col md:flex-row gap-4 p-4 border border-slate-700/50 rounded-lg bg-slate-800/50 relative';
+        const uniqueId = 'edu-editor-' + Date.now() + Math.random().toString(36).substr(2, 9);
+        div.innerHTML = `
+            <button type="button" class="absolute top-2 right-2 text-red-400 hover:text-red-300 transition z-10" onclick="this.parentElement.remove()">
+                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <div class="flex-1 space-y-3">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <input type="text" placeholder="Institution/University" value="${data.institution || ''}" required class="edu-inst w-full bg-slate-900 border border-slate-600 p-2 rounded text-white focus:outline-none focus:border-teal-400 text-sm">
+                    <input type="text" placeholder="Degree/Certificate" value="${data.degree || ''}" required class="edu-deg w-full bg-slate-900 border border-slate-600 p-2 rounded text-white focus:outline-none focus:border-teal-400 text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="text" placeholder="Start Date" value="${data.startDate || ''}" required class="edu-start w-full bg-slate-900 border border-slate-600 p-2 rounded text-white focus:outline-none focus:border-teal-400 text-sm">
+                    <input type="text" placeholder="End Date" value="${data.endDate || ''}" required class="edu-end w-full bg-slate-900 border border-slate-600 p-2 rounded text-white focus:outline-none focus:border-teal-400 text-sm">
+                </div>
+                <!-- Performance Metric -->
+                <div class="grid grid-cols-2 gap-3">
+                    <select class="edu-score-type w-full bg-slate-900 border border-slate-600 p-2 rounded text-white focus:outline-none focus:border-teal-400 text-sm">
+                        <option value="CGPA" ${data.scoreType === 'CGPA' ? 'selected' : ''}>CGPA</option>
+                        <option value="Percentage" ${data.scoreType === 'Percentage' ? 'selected' : ''}>Percentage</option>
+                    </select>
+                    <input type="text" placeholder="Value (e.g. 9.0 or 85%)" value="${data.scoreValue || ''}" class="edu-score-value w-full bg-slate-900 border border-slate-600 p-2 rounded text-white focus:outline-none focus:border-teal-400 text-sm">
+                </div>
+                <div class="relative">
+                    <label class="block mb-1 text-[10px] font-bold text-slate-500 uppercase tracking-widest italic">Other Details (Optional)</label>
+                    <div id="${uniqueId}" class="quill-editor-container edu-desc-editor"></div>
+                </div>
+            </div>
+        `;
+        setTimeout(() => {
+            const quill = initQuill('#' + uniqueId);
+            quill.root.innerHTML = data.description || '';
+            div.quillInstance = quill;
+        }, 0);
+        return div;
+    }
+
+    function createResumeProjectRow(data = {}) {
+        const div = document.createElement('div');
+        div.className = 'resume-project-item flex flex-col md:flex-row gap-4 p-4 border border-slate-700/50 rounded-lg bg-slate-800/50 relative';
+        const uniqueId = 'proj-editor-' + Date.now() + Math.random().toString(36).substr(2, 9);
+        div.innerHTML = `
+            <button type="button" class="absolute top-2 right-2 text-red-400 hover:text-red-300 transition z-10" onclick="this.parentElement.remove()">
+                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <div class="flex-1 space-y-3">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <input type="text" placeholder="Project Name" value="${data.name || ''}" required class="proj-name w-full bg-slate-900 border border-slate-600 p-2 rounded text-white focus:outline-none focus:border-teal-400 text-sm">
+                    <input type="url" placeholder="Project Link" value="${data.link || ''}" class="proj-link w-full bg-slate-900 border border-slate-600 p-2 rounded text-white focus:outline-none focus:border-teal-400 text-sm">
+                </div>
+                <div class="relative">
+                    <label class="block mb-1 text-[10px] font-bold text-slate-500 uppercase tracking-widest italic">Project Description / Technical Stack</label>
+                    <div id="${uniqueId}" class="quill-editor-container proj-desc-editor"></div>
+                </div>
+            </div>
+        `;
+        setTimeout(() => {
+            const quill = initQuill('#' + uniqueId);
+            quill.root.innerHTML = data.description || '';
+            div.quillInstance = quill;
+        }, 0);
+        return div;
+    }
+
+    function createLanguageRow(data = {}) {
+        const div = document.createElement('div');
+        div.className = 'resume-language-item flex items-center gap-3 p-3 border border-slate-700/50 rounded-lg bg-slate-800/50 relative';
+        div.innerHTML = `
+            <input type="text" placeholder="Language" value="${data.language || ''}" required class="lang-name w-full bg-slate-900 border border-slate-600 p-2 rounded text-white focus:outline-none focus:border-teal-400 text-sm">
+            <input type="text" placeholder="Proficiency" value="${data.proficiency || ''}" required class="lang-level w-full bg-slate-900 border border-slate-600 p-2 rounded text-white focus:outline-none focus:border-teal-400 text-sm">
+            <button type="button" class="text-red-400 hover:text-red-300 transition shrink-0" onclick="this.parentElement.remove()">
+                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        `;
+        return div;
+    }
+
+    function createSkillRow(skill = '') {
+        const div = document.createElement('div');
+        div.className = 'resume-skill-item flex items-center gap-2 p-2 bg-slate-800/30 border border-slate-700/50 rounded-lg group';
+        div.innerHTML = `
+            <input type="text" value="${skill}" placeholder="e.g. React" class="skill-input flex-1 bg-transparent border-none text-slate-200 focus:outline-none text-sm p-1">
+            <button type="button" class="text-slate-500 hover:text-red-400 transition" onclick="this.parentElement.remove()">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        `;
+        return div;
+    }
+
+    // Event Listeners
+    document.getElementById('add-resume-experience')?.addEventListener('click', () => {
+        document.getElementById('resume-experience-container').appendChild(createExperienceRow());
+    });
+    document.getElementById('add-resume-skill')?.addEventListener('click', () => {
+        document.getElementById('resume-skills-container').appendChild(createSkillRow());
+    });
+    document.getElementById('add-resume-education')?.addEventListener('click', () => {
+        document.getElementById('resume-education-container').appendChild(createEducationRow());
+    });
+    document.getElementById('add-resume-project')?.addEventListener('click', () => {
+        document.getElementById('resume-project-container').appendChild(createResumeProjectRow());
+    });
+    document.getElementById('add-resume-language')?.addEventListener('click', () => {
+        document.getElementById('resume-language-container').appendChild(createLanguageRow());
+    });
+
+    const resumeFormObj = document.getElementById('resume-form');
+    if (resumeFormObj) {
+        resumeFormObj.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            
+            const photoFile = document.getElementById('resume-photo-file').files[0];
+            if (photoFile) formData.append('resumePhoto', photoFile);
+
+            // NEW: Template selection
+            const selectedTemplate = document.querySelector('input[name="selectedTemplate"]:checked')?.value || 'classic';
+            formData.append('selectedTemplate', selectedTemplate);
+
+            const experiences = Array.from(document.querySelectorAll('.resume-experience-item')).map(item => ({
+                company: item.querySelector('.exp-company').value,
+                position: item.querySelector('.exp-position').value,
+                startDate: item.querySelector('.exp-start').value,
+                endDate: item.querySelector('.exp-end').value,
+                description: item.quillInstance ? item.quillInstance.root.innerHTML : ''
+            }));
+
+            const education = Array.from(document.querySelectorAll('.resume-education-item')).map(item => ({
+                institution: item.querySelector('.edu-inst').value,
+                degree: item.querySelector('.edu-deg').value,
+                startDate: item.querySelector('.edu-start').value,
+                endDate: item.querySelector('.edu-end').value,
+                scoreType: item.querySelector('.edu-score-type').value,
+                scoreValue: item.querySelector('.edu-score-value').value,
+                description: item.quillInstance ? item.quillInstance.root.innerHTML : ''
+            }));
+
+            const projects = Array.from(document.querySelectorAll('.resume-project-item')).map(item => ({
+                name: item.querySelector('.proj-name').value,
+                link: item.querySelector('.proj-link').value,
+                description: item.quillInstance ? item.quillInstance.root.innerHTML : ''
+            }));
+
+            const languages = Array.from(document.querySelectorAll('.resume-language-item')).map(item => ({
+                language: item.querySelector('.lang-name').value,
+                proficiency: item.querySelector('.lang-level').value
+            }));
+
+            const personalInfo = {
+                name: document.getElementById('resume-name').value,
+                title: document.getElementById('resume-title').value,
+                email: document.getElementById('resume-email').value,
+                phone: document.getElementById('resume-phone').value,
+                address: document.getElementById('resume-address').value,
+                linkedin: document.getElementById('resume-linkedin').value,
+                github: document.getElementById('resume-github').value,
+                summary: summaryQuill ? summaryQuill.root.innerHTML : document.getElementById('resume-summary').value,
+                photoUrl: document.getElementById('resume-photoUrl').value,
+                photoShape: document.getElementById('resume-photo-shape').value
+            };
+
+            formData.append('personalInfo', JSON.stringify(personalInfo));
+            
+            const skillInputs = document.querySelectorAll('.skill-input');
+            const skillsArray = Array.from(skillInputs).map(input => input.value).filter(val => val.trim() !== '');
+            formData.append('skills', JSON.stringify(skillsArray));
+            formData.append('experience', JSON.stringify(experiences));
+            formData.append('education', JSON.stringify(education));
+            formData.append('projects', JSON.stringify(projects));
+            formData.append('languages', JSON.stringify(languages));
+            formData.append('sections', JSON.stringify(resumeSections));
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const ogText = submitBtn.innerHTML;
+            submitBtn.innerHTML = 'Saving...';
+            submitBtn.disabled = true;
+            
+            try {
+                const res = await fetch('/api/admin/resume', { method: 'PUT', body: formData });
+                if (res.ok) {
+                    showToast('Resume saved successfully!');
+                    loadResume();
+                } else {
+                    const err = await res.json();
+                    throw new Error(err.message);
+                }
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                submitBtn.innerHTML = ogText;
+                submitBtn.disabled = false;
+            }
+        });
+    }
 });

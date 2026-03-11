@@ -23,6 +23,7 @@ const Hero = require('./models/hero');
 const Message = require('./models/message');
 const EmailTemplate = require('./models/emailTemplate');
 const Booking = require('./models/booking');
+const Resume = require('./models/resume');
 
 // --- Multer, App, Port, DB Connection, Middleware (UNCHANGED) ---
 const storage = multer.memoryStorage();
@@ -190,6 +191,80 @@ app.get('/api/hero', async (req, res) => {
     }
 });
 
+// =======================================================
+// --- RESUME API ROUTES (NEW) ---
+// =======================================================
+
+// Public route to get the latest resume data
+app.get('/api/resume', async (req, res) => {
+    try {
+        let resume = await Resume.findOne();
+        if (!resume) {
+            // Provide a default empty structure if none exists
+            resume = new Resume({
+                personalInfo: { name: 'Akash Mandal', title: 'Web Developer', email: 'mail@example.com', summary: 'Passionate developer.' },
+                experience: [],
+                education: [],
+                skills: [],
+                projects: []
+            });
+            await resume.save();
+        }
+        res.json(resume);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch resume data', error: error.message });
+    }
+});
+
+// Protected Admin route to update the resume data
+app.put('/api/admin/resume', requireLogin, upload.single('resumePhoto'), async (req, res) => {
+    try {
+        const updateData = { ...req.body };
+        
+        // Handle parsing for arrays if they come as strings
+        if (typeof updateData.skills === 'string') {
+            try {
+                updateData.skills = JSON.parse(updateData.skills);
+            } catch (e) {
+                updateData.skills = updateData.skills.split(',').map(s => s.trim()).filter(s => s);
+            }
+        }
+        
+        if (updateData.experience && typeof updateData.experience === 'string') updateData.experience = JSON.parse(updateData.experience);
+        if (updateData.education && typeof updateData.education === 'string') updateData.education = JSON.parse(updateData.education);
+        if (updateData.projects && typeof updateData.projects === 'string') updateData.projects = JSON.parse(updateData.projects);
+        if (updateData.languages && typeof updateData.languages === 'string') updateData.languages = JSON.parse(updateData.languages);
+        if (updateData.sections && typeof updateData.sections === 'string') updateData.sections = JSON.parse(updateData.sections);
+
+        if (req.file) {
+            const formData = new FormData();
+            formData.append('image', req.file.buffer, { filename: req.file.originalname });
+            
+            const response = await axios.post(
+                `https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`,
+                formData,
+                { headers: formData.getHeaders() }
+            );
+            
+            if (!updateData.personalInfo) updateData.personalInfo = {};
+            if (typeof updateData.personalInfo === 'string') updateData.personalInfo = JSON.parse(updateData.personalInfo);
+            
+            updateData.personalInfo.photoUrl = response.data.data.url;
+        } else if (updateData.personalInfo && typeof updateData.personalInfo === 'string') {
+            updateData.personalInfo = JSON.parse(updateData.personalInfo);
+        }
+
+        const updatedResume = await Resume.findOneAndUpdate(
+            {}, 
+            updateData, 
+            { new: true, upsert: true }
+        );
+        res.json({ success: true, message: 'Resume updated successfully', resume: updatedResume });
+    } catch (error) {
+        console.error('Error updating resume:', error);
+        res.status(400).json({ message: 'Failed to update resume', error: error.message });
+    }
+});
 
 
 // =======================================================

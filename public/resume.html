@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Resume | Akash Mandal</title>
+    <!-- Premium Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="/output.css" rel="stylesheet">
+    <style>
+        :root {
+            --classic-serif: 'EB Garamond', serif;
+            --modern-sans: 'Inter', sans-serif;
+            --minimal-serif: 'Playfair Display', serif;
+        }
+        
+        body { 
+            background-color: #f1f5f9; 
+            margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* Container for the rendered resume */
+        #resume-content {
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            margin: 40px auto;
+            background: white;
+            position: relative;
+        }
+
+        /* --- CLASSIC TEMPLATE STYLES (Reference Match) --- */
+        .template-classic #resume-content {
+            max-width: 850px;
+            font-family: var(--classic-serif);
+            padding: 0;
+        }
+
+        .section-title-classic {
+            font-family: var(--classic-serif);
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #1e293b;
+            border-bottom: 2px solid #1e293b;
+            padding-bottom: 2px;
+            margin-bottom: 12px;
+            margin-top: 20px;
+        }
+
+        /* --- MODERN TEMPLATE STYLES --- */
+        .template-modern #resume-content {
+            max-width: 900px;
+            font-family: var(--modern-sans);
+            display: grid;
+            grid-template-columns: 280px 1fr;
+        }
+
+        .template-modern .section-title {
+            font-weight: 700;
+            color: #4f46e5;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+        }
+
+        /* --- MINIMAL TEMPLATE STYLES --- */
+        .template-minimal #resume-content {
+            max-width: 800px;
+            font-family: var(--classic-serif);
+            padding: 60px;
+        }
+
+        .template-minimal .section-title {
+            text-align: center;
+            font-family: var(--minimal-serif);
+            font-weight: 700;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .template-minimal .section-title::after {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 2px;
+            background: #000;
+            margin: 8px auto 0;
+        }
+
+        /* Common content styling */
+        .section-content {
+            color: #334155;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        /* No-Print Header */
+        .no-print { display: flex; }
+
+        @media print {
+            body { background-color: white !important; }
+            #resume-content { 
+                box-shadow: none !important; 
+                margin: 0 !important; 
+                width: 100% !important; 
+                max-width: 100% !important;
+            }
+            .no-print { display: none !important; }
+            @page {
+                size: A4;
+                margin: 0;
+            }
+        }
+
+        /* Responsive Mobile Adjustment */
+        @media (max-width: 768px) {
+            #resume-content {
+                width: 95%;
+                margin: 20px auto;
+                grid-template-columns: 1fr !important;
+                box-shadow: none;
+            }
+            .template-modern #resume-content .sidebar {
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+        }
+    </style>
+</head>
+<body class="template-classic">
+    <!-- UI Controls -->
+    <div class="no-print justify-center p-4 bg-slate-900 sticky top-0 z-50 shadow-md gap-4">
+        <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-6 rounded-lg transition-all shadow-lg flex items-center gap-2 transform hover:scale-105">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+            Download Resume (PDF)
+        </button>
+        <a href="/" class="bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors flex items-center justify-center">Back to Site</a>
+        <a href="/admin/dashboard.html" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2 px-6 rounded-lg transition-colors flex items-center justify-center border border-slate-600">Admin Dashboard</a>
+    </div>
+
+    <!-- Main Content Area where JS will inject the template -->
+    <div id="resume-content">
+        <div class="p-20 text-center text-slate-400">
+            <svg class="animate-spin h-10 w-10 mx-auto mb-4" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="font-medium">Loading your profile...</p>
+        </div>
+    </div>
+
+    <script src="/resume.js"></script>
+</body>
+</html>
