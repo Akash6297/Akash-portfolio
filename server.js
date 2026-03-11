@@ -651,4 +651,9 @@ app.put('/api/admin/hero', requireLogin, upload.single('heroPhoto'), async (req,
 });
 
 // --- Server Start ---
-app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));
+if (require.main === module) {
+    app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));
+}
+
+// Export for Vercel Serverless
+module.exports = app;
