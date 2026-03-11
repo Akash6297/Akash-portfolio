@@ -268,16 +268,93 @@
       <!-- Service cards will be injected here by JavaScript -->
     </div>
 
-    <!-- NEW: Calendly Call-to-Action Button -->
-        <div class="text-center mt-16">
-            <a href="https://calendly.com/akashmandal6297/30min" 
-               onclick="Calendly.initPopupWidget({url: 'https://calendly.com/akashmandal6297/30min'});return false;"
-               class="inline-block bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold text-lg py-4 px-8 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300">
-                Book a Free Discovery Call
-            </a>
-        </div>
+    <!-- CUSTOM MEETING BOOKING SYSTEM -->
+    <div class="text-center mt-16">
+        <button id="open-booking-modal" class="inline-block bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold text-lg py-4 px-8 rounded-lg shadow-lg hover:scale-105 transition-transform duration-300">
+            Book a Free Discovery Call
+        </button>
+    </div>
   </div>
 </section>
+
+<!-- ============================================ -->
+<!-- CUSTOM BOOKING MODAL -->
+<!-- ============================================ -->
+<div id="booking-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-slate-800 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform scale-95 transition-transform duration-300">
+        <!-- Modal Header -->
+        <div class="bg-slate-750 border-b border-slate-700/50 p-6 flex justify-between items-center">
+            <div>
+                <h3 class="text-2xl font-bold text-white">Book a Discovery Call</h3>
+                <p class="text-teal-400 text-sm mt-1">30 Minute Meeting</p>
+            </div>
+            <button id="close-booking-modal" class="text-slate-400 hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6 md:p-8">
+            <form id="custom-booking-form" class="space-y-6">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Column 1: Date & Time -->
+                    <div class="space-y-4">
+                        <div>
+                            <label for="booking-date" class="block text-sm font-medium text-slate-300 mb-2">Select Date</label>
+                            <!-- We set min attribute via JS to today -->
+                            <input type="date" id="booking-date" name="date" required 
+                                class="w-full bg-slate-700/50 border border-slate-600 rounded-md py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert">
+                            <p class="text-xs text-slate-500 mt-1">Available Monday - Friday</p>
+                        </div>
+                        
+                        <div>
+                            <label for="booking-time" class="block text-sm font-medium text-slate-300 mb-2 flex justify-between">
+                                <span>Select Time</span>
+                                <span id="time-loading" class="hidden text-teal-400">
+                                    <svg class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                </span>
+                            </label>
+                            <select id="booking-time" name="time" required disabled
+                                class="w-full bg-slate-700/50 border border-slate-600 rounded-md py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed appearance-none">
+                                <option value="" disabled selected>Please select a date first</option>
+                                <!-- Time options populated by JS -->
+                            </select>
+                            <!-- Custom arrow for select to ensure visibility -->
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400 mt-[6.5rem]">
+                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Details -->
+                    <div class="space-y-4">
+                        <div>
+                            <label for="booking-name" class="block text-sm font-medium text-slate-300 mb-2">Your Name</label>
+                            <input type="text" id="booking-name" name="name" required class="w-full bg-slate-700/50 border border-slate-600 rounded-md py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all">
+                        </div>
+                        <div>
+                            <label for="booking-email" class="block text-sm font-medium text-slate-300 mb-2">Your Email</label>
+                            <input type="email" id="booking-email" name="email" required class="w-full bg-slate-700/50 border border-slate-600 rounded-md py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all">
+                        </div>
+                        <div>
+                            <label for="booking-message" class="block text-sm font-medium text-slate-300 mb-2">Topic of Discussion (Optional)</label>
+                            <textarea id="booking-message" name="message" rows="2" class="w-full bg-slate-700/50 border border-slate-600 rounded-md py-3 px-4 text-white resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-700">
+                    <button id="submit-booking-button" type="submit" class="w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-bold py-3 px-6 rounded-md hover:from-teal-600 hover:to-cyan-600 transition-all duration-300 flex items-center justify-center disabled:opacity-50">
+                        <span id="booking-button-text">Confirm Booking</span>
+                        <svg id="booking-button-spinner" class="hidden w-5 h-5 ml-2 animate-spin-fast" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    </button>
+                    <p id="booking-form-status" class="text-center mt-4 h-6 font-medium"></p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <!-- ============================================ -->
 <!-- PROFESSIONAL CONTACT SECTION (REVISED) -->
@@ -796,6 +873,146 @@ const menuButton = document.getElementById("mobile-menu-button");
         buttonSpinner.classList.add('hidden');
       }
     });
+
+    // ==========================================
+    // --- CUSTOM BOOKING MODAL LOGIC (NEW) ---
+    // ==========================================
+    const openBookingBtn = document.getElementById('open-booking-modal');
+    const closeBookingBtn = document.getElementById('close-booking-modal');
+    const bookingModal = document.getElementById('booking-modal');
+    const bookingForm = document.getElementById('custom-booking-form');
+    const dateInput = document.getElementById('booking-date');
+    const timeSelect = document.getElementById('booking-time');
+    const timeLoading = document.getElementById('time-loading');
+    const bookingSubmitBtn = document.getElementById('submit-booking-button');
+    const bookingBtnText = document.getElementById('booking-button-text');
+    const bookingSpinner = document.getElementById('booking-button-spinner');
+    const bookingStatus = document.getElementById('booking-form-status');
+
+    // 1. Setup Date Picker constraints (only weekdays, min today)
+    const today = new Date();
+    // Format to YYYY-MM-DD
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    dateInput.min = `${yyyy}-${mm}-${dd}`;
+
+    dateInput.addEventListener('input', (e) => {
+        const selectedDate = new Date(e.target.value);
+        const day = selectedDate.getUTCDay();
+        // 0 is Sunday, 6 is Saturday
+        if (day === 0 || day === 6) {
+            e.target.setCustomValidity('Meetings are only available Monday through Friday.');
+            timeSelect.innerHTML = '<option value="" disabled selected>Please select a weekday</option>';
+            timeSelect.disabled = true;
+        } else {
+            e.target.setCustomValidity('');
+            fetchAvailableSlots(e.target.value);
+        }
+    });
+
+    // 2. Open / Close Modal Logic
+    const toggleModal = (show) => {
+        if (show) {
+            bookingModal.classList.remove('hidden');
+            // Small delay to allow display block to apply before transitioning opacity
+            setTimeout(() => {
+                bookingModal.classList.remove('opacity-0');
+                bookingModal.querySelector('div').classList.remove('scale-95');
+            }, 10);
+        } else {
+            bookingModal.classList.add('opacity-0');
+            bookingModal.querySelector('div').classList.add('scale-95');
+            setTimeout(() => {
+                bookingModal.classList.add('hidden');
+                bookingForm.reset();
+                timeSelect.innerHTML = '<option value="" disabled selected>Please select a date first</option>';
+                timeSelect.disabled = true;
+                bookingStatus.textContent = '';
+            }, 300); // Matches transition duration
+        }
+    };
+
+    if(openBookingBtn) openBookingBtn.addEventListener('click', () => toggleModal(true));
+    if(closeBookingBtn) closeBookingBtn.addEventListener('click', () => toggleModal(false));
+    
+    // Close on outside click
+    window.addEventListener('click', (e) => {
+        if (e.target === bookingModal) toggleModal(false);
+    });
+
+    // 3. Fetch Available Slots for Selected Date
+    async function fetchAvailableSlots(dateStr) {
+        timeSelect.disabled = true;
+        timeLoading.classList.remove('hidden');
+        timeSelect.innerHTML = '<option value="" disabled selected>Loading slots...</option>';
+        bookingStatus.textContent = '';
+
+        try {
+            const response = await fetch(`/api/available-slots?date=${dateStr}`);
+            const data = await response.json();
+
+            timeSelect.innerHTML = '<option value="" disabled selected>Select an available time</option>';
+            
+            if (data.availableSlots && data.availableSlots.length > 0) {
+                data.availableSlots.forEach(slot => {
+                    const option = document.createElement('option');
+                    option.value = slot;
+                    option.textContent = slot;
+                    timeSelect.appendChild(option);
+                });
+                timeSelect.disabled = false;
+            } else {
+                timeSelect.innerHTML = '<option value="" disabled selected>No slots available for this date</option>';
+            }
+        } catch (error) {
+            timeSelect.innerHTML = '<option value="" disabled selected>Error loading slots</option>';
+            console.error("Error fetching slots:", error);
+        } finally {
+            timeLoading.classList.add('hidden');
+        }
+    }
+
+    // 4. Handle Form Submission
+    bookingForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Show loading state
+        bookingSubmitBtn.disabled = true;
+        bookingBtnText.classList.add('hidden');
+        bookingSpinner.classList.remove('hidden');
+        bookingStatus.textContent = '';
+
+        const formData = new FormData(bookingForm);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const response = await fetch('/api/bookings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+
+            if (result.success) {
+                bookingStatus.textContent = result.message;
+                bookingStatus.className = 'text-center mt-4 h-6 font-medium text-teal-400';
+                setTimeout(() => toggleModal(false), 3000); // Close modal after 3 seconds
+            } else {
+                bookingStatus.textContent = result.message || 'An error occurred. Please try again.';
+                bookingStatus.className = 'text-center mt-4 h-6 font-medium text-red-500';
+            }
+        } catch (error) {
+            bookingStatus.textContent = 'A network error occurred.';
+            bookingStatus.className = 'text-center mt-4 h-6 font-medium text-red-500';
+        } finally {
+            bookingSubmitBtn.disabled = false;
+            bookingBtnText.classList.remove('hidden');
+            bookingSpinner.classList.add('hidden');
+        }
+    });
+
   });
 </script>
 </body>

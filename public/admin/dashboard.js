@@ -367,6 +367,101 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- BOOKINGS MANAGEMENT ---
+    const fetchBookings = async () => {
+        const bookingsTableBody = document.getElementById('bookings-table-body');
+        const noBookingsMsg = document.getElementById('no-bookings-message');
+        const statusFilter = document.getElementById('booking-status-filter').value;
+        
+        if(!bookingsTableBody || !noBookingsMsg) return;
+
+        const bookings = await apiRequest('GET', '/api/admin/bookings');
+        if (!bookings) return;
+        
+        bookingsTableBody.innerHTML = '';
+        
+        const filteredBookings = statusFilter === 'all' 
+            ? bookings 
+            : bookings.filter(b => b.status === statusFilter);
+
+        if (filteredBookings.length === 0) {
+            noBookingsMsg.classList.remove('hidden');
+        } else {
+            noBookingsMsg.classList.add('hidden');
+            filteredBookings.forEach(booking => {
+                let statusColor = 'text-slate-400';
+                if(booking.status === 'confirmed') statusColor = 'text-green-400';
+                if(booking.status === 'rejected') statusColor = 'text-red-400';
+                if(booking.status === 'completed') statusColor = 'text-blue-400';
+
+                const row = `
+                    <tr data-id="${booking._id}" class="hover:bg-slate-700/30 transition-colors">
+                        <td class="p-4 border-t border-slate-700">
+                            <div class="font-semibold text-white">${booking.date}</div>
+                            <div class="text-sm text-slate-400">${booking.time}</div>
+                        </td>
+                        <td class="p-4 border-t border-slate-700 text-white font-medium">${booking.name}</td>
+                        <td class="p-4 border-t border-slate-700 text-slate-300">
+                            <a href="mailto:${booking.email}" class="hover:text-teal-400 hover:underline transition-colors">${booking.email}</a>
+                        </td>
+                        <td class="p-4 border-t border-slate-700 font-semibold capitalize ${statusColor}">${booking.status}</td>
+                        <td class="p-4 border-t border-slate-700 space-x-2">
+                            ${booking.status === 'pending' ? `<button class="confirm-booking-btn bg-teal-500/10 text-teal-400 border border-teal-500/50 hover:bg-teal-500 hover:text-white px-3 py-1.5 rounded-md text-sm transition-all duration-300">Confirm</button>` : ''}
+                            ${booking.status === 'pending' ? `<button class="reject-booking-btn bg-red-500/10 text-red-400 border border-red-500/50 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-md text-sm transition-all duration-300">Reject</button>` : ''}
+                            ${booking.status === 'confirmed' ? `<button class="complete-booking-btn bg-blue-500/10 text-blue-400 border border-blue-500/50 hover:bg-blue-500 hover:text-white px-3 py-1.5 rounded-md text-sm transition-all duration-300">Mark Completed</button>` : ''}
+                            <button class="delete-btn text-slate-500 hover:text-red-500 text-xl leading-none ml-2 align-middle transition-colors" data-type="booking" title="Delete Booking">×</button>
+                        </td>
+                    </tr>
+                    ${booking.message && booking.message !== 'No message provided' ? `
+                    <tr class="bg-slate-800/50">
+                        <td colspan="5" class="px-4 py-3 border-t border-slate-700 border-dashed text-sm text-slate-400 italic">
+                            <span class="font-semibold text-slate-300 mr-2">Note:</span>${booking.message}
+                        </td>
+                    </tr>` : ''}
+                `;
+                bookingsTableBody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+    };
+
+    const bookingStatusFilter = document.getElementById('booking-status-filter');
+    if(bookingStatusFilter) bookingStatusFilter.addEventListener('change', fetchBookings);
+    
+    const refreshBookingsBtn = document.getElementById('refresh-bookings-btn');
+    if(refreshBookingsBtn) refreshBookingsBtn.addEventListener('click', fetchBookings);
+
+    const bookingsTableBody = document.getElementById('bookings-table-body');
+    if(bookingsTableBody) {
+        bookingsTableBody.addEventListener('click', async (e) => {
+            const target = e.target;
+            const row = target.closest('tr');
+            if (!row || !row.dataset.id) return;
+            const id = row.dataset.id;
+
+            if (target.classList.contains('confirm-booking-btn')) {
+                const meetingLink = prompt("Enter meeting link (optional) to send to the client:");
+                if(meetingLink !== null) {
+                    await apiRequest('PUT', `/api/admin/bookings/${id}/status`, { status: 'confirmed', meetingLink });
+                    showToast('Booking confirmed & user notified!');
+                    fetchBookings();
+                }
+            } else if (target.classList.contains('reject-booking-btn')) {
+                if(confirm("Are you sure you want to reject this booking? The user will be notified.")) {
+                    await apiRequest('PUT', `/api/admin/bookings/${id}/status`, { status: 'rejected' });
+                    showToast('Booking rejected.');
+                    fetchBookings();
+                }
+            } else if (target.classList.contains('complete-booking-btn')) {
+                await apiRequest('PUT', `/api/admin/bookings/${id}/status`, { status: 'completed' });
+                showToast('Booking marked as completed.');
+                fetchBookings();
+            } else if (target.classList.contains('delete-btn') && target.dataset.type === 'booking') {
+                deleteInfo = { id, type: 'booking' };
+                deleteModal.classList.remove('hidden');
+            }
+        });
+    }
+
    // --- MESSAGE MANAGEMENT LOGIC (Unchanged but relies on the server fix) ---
     const fetchMessages = async () => {
         const messages = await apiRequest('GET', '/api/admin/messages');
@@ -466,6 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 else if (type === 'service') await fetchServices();
                 else if (type === 'experience') await fetchExperiences();
                 else if (type === 'message') await fetchMessages();
+                else if (type === 'booking') await fetchBookings();
             }
         }
     });
@@ -706,6 +802,7 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (sectionId === 'projects-management') fetchProjects();
             else if (sectionId === 'services-management') fetchServices();
             else if (sectionId === 'messages-management') fetchMessages();
+            else if (sectionId === 'bookings-management') fetchBookings();
             else if (sectionId === 'email-templates') fetchEmailTemplates();
         }
     };

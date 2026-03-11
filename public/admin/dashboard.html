@@ -73,6 +73,7 @@
                         <li><a href="#" data-section="experience-management" class="sidebar-link flex items-center py-2 px-4 rounded-lg transition-colors duration-200"><svg class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.564 23.564 0 0112 15c-1.864 0-3.614-.38-5.255-1.045M15 13.5l-3-3m0 0l-3 3m3-3v5.25mH12V3.75m0 0L2.25 9m9.75-5.25V21.75m0 0H2.25m9.75 0h19.5"/></svg>Experience</a></li>
                         <li><a href="#" data-section="projects-management" class="sidebar-link flex items-center py-2 px-4 rounded-lg transition-colors duration-200"><svg class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>Projects</a></li>
                         <li><a href="#" data-section="services-management" class="sidebar-link flex items-center py-2 px-4 rounded-lg transition-colors duration-200"><svg class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c1.333 0 2.5.567 3.5 1.5M12 8l4-4 4 4m-4-4v12a2 2 0 01-2 2H6a2 2 0 01-2-2V8m4-4L8 4m4 0V3m-4 5h8"/></svg>Services</a></li>
+                        <li><a href="#" data-section="bookings-management" class="sidebar-link flex items-center py-2 px-4 rounded-lg transition-colors duration-200"><svg class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>Bookings</a></li>
                         <li><a href="#" data-section="messages-management" class="sidebar-link flex items-center py-2 px-4 rounded-lg transition-colors duration-200"><svg class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>Contact Messages</a></li>
                         <li><a href="#" data-section="admin-settings" class="sidebar-link flex items-center py-2 px-4 rounded-lg transition-colors duration-200"><svg class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Admin Settings</a></li>
                         <li><a href="#" data-section="email-templates" class="sidebar-link flex items-center py-2 px-4 rounded-lg transition-colors duration-200"><svg class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.25m8.25 8.25v-8.25m8.25 8.25v-8.25m0 0l-8.25-8.25L3 10.75m18 0l-8.25 8.25L3 10.75m18 0l-8.25-8.25L3 10.75"/></svg>Email Templates</a></li>
@@ -199,7 +200,52 @@
                     </div>
                 </div>
 
-                                <!-- ============================================== -->
+                <!-- ============================================== -->
+                <!-- BOOKINGS MANAGEMENT SECTION (NEW) -->
+                <!-- ============================================== -->
+                <div id="bookings-management-container" class="admin-section hidden bg-slate-800 p-6 rounded-lg mb-8 shadow-xl">
+                    <h2 class="text-3xl font-bold text-white mb-6 border-l-4 border-teal-400 pl-4">Meeting Bookings</h2>
+                    
+                    <div class="mb-6 flex justify-between items-center bg-slate-700/50 p-4 rounded-lg border border-slate-600">
+                        <div class="flex items-center space-x-4">
+                            <span class="text-slate-300">Filter Status:</span>
+                            <select id="booking-status-filter" class="bg-slate-700 border border-slate-600 rounded-md py-2 px-4 text-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="all">All</option>
+                                <option value="pending">Pending</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="completed">Completed</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+                        <button id="refresh-bookings-btn" class="bg-slate-600 hover:bg-slate-500 text-white p-2 rounded-full transition-colors" title="Refresh Bookings">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        </button>
+                    </div>
+
+                    <div class="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left whitespace-nowrap">
+                                <thead class="bg-slate-700 text-slate-300">
+                                    <tr>
+                                        <th class="p-4 font-semibold tracking-wide">Date & Time</th>
+                                        <th class="p-4 font-semibold tracking-wide">Name</th>
+                                        <th class="p-4 font-semibold tracking-wide">Email</th>
+                                        <th class="p-4 font-semibold tracking-wide">Status</th>
+                                        <th class="p-4 font-semibold tracking-wide">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bookings-table-body" class="divide-y divide-slate-700/50">
+                                    <!-- Rows populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="no-bookings-message" class="hidden text-center text-slate-500 py-12">
+                            <p>No bookings found.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============================================== -->
                 <!-- THIS IS THE FIX: This section is now moved out -->
                 <!-- ============================================== -->
                 <div id="messages-management-container" class="admin-section hidden">

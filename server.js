@@ -22,6 +22,7 @@ const About = require('./models/about');
 const Hero = require('./models/hero');
 const Message = require('./models/message');
 const EmailTemplate = require('./models/emailTemplate');
+const Booking = require('./models/booking');
 
 // --- Multer, App, Port, DB Connection, Middleware (UNCHANGED) ---
 const storage = multer.memoryStorage();
@@ -191,6 +192,181 @@ app.get('/api/hero', async (req, res) => {
 
 
 
+// =======================================================
+// --- BOOKING SYSTEM ROUTES (NEW) ---
+// =======================================================
+
+// 1. Fetch available slots for a given date
+app.get('/api/available-slots', async (req, res) => {
+    try {
+        const { date } = req.query; // YYYY-MM-DD
+        if (!date) return res.status(400).json({ message: 'Date is required' });
+
+        // Generate all possible slots (10:00 AM to 5:00 PM, 30 min intervals)
+        const allSlots = [
+            "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", 
+            "12:00 PM", "12:30 PM", "01:00 PM", "01:30 PM", 
+            "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM", 
+            "04:00 PM", "04:30 PM", "05:00 PM"
+        ];
+
+        // Find bookings for this date that are NOT rejected
+        const existingBookings = await Booking.find({ 
+            date, 
+            status: { $ne: 'rejected' } 
+        });
+
+        const bookedTimes = existingBookings.map(b => b.time);
+        
+        // Filter out booked times
+        const availableSlots = allSlots.filter(slot => !bookedTimes.includes(slot));
+        
+        res.json({ availableSlots });
+    } catch (error) {
+        console.error('Error fetching available slots:', error);
+        res.status(500).json({ message: 'Failed to fetch slots' });
+    }
+});
+
+// 2. Submit a new booking
+app.post('/api/bookings', async (req, res) => {
+    try {
+        const { name, email, date, time, message } = req.body;
+        
+        // Basic validation
+        if (!name || !email || !date || !time) {
+            return res.status(400).json({ success: false, message: 'Missing required fields' });
+        }
+
+        // Check for double booking just in case
+        const existing = await Booking.findOne({ date, time, status: { $ne: 'rejected' } });
+        if (existing) {
+            return res.status(400).json({ success: false, message: 'This slot is already booked.' });
+        }
+
+        const newBooking = new Booking({ name, email, date, time, message: message || 'No message provided' });
+        await newBooking.save();
+
+        // Optional: Send Email Notification to Admin
+        try {
+            const gmailTransporter = nodemailer.createTransport({
+                host: 'smtp.gmail.com', port: 465, secure: true,
+                auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
+            });
+
+            await gmailTransporter.sendMail({
+                from: `"Portfolio Booking System" <${process.env.EMAIL_USER}>`,
+                to: process.env.EMAIL_USER,
+                replyTo: email,
+                subject: `New Meeting Request from ${name}`,
+                html: `
+                    <div style="font-family: sans-serif; padding: 20px;">
+                        <h2>New Meeting Request</h2>
+                        <p><strong>Name:</strong> ${name}</p>
+                        <p><strong>Email:</strong> ${email}</p>
+                        <p><strong>Date:</strong> ${date}</p>
+                        <p><strong>Time:</strong> ${time}</p>
+                        <p><strong>Message:</strong><br>${message || 'None'}</p>
+                        <p style="margin-top: 20px;"><a href="${process.env.PORT ? 'http://localhost:' + process.env.PORT : 'https://akash-portfolio-n7lc.onrender.com'}/admin/dashboard.html">View in Admin Panel</a></p>
+                    </div>`
+            });
+        } catch (emailErr) {
+            console.error('Failed to send admin notification email for booking:', emailErr);
+            // We don't fail the booking if email fails
+        }
+
+        res.status(201).json({ success: true, message: 'Booking requested successfully! We will confirm shortly.' });
+    } catch (error) {
+        console.error('Error saving booking:', error);
+        res.status(500).json({ success: false, message: 'Failed to save booking' });
+    }
+});
+
+// 3. Admin: Get all bookings
+app.get('/api/admin/bookings', requireLogin, async (req, res) => {
+    try {
+        const bookings = await Booking.find().sort({ date: 1, time: 1 }); // Sort by date then time
+        res.json(bookings);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch bookings.' });
+    }
+});
+
+// 4. Admin: Update booking status (confirm/reject/complete)
+app.put('/api/admin/bookings/:id/status', requireLogin, async (req, res) => {
+    try {
+        const { status, meetingLink } = req.body;
+        if (!['pending', 'confirmed', 'rejected', 'completed'].includes(status)) {
+            return res.status(400).json({ message: 'Invalid status' });
+        }
+
+        const booking = await Booking.findById(req.params.id);
+        if (!booking) return res.status(404).json({ message: 'Booking not found' });
+
+        booking.status = status;
+        await booking.save();
+
+        // Optional: Send email to user if confirmed or rejected
+        try {
+            const gmailTransporter = nodemailer.createTransport({
+                host: 'smtp.gmail.com', port: 465, secure: true,
+                auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
+            });
+
+            let subject = '';
+            let htmlContent = '';
+
+            if (status === 'confirmed') {
+                subject = `Meeting Confirmed: Akash Mandal`;
+                htmlContent = `
+                    <div style="font-family: sans-serif; padding: 20px;">
+                        <h2>Meeting Confirmed!</h2>
+                        <p>Hi ${booking.name},</p>
+                        <p>Your meeting on <strong>${booking.date}</strong> at <strong>${booking.time}</strong> has been confirmed.</p>
+                        ${meetingLink ? `<p><strong>Meeting Link:</strong> <a href="${meetingLink}">${meetingLink}</a></p>` : '<p>The meeting link will be shared shortly.</p>'}
+                        <p>Looking forward to speaking with you!</p>
+                        <p>- Akash Mandal</p>
+                    </div>`;
+            } else if (status === 'rejected') {
+                subject = `Meeting Declined: Akash Mandal`;
+                htmlContent = `
+                    <div style="font-family: sans-serif; padding: 20px;">
+                        <h2>Meeting Update</h2>
+                        <p>Hi ${booking.name},</p>
+                        <p>Unfortunately, I to decline the meeting requested for <strong>${booking.date}</strong> at <strong>${booking.time}</strong> due to scheduling conflicts.</p>
+                        <p>Please feel free to request another time slot on my portfolio.</p>
+                        <p>- Akash Mandal</p>
+                    </div>`;
+            }
+
+            if (subject) {
+                await gmailTransporter.sendMail({
+                    from: `"Akash Mandal" <${process.env.EMAIL_USER}>`,
+                    to: booking.email,
+                    subject: subject,
+                    html: htmlContent
+                });
+            }
+
+        } catch (emailErr) {
+             console.error('Failed to notify user about status change:', emailErr);
+        }
+
+        res.json({ success: true, booking });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to update booking status.' });
+    }
+});
+
+// 5. Admin: Delete a booking
+app.delete('/api/admin/bookings/:id', requireLogin, async (req, res) => {
+    try {
+        await Booking.findByIdAndDelete(req.params.id);
+        res.json({ success: true, message: 'Booking deleted.' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to delete booking.' });
+    }
+});
 
 // =======================================================
 // --- CONTACT FORM ROUTE (REBUILT FOR DYNAMIC TEMPLATES) ---
