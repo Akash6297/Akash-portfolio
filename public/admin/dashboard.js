@@ -189,8 +189,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td class="p-4 border-t border-slate-700">${exp.title}</td>
                 <td class="p-4 border-t border-slate-700">${exp.company}</td>
                 <td class="p-4 border-t border-slate-700">
-                    <button class="edit-experience-btn bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 mr-2">Edit</button>
-                    <button class="delete-btn bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700" data-type="experience">Delete</button>
+                    <button class="edit-experience-btn bg-teal-500/10 text-teal-400 border border-teal-500/30 hover:bg-teal-500 hover:text-white p-2 rounded-lg transition-all duration-300 mr-1">
+                        <svg class="w-4 h-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    </button>
+
+                    <button class="delete-btn bg-red-600/10 text-red-500 border border-red-500/30 hover:bg-red-600 hover:text-white p-2 rounded-lg transition-all duration-300" data-type="experience" title="Delete Experience">
+                    <svg class="w-4 h-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </button>
+
                 </td></tr>`;
             experiencesTableBody.insertAdjacentHTML('beforeend', row);
         });
@@ -250,8 +256,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td class="p-4 border-t border-slate-700">${project.name}</td>
                     <td class="p-4 border-t border-slate-700">${project.description.substring(0, 50)}...</td>
                     <td class="p-4 border-t border-slate-700">
-                        <button class="edit-project-btn bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 mr-2">Edit</button>
-                        <button class="delete-btn bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700" data-type="project">Delete</button>
+                        <button class="edit-project-btn bg-teal-500/10 text-teal-400 border border-teal-500/30 hover:bg-teal-500 hover:text-white p-2 rounded-lg transition-all duration-300 mr-1">
+                            <svg class="w-4 h-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                        </button>
+
+                        <button class="delete-btn bg-red-600/10 text-red-500 border border-red-500/30 hover:bg-red-600 hover:text-white p-2 rounded-lg transition-all duration-300" data-type="project" title="Delete Project">
+                    <svg class="w-4 h-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </button>
+
                     </td>
                 </tr>`;
             projectsTableBody.insertAdjacentHTML('beforeend', row);
@@ -329,8 +341,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td class="p-4 border-t border-slate-700">${service.title}</td>
                     <td class="p-4 border-t border-slate-700">${service.description.substring(0, 50)}...</td>
                     <td class="p-4 border-t border-slate-700">
-                        <button class="edit-service-btn bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 mr-2">Edit</button>
-                        <button class="delete-btn bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700" data-type="service">Delete</button>
+                        <button class="edit-service-btn bg-teal-500/10 text-teal-400 border border-teal-500/30 hover:bg-teal-500 hover:text-white p-2 rounded-lg transition-all duration-300 mr-1">
+                            <svg class="w-4 h-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                        </button>
+
+                        <button class="delete-btn bg-red-600/10 text-red-500 border border-red-500/30 hover:bg-red-600 hover:text-white p-2 rounded-lg transition-all duration-300" data-type="service" title="Delete Service">
+                    <svg class="w-4 h-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </button>
+
                     </td>
                 </tr>`;
             servicesTableBody.insertAdjacentHTML('beforeend', row);
@@ -423,7 +441,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             ${booking.status === 'pending' ? `<button class="confirm-booking-btn bg-teal-500/10 text-teal-400 border border-teal-500/50 hover:bg-teal-500 hover:text-white px-3 py-1.5 rounded-md text-sm transition-all duration-300">Confirm</button>` : ''}
                             ${booking.status === 'pending' ? `<button class="reject-booking-btn bg-red-500/10 text-red-400 border border-red-500/50 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-md text-sm transition-all duration-300">Reject</button>` : ''}
                             ${booking.status === 'confirmed' ? `<button class="complete-booking-btn bg-blue-500/10 text-blue-400 border border-blue-500/50 hover:bg-blue-500 hover:text-white px-3 py-1.5 rounded-md text-sm transition-all duration-300">Mark Completed</button>` : ''}
-                            <button class="delete-btn text-slate-500 hover:text-red-500 text-xl leading-none ml-2 align-middle transition-colors" data-type="booking" title="Delete Booking">×</button>
+                            <button class="delete-btn bg-red-600/10 text-red-500 border border-red-500/30 hover:bg-red-600 hover:text-white p-2.5 rounded-lg transition-all duration-300 ml-2 align-middle" data-type="booking" title="Delete Booking">
+                                <svg class="w-4 h-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+
                         </td>
                     </tr>
                     ${booking.message && booking.message !== 'No message provided' ? `
@@ -498,7 +519,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div class="flex items-center space-x-2 ml-4 flex-shrink-0">
                            ${message.replied ? '<span class="text-xs bg-blue-600 text-white px-2 py-1 rounded-full">Replied</span>' : ''}
-                           <button class="delete-btn text-slate-500 hover:text-red-500 text-2xl leading-none" data-type="message" title="Delete Message">×</button>
+                           <button class="delete-btn bg-red-600/10 text-red-500 border border-red-500/20 hover:bg-red-600 hover:text-white p-2.5 rounded-xl transition-all duration-300" data-type="message" title="Delete Message">
+                               <svg class="w-4 h-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                           </button>
+
                         </div>
                     </div>`;
                 messagesList.insertAdjacentHTML('beforeend', messageCard);
@@ -673,24 +697,80 @@ document.addEventListener('DOMContentLoaded', () => {
         templates.forEach(template => {
             const config = JSON.parse(template.htmlContent);
             const builderHTML = `
-                <div class="bg-slate-800 p-6 rounded-lg shadow-xl" id="builder-${template._id}">
-                    <form class="email-template-form" data-id="${template._id}">
-                        <h3 class="text-2xl font-semibold text-white">${template.templateName}</h3>
-                        <p class="text-sm text-slate-400">Variables: ${template.variables.join(', ')}</p>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
-                            <div class="space-y-4">
-                                <div><label class="block mb-2">Primary Color</label><input type="color" name="primaryColor" value="${config.primaryColor || '#14b8a6'}" class="w-full h-10 p-1 bg-slate-700 rounded-md"></div>
-                                <div><label class="block mb-2">Header Text</label><input type="text" name="headerText" value="${config.headerText || ''}" class="w-full bg-slate-700 p-2 rounded-md"></div>
-                                <div><label class="block mb-2">Body Content</label><textarea name="bodyText" rows="6" class="w-full bg-slate-700 p-2 rounded-md">${config.bodyText || ''}</textarea></div>
-                                <div><label class="block mb-2">Footer Text</label><input type="text" name="footerText" value="${config.footerText || ''}" class="w-full bg-slate-700 p-2 rounded-md"></div>
-                                <div class="flex items-center"><input type="checkbox" id="showSocials-${template._id}" name="showSocials" ${config.showSocials ? 'checked' : ''}><label for="showSocials-${template._id}" class="ml-2">Show Social Links</label></div>
-                                <div class="social-inputs ${config.showSocials ? '' : 'hidden'}"><label class="block mb-2">GitHub URL</label><input type="text" name="githubLink" value="${config.githubLink || ''}" class="w-full bg-slate-700 p-2 rounded-md"></div>
-                                <div class="social-inputs ${config.showSocials ? '' : 'hidden'}"><label class="block mb-2">LinkedIn URL</label><input type="text" name="linkedinLink" value="${config.linkedinLink || ''}" class="w-full bg-slate-700 p-2 rounded-md"></div>
-                                <button type="submit" class="w-full bg-teal-500 text-white font-semibold py-2 px-6 rounded-md">Save Template</button>
-                            </div>
+                <div class="bg-slate-800/80 backdrop-blur-md p-6 md:p-8 rounded-2xl border border-slate-700/50 shadow-2xl transition-all hover:shadow-teal-500/10" id="builder-${template._id}">
+                    <form class="email-template-form space-y-6" data-id="${template._id}">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-700/50 pb-4">
                             <div>
-                                <label class="block mb-2">Live Preview</label>
-                                <iframe class="w-full h-96 bg-white border-0 rounded-md"></iframe>
+                                <h3 class="text-2xl font-bold text-white tracking-tight">${template.templateName}</h3>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    ${template.variables.map(v => `<span class="bg-teal-500/10 text-teal-400 text-[10px] font-bold px-2 py-0.5 rounded border border-teal-500/20 uppercase tracking-widest cursor-help" title="Copy to use in content">${v}</span>`).join('')}
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2 bg-slate-900/50 p-2 rounded-lg border border-slate-700/50">
+                                <span class="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Live Preview Enabled</span>
+                                <div class="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div class="space-y-5">
+                                <div>
+                                    <label class="block mb-2 text-xs font-bold text-slate-400 uppercase tracking-widest">Email Subject Line</label>
+                                    <input type="text" name="subject" value="${template.subject || ''}" placeholder="e.g. New Message from {{name}}" class="w-full bg-slate-900/80 border border-slate-600 p-3 rounded-xl text-white focus:outline-none focus:border-teal-400 transition-all shadow-inner">
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block mb-2 text-xs font-bold text-slate-400 uppercase tracking-widest">Primary Color</label>
+                                        <div class="flex items-center space-x-3 bg-slate-900/80 border border-slate-600 p-2.5 rounded-xl">
+                                            <input type="color" name="primaryColor" value="${config.primaryColor || '#14b8a6'}" class="w-10 h-8 bg-transparent border-0 cursor-pointer">
+                                            <span class="text-slate-300 font-mono text-sm">${config.primaryColor || '#14b8a6'}</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block mb-2 text-xs font-bold text-slate-400 uppercase tracking-widest">Header Text</label>
+                                        <input type="text" name="headerText" value="${config.headerText || ''}" class="w-full bg-slate-900/80 border border-slate-600 p-3 rounded-xl text-white focus:outline-none focus:border-teal-400 transition-all shadow-inner">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block mb-2 text-xs font-bold text-slate-400 uppercase tracking-widest">Body content (HTML supported)</label>
+                                    <textarea name="bodyText" rows="6" class="w-full bg-slate-900/80 border border-slate-600 p-3 rounded-xl text-white focus:outline-none focus:border-teal-400 transition-all shadow-inner font-mono text-sm">${config.bodyText || ''}</textarea>
+                                </div>
+
+                                <div>
+                                    <label class="block mb-2 text-xs font-bold text-slate-400 uppercase tracking-widest">Footer Text</label>
+                                    <input type="text" name="footerText" value="${config.footerText || ''}" class="w-full bg-slate-900/80 border border-slate-600 p-3 rounded-xl text-white focus:outline-none focus:border-teal-400 transition-all shadow-inner">
+                                </div>
+
+                                <div class="bg-slate-900/40 p-4 rounded-xl border border-slate-700/30 space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Social Links</span>
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" name="showSocials" class="sr-only peer" ${config.showSocials ? 'checked' : ''} onchange="this.closest('form').querySelector('.social-fields-grid').classList.toggle('hidden', !this.checked)">
+                                            <div class="w-9 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-500"></div>
+                                        </label>
+                                    </div>
+                                    <div class="social-fields-grid grid grid-cols-1 md:grid-cols-2 gap-3 ${config.showSocials ? '' : 'hidden'}">
+                                        <input type="text" name="githubLink" placeholder="GitHub URL" value="${config.githubLink || ''}" class="w-full bg-slate-800 border border-slate-600 p-2 rounded-lg text-white text-xs">
+                                        <input type="text" name="linkedinLink" placeholder="LinkedIn URL" value="${config.linkedinLink || ''}" class="w-full bg-slate-800 border border-slate-600 p-2 rounded-lg text-white text-xs">
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="w-full bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold py-3.5 px-6 rounded-xl hover:from-teal-400 hover:to-emerald-400 shadow-[0_4px_15px_rgba(20,184,166,0.2)] hover:shadow-[0_8px_25px_rgba(20,184,166,0.4)] transition-all duration-300 border border-teal-400/20 active:scale-[0.98]">Save Template Configuration</button>
+                            </div>
+                            
+                            <div class="flex flex-col h-full">
+                                <label class="block mb-2 text-xs font-bold text-slate-400 uppercase tracking-widest">Real-time Desktop Preview</label>
+                                <div class="flex-1 bg-slate-900 rounded-2xl border border-slate-700/50 overflow-hidden shadow-2xl ring-1 ring-white/5 relative group">
+                                    <div class="absolute top-0 left-0 right-0 h-6 bg-slate-800 flex items-center px-3 space-x-1.5 border-b border-slate-700/50">
+                                        <div class="w-2 h-2 rounded-full bg-red-400/50"></div>
+                                        <div class="w-2 h-2 rounded-full bg-yellow-400/50"></div>
+                                        <div class="w-2 h-2 rounded-full bg-green-400/50"></div>
+                                    </div>
+                                    <iframe class="w-full h-[500px] border-0 pt-6 bg-slate-100"></iframe>
+                                </div>
+                                <p class="text-[10px] text-slate-500 mt-2 text-center italic">The preview uses sample data to demonstrate layouts.</p>
                             </div>
                         </div>
                     </form>
@@ -700,11 +780,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.querySelectorAll('.email-template-form').forEach(form => {
             const updatePreview = () => {
-                const config = Object.fromEntries(new FormData(form).entries());
+                const formData = new FormData(form);
+                const config = Object.fromEntries(formData.entries());
                 config.showSocials = form.querySelector('[name="showSocials"]').checked;
-                form.querySelectorAll('.social-inputs').forEach(el => el.classList.toggle('hidden', !config.showSocials));
+                
                 const iframe = form.querySelector('iframe');
-                const sampleVars = getSampleData(form.closest('.bg-slate-800').querySelector('h3').textContent);
+                const templateName = form.querySelector('h3').textContent;
+                const sampleVars = getSampleData(templateName);
                 iframe.srcdoc = createMasterTemplate(config, sampleVars);
             };
 
@@ -712,12 +794,26 @@ document.addEventListener('DOMContentLoaded', () => {
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const id = form.dataset.id;
-                const config = Object.fromEntries(new FormData(form).entries());
-                config.showSocials = form.querySelector('[name="showSocials"]').checked;
+                const formData = new FormData(form);
+                const rawData = Object.fromEntries(formData.entries());
                 
-                const data = { htmlContent: JSON.stringify(config), subject: "placeholder" }; // Subject update needs more complex logic
+                const config = {
+                    primaryColor: rawData.primaryColor,
+                    headerText: rawData.headerText,
+                    bodyText: rawData.bodyText,
+                    footerText: rawData.footerText,
+                    showSocials: form.querySelector('[name="showSocials"]').checked,
+                    githubLink: rawData.githubLink,
+                    linkedinLink: rawData.linkedinLink
+                };
+                
+                const data = { 
+                    htmlContent: JSON.stringify(config), 
+                    subject: rawData.subject || "No Subject" 
+                };
+
                 const result = await apiRequest('PUT', `/api/admin/email-templates/${id}`, data);
-                if (result) showToast('Template saved successfully!');
+                if (result) showToast(`'${rawData.subject}' template saved successfully!`);
             });
             updatePreview();
         });
@@ -781,8 +877,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td class="p-3 border-t border-slate-700">${user.username} ${isSuper ? '<span class="text-xs text-teal-400">(Super Admin)</span>' : ''}</td>
                     <td class="p-3 border-t border-slate-700">${user.email}</td>
                     <td class="p-3 border-t border-slate-700">
-                        <button class="edit-user-btn bg-yellow-500 text-white px-3 py-1 rounded-md text-sm hover:bg-yellow-600">Edit</button>
-                        ${!isSuper ? `<button class="delete-btn bg-red-600 text-white px-3 py-1 rounded-md text-sm hover:bg-red-700 ml-2" data-type="user">Delete</button>` : ''}
+                        <button class="edit-user-btn bg-teal-500/10 text-teal-400 border border-teal-500/30 hover:bg-teal-500 hover:text-white p-2 rounded-lg transition-all duration-300">
+                            <svg class="w-4 h-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                        </button>
+                        ${!isSuper ? `
+                        <button class="delete-btn bg-red-600/10 text-red-500 border border-red-500/30 hover:bg-red-600 hover:text-white p-2 rounded-lg transition-all duration-300 ml-2" data-type="user" title="Delete User">
+                            <svg class="w-4 h-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>` : ''}
                     </td>
                 </tr>`;
             usersTableBody.insertAdjacentHTML('beforeend', row);
@@ -1078,8 +1179,8 @@ document.addEventListener('DOMContentLoaded', () => {
         div.className = 'resume-experience-item flex flex-col md:flex-row gap-4 p-4 border border-slate-700/50 rounded-lg bg-slate-800/50 relative';
         const uniqueId = 'exp-editor-' + Date.now() + Math.random().toString(36).substr(2, 9);
         div.innerHTML = `
-            <button type="button" class="absolute top-2 right-2 text-red-400 hover:text-red-300 transition z-10" onclick="this.parentElement.remove()">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            <button type="button" class="absolute top-2 right-2 text-red-500 hover:text-red-400 bg-slate-900/80 p-1.5 rounded-lg transition-all z-10 hover:scale-110 shadow-lg border border-red-500/20" title="Delete Entry" onclick="this.parentElement.remove()">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
             </button>
             <div class="flex-1 space-y-3">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1112,7 +1213,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const uniqueId = 'edu-editor-' + Date.now() + Math.random().toString(36).substr(2, 9);
         div.innerHTML = `
             <button type="button" class="absolute top-2 right-2 text-red-400 hover:text-red-300 transition z-10" onclick="this.parentElement.remove()">
-                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
             </button>
             <div class="flex-1 space-y-3">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1151,7 +1252,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const uniqueId = 'proj-editor-' + Date.now() + Math.random().toString(36).substr(2, 9);
         div.innerHTML = `
             <button type="button" class="absolute top-2 right-2 text-red-400 hover:text-red-300 transition z-10" onclick="this.parentElement.remove()">
-                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
             </button>
             <div class="flex-1 space-y-3">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1178,8 +1279,8 @@ document.addEventListener('DOMContentLoaded', () => {
         div.innerHTML = `
             <input type="text" placeholder="Language" value="${data.language || ''}" required class="lang-name w-full bg-slate-900 border border-slate-600 p-2 rounded text-white focus:outline-none focus:border-teal-400 text-sm">
             <input type="text" placeholder="Proficiency" value="${data.proficiency || ''}" required class="lang-level w-full bg-slate-900 border border-slate-600 p-2 rounded text-white focus:outline-none focus:border-teal-400 text-sm">
-            <button type="button" class="text-red-400 hover:text-red-300 transition shrink-0" onclick="this.parentElement.remove()">
-                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            <button type="button" class="text-red-500 hover:text-red-400 bg-slate-900/50 p-1 rounded-lg transition-all hover:scale-110" title="Delete Entry" onclick="this.parentElement.remove()">
+                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
             </button>
         `;
         return div;
@@ -1190,8 +1291,8 @@ document.addEventListener('DOMContentLoaded', () => {
         div.className = 'resume-skill-item flex items-center gap-2 p-2 bg-slate-800/30 border border-slate-700/50 rounded-lg group';
         div.innerHTML = `
             <input type="text" value="${skill}" placeholder="e.g. React" class="skill-input flex-1 bg-transparent border-none text-slate-200 focus:outline-none text-sm p-1">
-            <button type="button" class="text-slate-500 hover:text-red-400 transition" onclick="this.parentElement.remove()">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            <button type="button" class="text-slate-500 hover:text-red-500 transition hover:scale-110" title="Delete Skill" onclick="this.parentElement.remove()">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
             </button>
         `;
         return div;
@@ -1302,4 +1403,23 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // --- SCROLL TO TOP LOGIC ---
+    const scrollToTopBtn = document.getElementById('scroll-to-top');
+    if (scrollToTopBtn) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                scrollToTopBtn.style.opacity = '1';
+                scrollToTopBtn.style.visibility = 'visible';
+            } else {
+                scrollToTopBtn.style.opacity = '0';
+                scrollToTopBtn.style.visibility = 'hidden';
+            }
+        });
+
+        scrollToTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
 });

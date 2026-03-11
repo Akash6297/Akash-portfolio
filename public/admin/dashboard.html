@@ -67,10 +67,12 @@
             border: 1px solid rgba(51, 65, 85, 0.6) !important;
             border-radius: 0.75rem;
             color: #e2e8f0;
-            overflow: visible; /* Changed to visible to allow toolbar to show properly */
-            margin-bottom: 2rem;
+            overflow: hidden; /* Changed to hidden to contain the internal ql-container */
+            margin-bottom: 2.5rem;
             display: flex;
             flex-direction: column;
+            position: relative; /* Added for stable positioning */
+            width: 100%;
         }
         .ql-toolbar.ql-snow {
             border: none !important;
@@ -93,6 +95,36 @@
         .ql-editor.ql-blank::before {
             color: rgba(148, 163, 184, 0.5);
             font-style: normal;
+        }
+        /* Scroll to Top Button */
+        #scroll-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
+            color: white;
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(13, 148, 136, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            visibility: hidden;
+            z-index: 50;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        #scroll-to-top.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        #scroll-to-top:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(13, 148, 136, 0.6);
         }
     </style>
     <!-- Quill.js CDN -->
@@ -123,29 +155,48 @@
             </div>
         </header>
 
-        <!-- Main Content Area with Sidebar -->
-        <div class="flex flex-1 flex-col md:flex-row">
-            <!-- Sidebar -->
-             <aside class="w-full md:w-64 bg-slate-900/95 shadow-2xl p-4 md:p-6 flex-shrink-0 border-r border-slate-800/60 relative z-20">
-                <nav>
-                    <ul class="space-y-2">
-                        <li><a href="#" data-section="hero-management" class="sidebar-link flex items-center py-3 px-4 rounded-xl transition-all duration-300 border border-transparent hover:bg-slate-800/80 hover:border-slate-700/50 group text-slate-400 font-medium"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001 1h2a1 1 0 001-1m-6 0v-4a1 1 0 011-1h2a1 1 0 011 1v4m-6 0h.01M6 20h12"/></svg>Hero Section</a></li>
-                        <li><a href="#" data-section="about-management" class="sidebar-link flex items-center py-3 px-4 rounded-xl transition-all duration-300 border border-transparent hover:bg-slate-800/80 hover:border-slate-700/50 group text-slate-400 font-medium"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0h4m-4 0H5m0 0h.01M17 12h.01M17 16h.01"/></svg>About Me</a></li>
-                        <li><a href="#" data-section="experience-management" class="sidebar-link flex items-center py-3 px-4 rounded-xl transition-all duration-300 border border-transparent hover:bg-slate-800/80 hover:border-slate-700/50 group text-slate-400 font-medium"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.564 23.564 0 0112 15c-1.864 0-3.614-.38-5.255-1.045M15 13.5l-3-3m0 0l-3 3m3-3v5.25mH12V3.75m0 0L2.25 9m9.75-5.25V21.75m0 0H2.25m9.75 0h19.5"/></svg>Experience</a></li>
-                        <li><a href="#" data-section="projects-management" class="sidebar-link flex items-center py-3 px-4 rounded-xl transition-all duration-300 border border-transparent hover:bg-slate-800/80 hover:border-slate-700/50 group text-slate-400 font-medium"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>Projects</a></li>
-                        <li><a href="#" data-section="services-management" class="sidebar-link flex items-center py-3 px-4 rounded-xl transition-all duration-300 border border-transparent hover:bg-slate-800/80 hover:border-slate-700/50 group text-slate-400 font-medium"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c1.333 0 2.5.567 3.5 1.5M12 8l4-4 4 4m-4-4v12a2 2 0 01-2 2H6a2 2 0 01-2-2V8m4-4L8 4m4 0V3m-4 5h8"/></svg>Services</a></li>
-                        <li><a href="#" data-section="resume-management" class="sidebar-link flex items-center py-3 px-4 rounded-xl transition-all duration-300 border border-transparent hover:bg-slate-800/80 hover:border-slate-700/50 group text-slate-400 font-medium"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>Resume Builder</a></li>
-                        <li><a href="#" data-section="bookings-management" class="sidebar-link flex items-center py-3 px-4 rounded-xl transition-all duration-300 border border-transparent hover:bg-slate-800/80 hover:border-slate-700/50 group text-slate-400 font-medium"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>Bookings</a></li>
-                        <li><a href="#" data-section="messages-management" class="sidebar-link flex items-center py-3 px-4 rounded-xl transition-all duration-300 border border-transparent hover:bg-slate-800/80 hover:border-slate-700/50 group text-slate-400 font-medium"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>Contact Messages</a></li>
-                        <li><a href="#" data-section="admin-settings" class="sidebar-link flex items-center py-3 px-4 rounded-xl transition-all duration-300 border border-transparent hover:bg-slate-800/80 hover:border-slate-700/50 group text-slate-400 font-medium"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Admin Settings</a></li>
-                        <li><a href="#" data-section="email-templates" class="sidebar-link flex items-center py-3 px-4 rounded-xl transition-all duration-300 border border-transparent hover:bg-slate-800/80 hover:border-slate-700/50 group text-slate-400 font-medium"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.25m8.25 8.25v-8.25m8.25 8.25v-8.25m0 0l-8.25-8.25L3 10.75m18 0l-8.25 8.25L3 10.75m18 0l-8.25-8.25L3 10.75"/></svg>Email Templates</a></li>
+        <style>
+            /* Custom Scrollbar for Horizontal Sidebar */
+            .sidebar-nav::-webkit-scrollbar { height: 4px; }
+            .sidebar-nav::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.1); }
+            .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(20, 184, 166, 0.3); border-radius: 10px; }
+            
+            .sidebar-link { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
+            .sidebar-link:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(20, 184, 166, 0.15); border-color: rgba(20, 184, 166, 0.4) !important; color: #5eead4 !important; }
+            .sidebar-link.active { background: linear-gradient(135deg, rgba(20, 184, 166, 0.2), rgba(16, 185, 129, 0.1)); border-color: rgba(20, 184, 166, 0.5) !important; color: #5eead4 !important; box-shadow: 0 0 20px rgba(20, 184, 166, 0.1); }
+            .sidebar-link::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background: #14b8a6; transition: width 0.3s ease; }
+            .sidebar-link:hover::after { width: 100%; }
+            
+            @media (max-width: 768px) {
+                .sidebar-nav { flex-direction: row !important; overflow-x: auto !important; padding: 10px 4px !important; }
+                .sidebar-nav ul { flex-direction: row !important; space-y: 0 !important; space-x: 2 !important; display: flex !important; }
+                .sidebar-link { white-space: nowrap !important; padding: 0.75rem 1rem !important; font-size: 0.875rem !important; }
+                .sidebar-link svg { margin-right: 0.5rem !important; }
+            }
+        </style>
 
+        <!-- Main Content Area with Sidebar -->
+        <div class="flex flex-1 flex-col md:flex-row h-screen overflow-hidden">
+            <!-- Sidebar -->
+             <aside class="w-full md:w-64 bg-slate-900/95 shadow-2xl flex-shrink-0 border-b md:border-b-0 md:border-r border-slate-800/60 relative z-20">
+                <nav class="sidebar-nav h-full overflow-y-auto p-4 md:p-6">
+                    <ul class="flex flex-col space-y-2 md:space-y-2 lg:space-y-3">
+                        <li><a href="#" data-section="hero-management" class="sidebar-link flex items-center py-3.5 px-4 rounded-xl border border-slate-800/50 group text-slate-400 font-semibold tracking-wide"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 group-hover:drop-shadow-[0_0_8px_rgba(20,184,166,0.6)] transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001 1h2a1 1 0 001-1m-6 0v-4a1 1 0 011-1h2a1 1 0 011 1v4m-6 0h.01M6 20h12"/></svg>Hero</a></li>
+                        <li><a href="#" data-section="about-management" class="sidebar-link flex items-center py-3.5 px-4 rounded-xl border border-slate-800/50 group text-slate-400 font-semibold tracking-wide"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 group-hover:drop-shadow-[0_0_8px_rgba(20,184,166,0.6)] transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0h4m-4 0H5m0 0h.01M17 12h.01M17 16h.01"/></svg>About</a></li>
+                        <li><a href="#" data-section="experience-management" class="sidebar-link flex items-center py-3.5 px-4 rounded-xl border border-slate-800/50 group text-slate-400 font-semibold tracking-wide"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 group-hover:drop-shadow-[0_0_8px_rgba(20,184,166,0.6)] transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.564 23.564 0 0112 15c-1.864 0-3.614-.38-5.255-1.045M15 13.5l-3-3m0 0l-3 3m3-3v5.25mH12V3.75m0 0L2.25 9m9.75-5.25V21.75m0 0H2.25m9.75 0h19.5"/></svg>Experience</a></li>
+                        <li><a href="#" data-section="projects-management" class="sidebar-link flex items-center py-3.5 px-4 rounded-xl border border-slate-800/50 group text-slate-400 font-semibold tracking-wide"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 group-hover:drop-shadow-[0_0_8px_rgba(20,184,166,0.6)] transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>Projects</a></li>
+                        <li><a href="#" data-section="services-management" class="sidebar-link flex items-center py-3.5 px-4 rounded-xl border border-slate-800/50 group text-slate-400 font-semibold tracking-wide"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 group-hover:drop-shadow-[0_0_8px_rgba(20,184,166,0.6)] transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c1.333 0 2.5.567 3.5 1.5M12 8l4-4 4 4m-4-4v12a2 2 0 01-2 2H6a2 2 0 01-2-2V8m4-4L8 4m4 0V3m-4 5h8"/></svg>Services</a></li>
+                        <li><a href="#" data-section="resume-management" class="sidebar-link flex items-center py-3.5 px-4 rounded-xl border border-slate-800/50 group text-slate-400 font-semibold tracking-wide"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 group-hover:drop-shadow-[0_0_8px_rgba(20,184,166,0.6)] transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>Resume</a></li>
+                        <li><a href="#" data-section="bookings-management" class="sidebar-link flex items-center py-3.5 px-4 rounded-xl border border-slate-800/50 group text-slate-400 font-semibold tracking-wide"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 group-hover:drop-shadow-[0_0_8px_rgba(20,184,166,0.6)] transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>Bookings</a></li>
+                        <li><a href="#" data-section="messages-management" class="sidebar-link flex items-center py-3.5 px-4 rounded-xl border border-slate-800/50 group text-slate-400 font-semibold tracking-wide"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 group-hover:drop-shadow-[0_0_8px_rgba(20,184,166,0.6)] transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>Messages</a></li>
+                        <li><a href="#" data-section="admin-settings" class="sidebar-link flex items-center py-3.5 px-4 rounded-xl border border-slate-800/50 group text-slate-400 font-semibold tracking-wide"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 group-hover:drop-shadow-[0_0_8px_rgba(20,184,166,0.6)] transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Settings</a></li>
+                        <li><a href="#" data-section="email-templates" class="sidebar-link flex items-center py-3.5 px-4 rounded-xl border border-slate-800/50 group text-slate-400 font-semibold tracking-wide"><svg class="h-5 w-5 mr-3 text-slate-500 group-hover:text-teal-400 group-hover:drop-shadow-[0_0_8px_rgba(20,184,166,0.6)] transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 19v-8.25m8.25 8.25v-8.25m8.25 8.25v-8.25m0 0l-8.25-8.25L3 10.75m18 0l-8.25 8.25L3 10.75m18 0l-8.25-8.25L3 10.75"/></svg>Emails</a></li>
                     </ul>
                 </nav>
             </aside>
 
             <!-- Content Area - Initially empty, sections will be dynamically shown -->
-            <main class="flex-1 p-4 md:p-8">
+            <main class="flex-1 overflow-y-auto p-4 md:p-8">
                 <!-- Each management section is wrapped in a div with a unique ID and common class -->
                 
                  
@@ -379,7 +430,7 @@
                                     <div><label class="block mb-1 text-xs font-semibold text-slate-400 uppercase tracking-wide">LinkedIn profile URL</label><input type="url" id="resume-linkedin" class="w-full bg-slate-800 border border-slate-600 p-2.5 rounded-lg text-white focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"></div>
                                     <div class="md:col-span-2"><label class="block mb-1 text-xs font-semibold text-slate-400 uppercase tracking-wide">GitHub profile URL</label><input type="url" id="resume-github" class="w-full bg-slate-800 border border-slate-600 p-2.5 rounded-lg text-white focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all"></div>
                                 </div>
-                                <div class="md:col-span-3 mt-8 pt-6 border-t border-slate-700/30">
+                                <div class="md:col-span-3 mb-20 mt-8 pt-6 border-t border-slate-700/30">
                                     <div class="flex items-center justify-between mb-3">
                                         <div class="flex items-center gap-2">
                                             <label class="block text-sm font-bold text-teal-400 uppercase tracking-widest">Professional Summary / About You</label>
@@ -538,77 +589,72 @@
                 <div id="admin-settings-container" class="admin-section hidden glass-panel p-6 md:p-8 rounded-2xl mb-8 border border-slate-700/50 relative overflow-hidden">
                     <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 mb-8 border-l-4 border-teal-500 pl-4 tracking-tight shadow-sm inline-block">Admin Settings</h2>
 
-<!-- View for Normal Admins -->
+                    <!-- View for Normal Admins -->
                     <div id="normal-admin-view" class="hidden">
-                    <!-- OTP Request View -->
-                    <div id="otp-request-view">
-                        <p class="mb-4">For security, you must verify your identity to access these settings.</p>
-                        <button id="request-otp-btn" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:from-blue-500 hover:to-indigo-500 shadow-[0_4px_15px_rgba(37,99,235,0.3)] hover:shadow-[0_8px_25px_rgba(37,99,235,0.5)] border border-blue-400/20 animated-button">Send Verification Code</button>
-                        <p id="otp-request-status" class="mt-4 h-6"></p>
+                        <!-- OTP Request View -->
+                        <div id="otp-request-view">
+                            <p class="mb-4">For security, you must verify your identity to access these settings.</p>
+                            <button id="request-otp-btn" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:from-blue-500 hover:to-indigo-500 shadow-[0_4px_15px_rgba(37,99,235,0.3)] border border-blue-400/20 animated-button">Send Verification Code</button>
+                            <p id="otp-request-status" class="mt-4 h-6"></p>
+                        </div>
+
+                        <!-- OTP Verify View (hidden by default) -->
+                        <div id="otp-verify-view" class="hidden">
+                            <form id="otp-verify-form" class="space-y-4 max-w-sm">
+                                <label for="otp-input" class="block text-slate-300">An OTP has been sent to your email. Please enter it below.</label>
+                                <input type="text" id="otp-input" name="otp" required class="w-full bg-slate-900/50 border border-slate-700/80 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-400 text-slate-200 placeholder-slate-500 shadow-inner" placeholder="6-digit code">
+                                <button type="submit" class="w-full bg-teal-500 text-white font-semibold py-3 rounded-md hover:bg-teal-600">Verify</button>
+                                <p id="otp-verify-status" class="mt-4 h-6"></p>
+                            </form>
+                        </div>
+
+                        <!-- Admin Content View (hidden by default) -->
+                        <div id="admin-content-view" class="hidden space-y-12">
+                            <!-- Change Password Form -->
+                            <form id="change-password-form" class="space-y-4">
+                                <h3 class="text-2xl font-semibold text-white">Change Your Password</h3>
+                                <div><label for="current-password" class="block mb-2">Current Password</label><input type="password" id="current-password" name="currentPassword" required class="w-full bg-slate-700 p-2 rounded-md"></div>
+                                <div><label for="new-password" class="block mb-2">New Password (min. 8 characters)</label><input type="password" id="new-password" name="newPassword" required class="w-full bg-slate-700 p-2 rounded-md"></div>
+                                <button type="submit" class="bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-bold py-3 px-6 rounded-xl hover:from-amber-400 hover:to-yellow-400 border border-yellow-400/20 animated-button">Update Password</button>
+                                <p id="change-password-status" class="mt-4 h-6"></p>
+                            </form>
+                            
+                            <!-- Create New Admin Form -->
+                            <form id="create-admin-form" class="space-y-4 border-t border-slate-700 pt-8">
+                                <h3 class="text-2xl font-semibold text-white">Create New Admin User</h3>
+                                <div><label for="new-username" class="block mb-2">New Username</label><input type="text" id="new-username" name="newUsername" required class="w-full bg-slate-700 p-2 rounded-md"></div>
+                                <div><label for="new-email" class="block mb-2">New Admin's Email</label><input type="email" id="new-email" name="newEmail" required class="w-full bg-slate-700 p-2 rounded-md"></div>
+                                <div><label for="new-admin-password" class="block mb-2">New Password (min. 8 characters)</label><input type="password" id="new-admin-password" name="newPassword" required class="w-full bg-slate-700 p-2 rounded-md"></div>
+                                <button type="submit" class="bg-gradient-to-r from-emerald-600 to-green-600 text-white font-bold py-3 px-6 rounded-xl hover:from-emerald-500 hover:to-green-500 border border-green-400/20 animated-button">Create Admin</button>
+                                <p id="create-admin-status" class="mt-4 h-6"></p>
+                            </form>
+                        </div>
                     </div>
 
-                    <!-- OTP Verify View (hidden by default) -->
-                    <div id="otp-verify-view" class="hidden">
-                        <form id="otp-verify-form" class="space-y-4 max-w-sm">
-                            <label for="otp-input" class="block text-slate-300">An OTP has been sent to your email. Please enter it below.</label>
-                            <input type="text" id="otp-input" name="otp" required class="w-full bg-slate-900/50 border border-slate-700/80 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-400 text-slate-200 w-full placeholder-slate-500 shadow-inner" placeholder="6-digit code">
-                            <button type="submit" class="w-full bg-teal-500 text-white font-semibold py-3 rounded-md hover:bg-teal-600">Verify</button>
-                            <p id="otp-verify-status" class="mt-4 h-6"></p>
-                        </form>
-                    </div>
-
-                    <!-- dashboard.html -> main -->
-                
-
-        
-
-
-                    
-                    <!-- Admin Content View (hidden by default) -->
-                    <div id="admin-content-view" class="hidden space-y-12">
-                        <!-- Change Password Form -->
-                        <form id="change-password-form" class="space-y-4">
-                            <h3 class="text-2xl font-semibold text-white">Change Your Password</h3>
-                            <div><label for="current-password" class="block mb-2">Current Password</label><input type="password" id="current-password" name="currentPassword" required class="w-full bg-slate-700 p-2 rounded-md"></div>
-                            <div><label for="new-password" class="block mb-2">New Password (min. 8 characters)</label><input type="password" id="new-password" name="newPassword" required class="w-full bg-slate-700 p-2 rounded-md"></div>
-                            <button type="submit" class="bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-bold py-3 px-6 rounded-xl hover:from-amber-400 hover:to-yellow-400 shadow-[0_4px_15px_rgba(245,158,11,0.3)] hover:shadow-[0_8px_25px_rgba(245,158,11,0.5)] border border-yellow-400/20 animated-button">Update Password</button>
-                            <p id="change-password-status" class="mt-4 h-6"></p>
-                        </form>
+                    <!-- View for Super Admin (no OTP needed) -->
+                    <div id="super-admin-view" class="hidden space-y-12">
+                        <div>
+                            <h3 class="text-2xl font-semibold text-white mb-4 tracking-tight">Manage Admin Accounts</h3>
+                            <div class="bg-slate-900/60 rounded-2xl border border-slate-700/50 overflow-x-auto shadow-[inset_0_2px_15px_rgba(0,0,0,0.2)]">
+                                <table class="w-full text-left">
+                                    <thead class="bg-slate-800/90 text-teal-400 uppercase text-xs font-bold tracking-widest"><tr><th class="p-4 md:p-5">Username</th><th class="p-4 md:p-5">Email</th><th class="p-4 md:p-5">Actions</th></tr></thead>
+                                    <tbody id="users-table-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
                         
-                        <!-- Create New Admin Form -->
-                        <form id="create-admin-form" class="space-y-4 border-t border-slate-700 pt-8">
-                             <h3 class="text-2xl font-semibold text-white">Create New Admin User</h3>
-                             <div><label for="new-username" class="block mb-2">New Username</label><input type="text" id="new-username" name="newUsername" required class="w-full bg-slate-700 p-2 rounded-md"></div>
-                             <div><label for="new-email" class="block mb-2">New Admin's Email</label><input type="email" id="new-email" name="newEmail" required class="w-full bg-slate-700 p-2 rounded-md"></div>
-                             <div><label for="new-admin-password" class="block mb-2">New Password (min. 8 characters)</label><input type="password" id="new-admin-password" name="newPassword" required class="w-full bg-slate-700 p-2 rounded-md"></div>
-                             <button type="submit" class="bg-gradient-to-r from-emerald-600 to-green-600 text-white font-bold py-3 px-6 rounded-xl hover:from-emerald-500 hover:to-green-500 shadow-[0_4px_15px_rgba(5,150,105,0.3)] hover:shadow-[0_8px_25px_rgba(5,150,105,0.5)] border border-green-400/20 animated-button">Create Admin</button>
-                             <p id="create-admin-status" class="mt-4 h-6"></p>
-                        </form>
-                    </div>
+                        <div class="border-t border-slate-700/50 pt-8">
+                                <h3 class="text-2xl font-semibold text-white mb-6">Create New Admin User</h3>
+                                <form id="create-admin-form-super" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div><label for="new-username-super" class="block mb-2 text-sm font-semibold text-slate-300">New Username</label><input type="text" id="new-username-super" name="newUsername" required class="w-full bg-slate-900/50 border border-slate-700/80 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-400 text-slate-200"></div>
+                                    <div><label for="new-email-super" class="block mb-2 text-sm font-semibold text-slate-300">New Admin's Email</label><input type="email" id="new-email-super" name="newEmail" required class="w-full bg-slate-900/50 border border-slate-700/80 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-400 text-slate-200"></div>
+                                    <div class="md:col-span-2"><label for="new-admin-password-super" class="block mb-2 text-sm font-semibold text-slate-300">New Password (min. 8 characters)</label><input type="password" id="new-admin-password-super" name="newPassword" required class="w-full bg-slate-900/50 border border-slate-700/80 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-400 text-slate-200"></div>
+                                    <button type="submit" class="md:col-span-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-emerald-500 hover:to-green-500 shadow-[0_4px_15px_rgba(5,150,105,0.3)] border border-green-400/20 animated-button transition-all">Create Admin Account</button>
+                                    <p id="create-admin-status-super" class="md:col-span-2 mt-2 h-6"></p>
+                                </form>
+                        </div>
                     </div>
                 </div>
-
-                <!-- View for Super Admin (no OTP needed) -->
-    <div id="super-admin-view" class="hidden space-y-12">
-        <div>
-            <h3 class="text-2xl font-semibold text-white mb-4">Manage Admin Accounts</h3>
-            <div class="bg-slate-900/50 rounded-lg overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead class="bg-slate-700"><tr><th class="p-3">Username</th><th class="p-3">Email</th><th class="p-3">Actions</th></tr></thead>
-                    <tbody id="users-table-body"></tbody>
-                </table>
-            </div>
-        </div>
-        
-        <form id="create-admin-form" class="space-y-4 border-t border-slate-700 pt-8">
-             <h3 class="text-2xl font-semibold text-white">Create New Admin User</h3>
-                             <div><label for="new-username" class="block mb-2">New Username</label><input type="text" id="new-username" name="newUsername" required class="w-full bg-slate-700 p-2 rounded-md"></div>
-                             <div><label for="new-email" class="block mb-2">New Admin's Email</label><input type="email" id="new-email" name="newEmail" required class="w-full bg-slate-700 p-2 rounded-md"></div>
-                             <div><label for="new-admin-password" class="block mb-2">New Password (min. 8 characters)</label><input type="password" id="new-admin-password" name="newPassword" required class="w-full bg-slate-700 p-2 rounded-md"></div>
-                             <button type="submit" class="bg-gradient-to-r from-emerald-600 to-green-600 text-white font-bold py-3 px-6 rounded-xl hover:from-emerald-500 hover:to-green-500 shadow-[0_4px_15px_rgba(5,150,105,0.3)] hover:shadow-[0_8px_25px_rgba(5,150,105,0.5)] border border-green-400/20 animated-button">Create Admin</button>
-                             <p id="create-admin-status" class="mt-4 h-6"></p>
-                        </form>
-                          </div>
                 </div>
             </main>
         </div>
@@ -689,6 +735,9 @@
                 <iframe id="preview-iframe" class="w-full h-[60vh] bg-white border-0 rounded-md"></iframe>
             </div>
         </div>
-    </div>
+    <!-- Scroll to Top Button -->
+    <button id="scroll-to-top" title="Scroll to Top" class="fixed bottom-8 right-8 bg-gradient-to-r from-teal-500 to-emerald-500 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-all duration-300 opacity-0 invisible z-50">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
+    </button>
 </body>
 </html>

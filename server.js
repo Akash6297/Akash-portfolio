@@ -474,8 +474,8 @@ app.post('/send-message', async (req, res) => {
                 pass: process.env.EMAIL_PASS, // Your Gmail App Password
             },
         });
-        await gmailTransporter.sendMail({ from: `"${name}" <...>`, to: process.env.EMAIL_USER, replyTo: email, subject: adminSubject, html: adminHtml });
-        await gmailTransporter.sendMail({ from: `"Akash Mandal" <...>`, to: email, subject: userSubject, html: userHtml });
+        await gmailTransporter.sendMail({ from: `"${name}" <${process.env.EMAIL_USER}>`, to: process.env.EMAIL_USER, replyTo: email, subject: adminSubject, html: adminHtml });
+        await gmailTransporter.sendMail({ from: `"Akash Mandal" <${process.env.EMAIL_USER}>`, to: email, subject: userSubject, html: userHtml });
 
         return res.status(200).json({ success: true, message: 'Message sent successfully!' });
     } catch (error) {
@@ -691,7 +691,7 @@ app.post('/api/admin/messages/:id/reply', requireLogin, async (req, res) => {
 
         // Use global replace for all placeholders here as well
         
-        await gmailTransporter.sendMail({ from: `"Akash Mandal" <...>`, to: originalMessage.email, subject: replySubject, html: replyHtml });
+        await gmailTransporter.sendMail({ from: `"Akash Mandal" <${process.env.EMAIL_USER}>`, to: originalMessage.email, subject: replySubject, html: replyHtml });
         
         await Message.findByIdAndUpdate(req.params.id, { replied: true });
         res.json({ success: true, message: 'Reply sent successfully.' });
