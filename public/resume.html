@@ -97,14 +97,18 @@
 
         /* ─── Resume Page Container ─── */
         #resume-content {
-            max-width: 860px;
-            margin: 32px auto;
+            width: 820px; /* Fixed standard width for document look */
+            max-width: 95%;
+            margin: 40px auto;
             background: white;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             border-radius: 2px;
             font-family: var(--resume-font);
             font-size: var(--resume-size);
             line-height: var(--resume-line-height);
+            transition: transform 0.3s ease;
+            position: relative;
+            min-height: 1120px; /* Force A4-like minimum height */
         }
 
         /* ─── CLASSIC TEMPLATE ─── */
@@ -185,7 +189,7 @@
         .resume-classic .lang-item { font-size: 0.85em; display: flex; gap: 4px; }
 
         /* ─── MODERN TEMPLATE ─── */
-        .resume-modern { display: grid; grid-template-columns: 230px 1fr; min-height: 1100px; }
+        .resume-modern { display: grid; grid-template-columns: 210px 1fr; min-height: 1100px; }
         .resume-modern .rm-sidebar { background: var(--resume-accent); padding: 36px 24px; color: #e0f2fe; }
         .resume-modern .rm-sidebar .rm-photo { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.2); display: block; margin: 0 auto 16px; }
         .resume-modern .rm-name { font-size: 1.3em; font-weight: 700; color: white; text-align: center; line-height: 1.2; margin-bottom: 4px; }
@@ -248,10 +252,20 @@
         }
 
         /* ─── Responsive ─── */
-        @media (max-width: 900px) { #resume-content { max-width: 100%; margin: 0; box-shadow: none; border-radius: 0; } }
+        @media (max-width: 900px) { 
+            #resume-content { 
+                width: 95%; 
+                margin: 20px auto; 
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                min-height: auto;
+            } 
+        }
 
         @media (max-width: 640px) {
             :root { --resume-padding: 24px; --resume-size: 12px; }
+            .resume-nav { padding: 8px 16px; }
+            .back-link span { display: none; }
+            #resume-content { width: 100%; margin: 0; box-shadow: none; border-radius: 0; }
             .resume-modern { grid-template-columns: 1fr; }
             .resume-modern .rm-sidebar { padding: 24px; }
             .resume-modern .rm-main { padding: 24px; }

@@ -401,25 +401,43 @@
                     /* ─── Scaled Resume Canvas ─── */
                     .resume-canvas-outer {
                         flex: 1;
-                        overflow-y: auto;
-                        overflow-x: hidden;
+                        overflow: auto;
                         position: relative;
-                        background: #e2e8f0;
-                        padding: 8px;
+                        background: #334155; /* Darker background for document contrast */
+                        padding: 24px;
+                        display: flex;
+                        justify-content: center;
+                        align-items: flex-start;
                     }
-                    .resume-canvas-outer::-webkit-scrollbar { width: 4px; }
-                    .resume-canvas-outer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
+                    .resume-canvas-outer::-webkit-scrollbar { width: 6px; height: 6px; }
+                    .resume-canvas-outer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
                     .resume-canvas-scaler {
-                        transform-origin: top left;
+                        transform-origin: top center;
                         display: block;
                         position: relative;
+                        transition: transform 0.1s ease-out;
                     }
                     .resume-canvas-inner {
                         background: white;
                         overflow: visible;
-                        width: 860px;
-                        min-height: 900px;
+                        width: 820px; /* Standardized width */
+                        min-height: 1120px; /* A4 aspect ratio approximation */
+                        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+                        margin: 0 auto;
+                        color: #1e293b;
                     }
+
+                    /* ─── Zoom Controls ─── */
+                    .zoom-ctrl {
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        margin-left: auto;
+                        padding-left: 12px;
+                        border-left: 1px solid rgba(255,255,255,0.1);
+                    }
+                    .zoom-ctrl span { font-size: 10px; color: #94a3b8; font-weight: 600; }
+                    .zoom-val { color: #5eead4; font-size: 10px; font-weight: 700; min-width: 32px; text-align: center; }
 
                     /* ─── Preview Dot ─── */
                     .preview-dot { width: 9px; height: 9px; border-radius: 50%; }
@@ -702,6 +720,11 @@
                                 <div class="typo-ctrl">
                                     <span>Accent</span>
                                     <input type="color" id="pv-accent" value="#1e3a5f" oninput="applyTypoToPreview()">
+                                </div>
+                                <div class="zoom-ctrl">
+                                    <span>Zoom</span>
+                                    <input type="range" id="pv-zoom" min="0.5" max="1.5" step="0.05" value="1.0" oninput="applyTypoToPreview()">
+                                    <span class="zoom-val" id="pv-zoom-val">100%</span>
                                 </div>
                             </div>
                             <div class="resume-canvas-outer" id="resume-canvas-outer">
@@ -1077,7 +1100,7 @@ function downloadPreviewPdf() {
         }
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family: var(--resume-font); font-size: var(--resume-size); line-height: var(--resume-line-height); background: white; color: #1e293b; -webkit-print-color-adjust: exact; }
-        .resume-classic { padding: var(--resume-padding); max-width: 860px; margin: 0 auto; }
+        .resume-classic { padding: var(--resume-padding); width: 820px; margin: 0 auto; }
         .rc-header { display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:14px; margin-bottom:14px; border-bottom:2px solid var(--resume-accent); }
         .rc-name { font-size:1.9em; font-weight:700; color:var(--resume-accent); letter-spacing:-.02em; line-height:1.1; }
         .rc-title { font-size:.88em; color:#64748b; font-weight:500; letter-spacing:.1em; text-transform:uppercase; margin-top:4px; }
@@ -1097,7 +1120,7 @@ function downloadPreviewPdf() {
         .skill-tag { background:#f1f5f9; border:1px solid #e2e8f0; color:#334155; padding:2px 9px; border-radius:3px; font-size:.78em; font-weight:500; }
         .lang-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:5px; }
         .lang-item { font-size:.82em; }
-        .resume-modern { display:grid; grid-template-columns:190px 1fr; min-height:800px; }
+        .resume-modern { display:grid; grid-template-columns:210px 1fr; width:820px; margin:0 auto; min-height:1120px; }
         .rm-sidebar { background:var(--resume-accent); padding:26px 18px; color:#e0f2fe; }
         .rm-photo { width:72px; height:72px; border-radius:50%; object-fit:cover; border:3px solid rgba(255,255,255,.2); display:block; margin:0 auto 12px; }
         .rm-name { font-size:1.05em; font-weight:700; color:#fff; text-align:center; line-height:1.2; margin-bottom:3px; }
@@ -1197,16 +1220,40 @@ function scaleCanvas() {
     const outer  = document.getElementById('resume-canvas-outer');
     const scaler = document.getElementById('resume-canvas-scaler');
     const inner  = document.getElementById('resume-canvas-inner');
-    if (!outer || !scaler || !inner) return;
-    const ow = Math.max(100, (outer.clientWidth || outer.offsetWidth) - 16);
-    const iw = 860;
-    const scale = ow / iw;
-    // Apply CSS scale
-    const contentH = (inner.scrollHeight || inner.offsetHeight || 900) + 20; // +20 for bottom padding
+    const zoomInp = document.getElementById('pv-zoom');
+    const zoomVal = document.getElementById('pv-zoom-val');
+    
+    if (!outer || !scaler || !inner || !zoomInp) return;
+    
+    // Get user's manual zoom factor
+    const manualZoom = parseFloat(zoomInp.value) || 1.0;
+    if (zoomVal) zoomVal.textContent = Math.round(manualZoom * 100) + '%';
+    
+    // Auto-fit logic: calculate scale to fit the panel width
+    const padding = 48; // Space around the document
+    const ow = Math.max(100, (outer.clientWidth || outer.offsetWidth) - padding);
+    const iw = 820; // Internal document width
+    
+    let fitScale = ow / iw;
+    
+    // Minimum fit scale to ensure it's not too small on tiny screens
+    fitScale = Math.max(0.3, fitScale);
+    
+    // Final composite scale: responsive fit * user's manual zoom
+    const finalScale = fitScale * manualZoom;
+    
+    // Apply transformations
+    scaler.style.transform = `scale(${finalScale})`;
+    scaler.style.transformOrigin = 'top center';
+    scaler.style.width = iw + 'px';
+    
+    // Correct layout height for the outer scroll container
+    const contentH = (inner.scrollHeight || inner.offsetHeight || 1120);
     scaler.style.height = contentH + 'px';
-    // Use negative margin to make the parent scrollable area match the visual scaled height
-    scaler.style.marginBottom = (-contentH * (1 - scale)) + 'px';
-    scaler.style.marginRight  = (-iw * (1 - scale)) + 'px';
+    scaler.style.marginBottom = (-contentH * (1 - finalScale)) + 'px';
+    
+    // Horizontal centering handling for scaled content
+    scaler.style.marginRight = '0';
 }
 
 function applyTypoToPreview() {
