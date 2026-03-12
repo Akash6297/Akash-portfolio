@@ -235,6 +235,8 @@ app.put('/api/admin/resume', requireLogin, upload.single('resumePhoto'), async (
         if (updateData.projects && typeof updateData.projects === 'string') updateData.projects = JSON.parse(updateData.projects);
         if (updateData.languages && typeof updateData.languages === 'string') updateData.languages = JSON.parse(updateData.languages);
         if (updateData.sections && typeof updateData.sections === 'string') updateData.sections = JSON.parse(updateData.sections);
+        if (updateData.typography && typeof updateData.typography === 'string') updateData.typography = JSON.parse(updateData.typography);
+
 
         if (req.file) {
             const formData = new FormData();
@@ -818,8 +820,31 @@ app.delete('/api/admin/services/:id', requireLogin, async (req, res) => {
 // server.js -> Public Routes
 app.get('/api/experiences', async (req, res) => {
     try {
-        // Sort by the 'createdAt' field in descending order to show newest first
-        const data = await Experience.find().sort({ createdAt: -1 });
+        const data = await Experience.find().lean();
+        // Sort by the start date parsed from dateRange
+        data.sort((a, b) => {
+            const parseDate = (dateStr) => {
+                if (!dateStr) return new Date(0);
+                // Handle "Present" or "Current"
+                if (dateStr.toLowerCase().includes('present') || dateStr.toLowerCase().includes('current')) {
+                    dateStr = dateStr.replace(/present|current/i, new Date().toLocaleDateString('en-US', {month: 'short', year: 'numeric'}));
+                }
+                const parts = dateStr.split('-');
+                if (parts.length > 0) {
+                    const startStr = parts[0].trim();
+                    const d = new Date(startStr);
+                    if (!isNaN(d.getTime())) return d;
+                    
+                    // Try parsing mm/yyyy or mm-yyyy
+                    const mdParts = startStr.split(/[\/\-]/);
+                    if (mdParts.length === 2) {
+                        return new Date(`${mdParts[1]}-${mdParts[0]}-01`);
+                    }
+                }
+                return new Date(0);
+            };
+            return parseDate(b.dateRange) - parseDate(a.dateRange);
+        });
         res.json(data);
     } catch (err) {
         res.status(500).json({ message: err.message });

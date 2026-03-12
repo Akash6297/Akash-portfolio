@@ -1,4 +1,4 @@
-// public/resume.js
+// public/resume.js — Modern Sleek Resume Rendering
 
 document.addEventListener('DOMContentLoaded', async () => {
     const contentContainer = document.getElementById('resume-content');
@@ -9,22 +9,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         const data = await response.json();
 
         if (!data || !data.personalInfo) {
-            document.getElementById('resume-content').innerHTML = '<div class="col-span-2 text-center py-20 text-slate-500">No resume data found. Please create one in the Admin Dashboard.</div>';
+            contentContainer.innerHTML = `<div style="padding:80px;text-align:center;color:#94a3b8;font-family:Inter,sans-serif">
+                No resume data found. <a href="/admin/dashboard.html" style="color:#14b8a6;">Create one in the Admin Dashboard</a>.
+            </div>`;
             return;
         }
 
         renderResume(data);
     } catch (error) {
-        console.error('Error:', error);
-        document.getElementById('resume-content').innerHTML = '<div class="col-span-2 text-center py-20 text-red-500">Error loading resume. Please try again later.</div>';
+        console.error('Resume render error:', error);
+        contentContainer.innerHTML = `<div style="padding:80px;text-align:center;color:#ef4444;font-family:Inter,sans-serif">
+            Error loading resume. Please try again later.
+        </div>`;
     }
 
     function renderResume(data) {
-        const template = data.selectedTemplate || 'classic';
+        // ─── Apply Typography from saved settings ──────────────────────
+        applyTypography(data.typography);
 
-        // Remove existing layout classes and add template specific one
+        const template = data.selectedTemplate || 'classic';
         document.body.className = `template-${template}`;
-        const container = document.getElementById('resume-content');
 
         if (template === 'modern') {
             renderModern(data);
@@ -35,147 +39,350 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // ─── Apply Typography CSS Variables ─────────────────────────────
+    function applyTypography(typo) {
+        const t = typo || {};
+        const font    = t.font        || "'Inter', sans-serif";
+        const size    = t.size        || 13;
+        const lh      = t.lineHeight  || 1.5;
+        const gap     = t.sectionGap  || 20;
+        const accent  = t.accentColor || '#1e3a5f';
+
+        // Parse accent to get a light variant
+        const r = parseInt(accent.replace('#','').slice(0,2), 16);
+        const g = parseInt(accent.replace('#','').slice(2,4), 16);
+        const b = parseInt(accent.replace('#','').slice(4,6), 16);
+        const accentLight = `rgb(${Math.min(255,r+60)},${Math.min(255,g+60)},${Math.min(255,b+80)})`;
+
+        const root = document.documentElement;
+        root.style.setProperty('--resume-font',         font);
+        root.style.setProperty('--resume-size',         size + 'px');
+        root.style.setProperty('--resume-line-height',  String(lh));
+        root.style.setProperty('--resume-section-gap',  gap + 'px');
+        root.style.setProperty('--resume-accent',       accent);
+        root.style.setProperty('--resume-accent-light', accentLight);
+
+        // Also apply directly to content container for immediate effect
+        const el = document.getElementById('resume-content');
+        if (el) {
+            el.style.fontFamily  = font;
+            el.style.fontSize    = size + 'px';
+            el.style.lineHeight  = String(lh);
+        }
+    }
+
+
+    // ─── Helper: safe HTML escape ───────────────────────────────────
+    function esc(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    // ─── Helper: render ordered sections ────────────────────────────
+    function getOrderedSections(data) {
+        const defaults = [
+            { id: 'summary', name: 'Summary', order: 0, isVisible: true },
+            { id: 'experience', name: 'Experience', order: 1, isVisible: true },
+            { id: 'projects', name: 'Projects', order: 2, isVisible: true },
+            { id: 'education', name: 'Education', order: 3, isVisible: true },
+            { id: 'skills', name: 'Skills', order: 4, isVisible: true },
+            { id: 'languages', name: 'Languages', order: 5, isVisible: true },
+        ];
+        const cfg = (data.sections && data.sections.length > 0) ? data.sections : defaults;
+        return [...cfg].sort((a, b) => a.order - b.order).filter(s => s.isVisible);
+    }
+
+    // ─── CLASSIC TEMPLATE ────────────────────────────────────────────
     function renderClassic(data) {
-        const { personalInfo, experience, education, skills, projects, languages, sections } = data;
-        const container = document.getElementById('resume-content');
+        const { personalInfo, experience, education, skills, projects, languages } = data;
+        const p = personalInfo;
+        const sections = getOrderedSections(data);
 
-        // Classic layout is a single column with photo at top right
-        container.innerHTML = `
-            <div class="classic-resume p-10 max-w-[850px] mx-auto bg-white min-h-[1100px]">
-                <!-- Header -->
-                <div class="flex justify-between items-start mb-6 border-b-2 border-slate-800 pb-4">
-                    <div class="flex-1">
-                        <h1 class="text-5xl font-bold uppercase tracking-tight text-slate-900 mb-1" style="font-family: 'EB Garamond', serif;">${personalInfo.name}</h1>
-                        <p class="text-xl font-semibold text-slate-700 uppercase tracking-widest mb-4">${personalInfo.title}</p>
-                        <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm font-medium text-slate-600">
-                            ${personalInfo.address ? `<span><i class="fa-solid fa-location-dot mr-2 text-slate-400"></i>${personalInfo.address}</span>` : ''}
-                            ${personalInfo.phone ? `<span><i class="fa-solid fa-phone mr-2 text-slate-400"></i><a href="tel:${personalInfo.phone.replace(/\s/g, '')}" class="hover:text-slate-900 transition-colors">${personalInfo.phone}</a></span>` : ''}
-                            ${personalInfo.email ? `<span><i class="fa-solid fa-envelope mr-2 text-slate-400"></i><a href="mailto:${personalInfo.email}" class="hover:text-slate-900 transition-colors">${personalInfo.email}</a></span>` : ''}
-                            ${personalInfo.linkedin ? `<span><i class="fa-brands fa-linkedin mr-2 text-slate-400"></i><a href="${personalInfo.linkedin}" target="_blank" class="hover:text-slate-900 transition-colors">${personalInfo.linkedin.replace(/https?:\/\/(www\.)?/, '')}</a></span>` : ''}
-                            ${personalInfo.github ? `<span><i class="fa-brands fa-github mr-2 text-slate-400"></i><a href="${personalInfo.github}" target="_blank" class="hover:text-slate-900 transition-colors">${personalInfo.github.replace(/https?:\/\/(www\.)?/, '')}</a></span>` : ''}
-                        </div>
-                    </div>
-                    ${personalInfo.photoUrl ? `
-                        <div class="ml-6">
-                            <img src="${personalInfo.photoUrl}" alt="${personalInfo.name}" class="${personalInfo.photoShape === 'circle' ? 'w-32 h-32 rounded-full' : 'w-32 h-40 rounded'} object-cover shadow-lg border border-slate-200 transform hover:scale-105 transition-transform duration-300">
-                        </div>
-                    ` : ''}
-                </div>
+        const contactHtml = [
+            p.address && `<span><i class="fa-solid fa-location-dot"></i>${esc(p.address)}</span>`,
+            p.phone && `<span><i class="fa-solid fa-phone"></i><a href="tel:${esc(p.phone.replace(/\s/g,''))}">${esc(p.phone)}</a></span>`,
+            p.email && `<span><i class="fa-solid fa-envelope"></i><a href="mailto:${esc(p.email)}">${esc(p.email)}</a></span>`,
+            p.linkedin && `<span><i class="fa-brands fa-linkedin"></i><a href="${esc(p.linkedin)}" target="_blank">${p.linkedin.replace(/https?:\/\/(www\.)?/,'')}</a></span>`,
+            p.github && `<span><i class="fa-brands fa-github"></i><a href="${esc(p.github)}" target="_blank">${p.github.replace(/https?:\/\/(www\.)?/,'')}</a></span>`,
+        ].filter(Boolean).join('');
 
-                ${renderSectionsByType(data, 'classic')}
-            </div>
-        `;
-    }
-
-    function renderModern(data) {
-        const { personalInfo, experience, education, skills, projects, languages, sections } = data;
-        const container = document.getElementById('resume-content');
-
-        // Modern layout has a sidebar (Current implementation)
-        container.innerHTML = `
-            <div class="modern-resume grid grid-cols-[280px_1fr] min-h-[1100px]">
-                <div class="sidebar bg-slate-50 p-10 border-right border-slate-200">
-                    ${personalInfo.photoUrl ? `<img src="${personalInfo.photoUrl}" class="w-32 h-32 ${personalInfo.photoShape === 'circle' ? 'rounded-full' : 'rounded-lg'} mx-auto mb-6 object-cover border-4 border-white shadow-lg">` : ''}
-                    <h2 class="text-2xl font-bold text-center mb-1">${personalInfo.name}</h2>
-                    <p class="text-slate-500 text-center italic mb-8">${personalInfo.title}</p>
-                    
-                    <div class="space-y-4 text-sm">
-                        ${personalInfo.email ? `<p>✉️ ${personalInfo.email}</p>` : ''}
-                        ${personalInfo.phone ? `<p>📞 ${personalInfo.phone}</p>` : ''}
-                        ${personalInfo.linkedin ? `<p>🔗 LinkedIn</p>` : ''}
-                    </div>
-                </div>
-                <div class="main-content p-10">
-                    ${renderSectionsByType(data, 'modern')}
-                </div>
-            </div>
-        `;
-    }
-
-    function renderMinimal(data) {
-        const { personalInfo } = data;
-        const container = document.getElementById('resume-content');
-
-        container.innerHTML = `
-            <div class="minimal-resume max-w-[800px] mx-auto p-12 bg-white">
-                <header class="text-center mb-12">
-                    <h1 class="text-4xl font-light tracking-widest uppercase mb-2">${personalInfo.name}</h1>
-                    <p class="text-slate-400 uppercase tracking-widest text-sm">${personalInfo.title}</p>
-                </header>
-                ${renderSectionsByType(data, 'minimal')}
-            </div>
-        `;
-    }
-
-    function renderSectionsByType(data, type) {
-        const { personalInfo, experience, education, skills, projects, languages, sections } = data;
-        const config = sections && sections.length > 0 ? sections : [];
-        config.sort((a, b) => a.order - b.order);
-
-        return config.map(sec => {
-            if (!sec.isVisible) return '';
-
+        const sectionsHtml = sections.map(sec => {
             let content = '';
-            const titleClass = type === 'classic' ? 'section-title-classic' : 'section-title';
 
             switch (sec.id) {
                 case 'summary':
-                    content = `<div class="text-slate-700 leading-relaxed ql-editor p-0 font-sans" style="min-height: auto;">${personalInfo.summary}</div>`;
+                    if (!p.summary) return '';
+                    content = `<div class="ql-editor">${p.summary}</div>`;
                     break;
                 case 'experience':
+                    if (!experience?.length) return '';
                     content = experience.map(exp => `
-                        <div class="mb-4">
-                            <div class="flex justify-between font-bold text-slate-900">
-                                <span>${exp.company}</span>
-                                <span class="text-sm">${exp.startDate} - ${exp.endDate}</span>
+                        <div class="exp-item">
+                            <div class="exp-header">
+                                <span class="exp-company">${esc(exp.company)}</span>
+                                <span class="exp-date">${esc(exp.startDate)} – ${esc(exp.endDate)}</span>
                             </div>
-                            <div class="italic text-slate-600 mb-1">${exp.position}</div>
-                            <div class="text-sm text-slate-700 ql-editor p-0 font-sans" style="min-height: auto;">${exp.description}</div>
+                            <div class="exp-role">${esc(exp.position)}</div>
+                            <div class="exp-desc ql-editor">${exp.description || ''}</div>
                         </div>
                     `).join('');
                     break;
                 case 'projects':
+                    if (!projects?.length) return '';
                     content = projects.map(proj => `
-                        <div class="mb-3">
-                            <div class="font-bold underline flex items-center gap-2">
-                                ${proj.name}
-                                ${proj.link ? `<a href="${proj.link}" target="_blank" class="text-xs font-normal text-slate-500 hover:text-indigo-600 ml-2 transition-colors italic">${proj.link}</a>` : ''}
+                        <div class="proj-item">
+                            <div class="exp-header">
+                                <span class="exp-company">${esc(proj.name)}${proj.link ? ` <a href="${esc(proj.link)}" target="_blank" style="font-size:0.78em;font-weight:400;color:#64748b;text-decoration:underline;margin-left:6px;">${proj.link.replace(/https?:\/\//,'')}</a>` : ''}</span>
                             </div>
-                            <div class="text-sm text-slate-700 ql-editor p-0 font-sans" style="min-height: auto;">${proj.description}</div>
+                            <div class="exp-desc ql-editor">${proj.description || ''}</div>
                         </div>
                     `).join('');
                     break;
                 case 'education':
+                    if (!education?.length) return '';
                     content = education.map(edu => `
-                        <div class="mb-4">
-                            <div class="flex justify-between items-start">
+                        <div class="edu-item">
+                            <div class="exp-header">
                                 <div>
-                                    <div class="font-bold text-slate-900">${edu.institution}</div>
-                                    <div class="text-sm italic text-slate-600">${edu.degree}</div>
-                                    ${edu.scoreValue ? `<div class="text-xs font-semibold text-slate-700 mt-1 uppercase tracking-wider">${edu.scoreType}: ${edu.scoreValue}</div>` : ''}
+                                    <div class="exp-company">${esc(edu.institution)}</div>
+                                    <div class="exp-role">${esc(edu.degree)}${edu.scoreValue ? ` &nbsp;·&nbsp; ${esc(edu.scoreType)}: ${esc(edu.scoreValue)}` : ''}</div>
                                 </div>
-                                <div class="text-sm font-bold text-slate-700">${edu.startDate} - ${edu.endDate}</div>
+                                <span class="exp-date">${esc(edu.startDate)} – ${esc(edu.endDate)}</span>
                             </div>
-                            ${edu.description && edu.description !== '<p><br></p>' && edu.description !== '' ? `<div class="text-sm text-slate-700 ql-editor p-0 font-sans mt-1" style="min-height: auto;">${edu.description}</div>` : ''}
+                            ${edu.description && edu.description !== '<p><br></p>' ? `<div class="exp-desc ql-editor" style="margin-top:3px;">${edu.description}</div>` : ''}
                         </div>
                     `).join('');
                     break;
                 case 'skills':
-                    content = `<p class="text-sm leading-relaxed"><span class="font-bold">Technical Skills:</span> ${skills.join(', ')}</p>`;
+                    if (!skills?.length) return '';
+                    content = `<div class="skills-wrap">${skills.map(s => `<span class="skill-tag">${esc(s)}</span>`).join('')}</div>`;
                     break;
                 case 'languages':
-                    content = `<div class="grid grid-cols-3 gap-2">
-                        ${languages.map(l => `<div class="text-sm"><span class="font-bold">${l.language}:</span> ${l.proficiency}</div>`).join('')}
-                    </div>`;
+                    if (!languages?.length) return '';
+                    content = `<div class="lang-grid">${languages.map(l => `<div class="lang-item"><strong>${esc(l.language)}</strong> &mdash; ${esc(l.proficiency)}</div>`).join('')}</div>`;
                     break;
+                default: return '';
             }
 
-            return `
-                <div class="section-container mb-6">
-                    <h3 class="${titleClass}">${sec.name}</h3>
-                    <div class="section-content">${content}</div>
-                </div>
-            `;
+            return `<div>
+                <div class="section-title">${esc(sec.name)}</div>
+                <div>${content}</div>
+            </div>`;
         }).join('');
+
+        document.getElementById('resume-content').innerHTML = `
+            <div class="resume-classic">
+                <div class="rc-header">
+                    <div style="flex:1;">
+                        <div class="rc-name">${esc(p.name)}</div>
+                        <div class="rc-title">${esc(p.title)}</div>
+                        <div class="rc-contact">${contactHtml}</div>
+                    </div>
+                    ${p.photoUrl ? `<img src="${esc(p.photoUrl)}" class="rc-photo ${p.photoShape === 'circle' ? 'circle' : ''}" alt="${esc(p.name)}">` : ''}
+                </div>
+                ${sectionsHtml}
+            </div>
+        `;
+    }
+
+    // ─── MODERN TEMPLATE ─────────────────────────────────────────────
+    function renderModern(data) {
+        const { personalInfo: p, experience, education, skills, projects, languages } = data;
+        const sections = getOrderedSections(data);
+
+        const sidebarSections = ['skills', 'languages'];
+        const mainSections = sections.filter(s => !sidebarSections.includes(s.id));
+        const skillsSec = sections.find(s => s.id === 'skills' && s.isVisible);
+        const langSec = sections.find(s => s.id === 'languages' && s.isVisible);
+
+        const mainHtml = mainSections.map(sec => {
+            let content = '';
+            switch (sec.id) {
+                case 'summary':
+                    if (!p.summary) return '';
+                    content = `<div class="rm-summary ql-editor">${p.summary}</div>`;
+                    break;
+                case 'experience':
+                    if (!experience?.length) return '';
+                    content = experience.map(exp => `
+                        <div class="rm-exp-item">
+                            <div class="rm-exp-header">
+                                <span class="rm-exp-company">${esc(exp.company)}</span>
+                                <span class="rm-exp-date">${esc(exp.startDate)} – ${esc(exp.endDate)}</span>
+                            </div>
+                            <div class="rm-exp-role">${esc(exp.position)}</div>
+                            <div class="rm-exp-desc ql-editor">${exp.description || ''}</div>
+                        </div>
+                    `).join('');
+                    break;
+                case 'projects':
+                    if (!projects?.length) return '';
+                    content = projects.map(proj => `
+                        <div class="rm-exp-item">
+                            <div class="rm-exp-header">
+                                <span class="rm-exp-company">${esc(proj.name)}</span>
+                                ${proj.link ? `<a href="${esc(proj.link)}" target="_blank" class="rm-exp-date" style="text-decoration:underline;font-size:0.75em;">${proj.link.replace(/https?:\/\//,'').substring(0,30)}</a>` : ''}
+                            </div>
+                            <div class="rm-exp-desc ql-editor">${proj.description || ''}</div>
+                        </div>
+                    `).join('');
+                    break;
+                case 'education':
+                    if (!education?.length) return '';
+                    content = education.map(edu => `
+                        <div class="rm-exp-item">
+                            <div class="rm-exp-header">
+                                <span class="rm-exp-company">${esc(edu.institution)}</span>
+                                <span class="rm-exp-date">${esc(edu.startDate)} – ${esc(edu.endDate)}</span>
+                            </div>
+                            <div class="rm-exp-role">${esc(edu.degree)}${edu.scoreValue ? ` · ${esc(edu.scoreType)}: ${esc(edu.scoreValue)}` : ''}</div>
+                            ${edu.description && edu.description !== '<p><br></p>' ? `<div class="rm-exp-desc ql-editor">${edu.description}</div>` : ''}
+                        </div>
+                    `).join('');
+                    break;
+                default: return '';
+            }
+
+            return `<div>
+                <div class="rm-section-title">${esc(sec.name)}</div>
+                ${content}
+            </div>`;
+        }).join('');
+
+        document.getElementById('resume-content').innerHTML = `
+            <div class="resume-modern">
+                <div class="rm-sidebar">
+                    ${p.photoUrl ? `<img src="${esc(p.photoUrl)}" class="rm-photo" alt="${esc(p.name)}">` : ''}
+                    <div class="rm-name">${esc(p.name)}</div>
+                    <div class="rm-role">${esc(p.title)}</div>
+
+                    <div class="rm-sb-section">
+                        <div class="rm-sb-title">Contact</div>
+                        ${p.email ? `<div class="rm-contact-item"><i class="fa-solid fa-envelope"></i><a href="mailto:${esc(p.email)}">${esc(p.email)}</a></div>` : ''}
+                        ${p.phone ? `<div class="rm-contact-item"><i class="fa-solid fa-phone"></i>${esc(p.phone)}</div>` : ''}
+                        ${p.address ? `<div class="rm-contact-item"><i class="fa-solid fa-location-dot"></i>${esc(p.address)}</div>` : ''}
+                        ${p.linkedin ? `<div class="rm-contact-item"><i class="fa-brands fa-linkedin"></i><a href="${esc(p.linkedin)}" target="_blank">LinkedIn</a></div>` : ''}
+                        ${p.github ? `<div class="rm-contact-item"><i class="fa-brands fa-github"></i><a href="${esc(p.github)}" target="_blank">GitHub</a></div>` : ''}
+                    </div>
+
+                    ${skillsSec && skills?.length ? `
+                        <div class="rm-sb-section">
+                            <div class="rm-sb-title">Skills</div>
+                            <div class="rm-skill-list">
+                                ${skills.map(s => `<div class="rm-skill-item">${esc(s)}</div>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${langSec && languages?.length ? `
+                        <div class="rm-sb-section">
+                            <div class="rm-sb-title">Languages</div>
+                            ${languages.map(l => `
+                                <div class="rm-lang-item">
+                                    <div class="rm-lang-name">${esc(l.language)}</div>
+                                    <div class="rm-lang-level">${esc(l.proficiency)}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+
+                <div class="rm-main">${mainHtml}</div>
+            </div>
+        `;
+    }
+
+    // ─── MINIMAL TEMPLATE ────────────────────────────────────────────
+    function renderMinimal(data) {
+        const { personalInfo: p, experience, education, skills, projects, languages } = data;
+        const sections = getOrderedSections(data);
+
+        const contactHtml = [
+            p.email && `<span><i class="fa-solid fa-envelope"></i>${esc(p.email)}</span>`,
+            p.phone && `<span><i class="fa-solid fa-phone"></i>${esc(p.phone)}</span>`,
+            p.address && `<span><i class="fa-solid fa-location-dot"></i>${esc(p.address)}</span>`,
+            p.linkedin && `<span><i class="fa-brands fa-linkedin"></i><a href="${esc(p.linkedin)}" target="_blank" style="color:inherit;">LinkedIn</a></span>`,
+            p.github && `<span><i class="fa-brands fa-github"></i><a href="${esc(p.github)}" target="_blank" style="color:inherit;">GitHub</a></span>`,
+        ].filter(Boolean).join('');
+
+        const sectionsHtml = sections.map(sec => {
+            let content = '';
+            switch (sec.id) {
+                case 'summary':
+                    if (!p.summary) return '';
+                    content = `<div class="ql-editor" style="text-align:center;font-size:0.9em;color:#475569;">${p.summary}</div>`;
+                    break;
+                case 'experience':
+                    if (!experience?.length) return '';
+                    content = experience.map(exp => `
+                        <div class="min-exp-item">
+                            <div class="min-exp-header">
+                                <span class="min-exp-company">${esc(exp.company)}</span>
+                                <span class="min-exp-date">${esc(exp.startDate)} – ${esc(exp.endDate)}</span>
+                            </div>
+                            <div class="min-exp-role">${esc(exp.position)}</div>
+                            <div class="min-exp-desc ql-editor">${exp.description || ''}</div>
+                        </div>
+                    `).join('');
+                    break;
+                case 'projects':
+                    if (!projects?.length) return '';
+                    content = projects.map(proj => `
+                        <div class="min-exp-item">
+                            <div class="min-exp-header">
+                                <span class="min-exp-company">${esc(proj.name)}</span>
+                                ${proj.link ? `<a href="${esc(proj.link)}" target="_blank" class="min-exp-date" style="color:#64748b;text-decoration:underline;">${proj.link.replace(/https?:\/\//,'').substring(0,28)}</a>` : ''}
+                            </div>
+                            <div class="min-exp-desc ql-editor">${proj.description || ''}</div>
+                        </div>
+                    `).join('');
+                    break;
+                case 'education':
+                    if (!education?.length) return '';
+                    content = education.map(edu => `
+                        <div class="min-exp-item">
+                            <div class="min-exp-header">
+                                <span class="min-exp-company">${esc(edu.institution)}</span>
+                                <span class="min-exp-date">${esc(edu.startDate)} – ${esc(edu.endDate)}</span>
+                            </div>
+                            <div class="min-exp-role">${esc(edu.degree)}${edu.scoreValue ? ` · ${esc(edu.scoreType)}: ${esc(edu.scoreValue)}` : ''}</div>
+                            ${edu.description && edu.description !== '<p><br></p>' ? `<div class="min-exp-desc ql-editor">${edu.description}</div>` : ''}
+                        </div>
+                    `).join('');
+                    break;
+                case 'skills':
+                    if (!skills?.length) return '';
+                    content = `<div class="min-skills">${skills.map(s => `<span class="min-skill">${esc(s)}</span>`).join('')}</div>`;
+                    break;
+                case 'languages':
+                    if (!languages?.length) return '';
+                    content = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px;">
+                        ${languages.map(l => `<div style="font-size:0.85em;text-align:center;"><strong>${esc(l.language)}</strong><br><span style="color:#94a3b8;font-size:0.9em;">${esc(l.proficiency)}</span></div>`).join('')}
+                    </div>`;
+                    break;
+                default: return '';
+            }
+
+            return `<div>
+                <div class="min-section-title">${esc(sec.name)}</div>
+                ${content}
+            </div>`;
+        }).join('');
+
+        document.getElementById('resume-content').innerHTML = `
+            <div class="resume-minimal">
+                <div class="min-header">
+                    ${p.photoUrl ? `<img src="${esc(p.photoUrl)}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 12px;display:block;border:3px solid #e2e8f0;" alt="${esc(p.name)}">` : ''}
+                    <div class="min-name">${esc(p.name)}</div>
+                    <div class="min-title">${esc(p.title)}</div>
+                    <div class="min-contact">${contactHtml}</div>
+                </div>
+                ${sectionsHtml}
+            </div>
+        `;
     }
 });

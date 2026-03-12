@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="/output.css" rel="stylesheet">
         <style>
         /* Modern Scrollbar */
@@ -130,6 +131,8 @@
     <!-- Quill.js CDN -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <!-- Tesseract.js for Free OCR -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body class="bg-slate-950 text-slate-300 min-h-screen flex flex-col selection:bg-teal-500/30 font-sans">
 <!-- NEW: Toast Notification Container -->
@@ -314,18 +317,157 @@
                 </div>
 
 
+                <!-- RESUME MANAGEMENT SECTION -->
                 <!-- ============================================== -->
-                <!-- RESUME MANAGEMENT SECTION (NEW) -->
-                <!-- ============================================== -->
+                <style>
+                    /* ─── Split Layout ─── */
+                    .resume-split { display: grid; grid-template-columns: 1fr; gap: 0; align-items: start; }
+                    .resume-split.split-mode { grid-template-columns: 1fr minmax(0, 45%); gap: 24px; }
+
+                    /* ─── Preview Panel ─── */
+                    .resume-preview-panel {
+                        position: sticky;
+                        top: 72px;
+                        height: calc(100vh - 120px);
+                        background: #1e293b;
+                        border-radius: 16px;
+                        border: 1px solid rgba(255,255,255,0.07);
+                        overflow: visible;
+                        display: none;
+                        flex-direction: column;
+                        box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+                    }
+                    .resume-split.split-mode .resume-preview-panel { display: flex; }
+
+                    /* ─── Preview Topbar ─── */
+                    .resume-preview-topbar {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        padding: 8px 14px;
+                        background: #0f172a;
+                        border-bottom: 1px solid rgba(255,255,255,0.05);
+                        flex-shrink: 0;
+                        gap: 8px;
+                    }
+
+                    /* ─── Typography Controls IN Dashboard ─── */
+                    .typo-controls {
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                        flex-wrap: wrap;
+                        border-bottom: 1px solid rgba(255,255,255,0.05);
+                        padding: 8px 12px;
+                        background: #111827;
+                        flex-shrink: 0;
+                    }
+                    .typo-ctrl {
+                        display: flex;
+                        align-items: center;
+                        gap: 5px;
+                        font-size: 10px;
+                        font-weight: 600;
+                        letter-spacing: 0.06em;
+                        color: #64748b;
+                        text-transform: uppercase;
+                    }
+                    .typo-ctrl select {
+                        background: #1e293b;
+                        color: #cbd5e1;
+                        border: 1px solid rgba(255,255,255,0.07);
+                        border-radius: 6px;
+                        padding: 2px 6px;
+                        font-size: 11px;
+                        outline: none;
+                        cursor: pointer;
+                    }
+                    .typo-ctrl input[type=range] {
+                        width: 70px;
+                        accent-color: #14b8a6;
+                        cursor: pointer;
+                    }
+                    .typo-ctrl input[type=color] {
+                        width: 22px;
+                        height: 22px;
+                        border-radius: 50%;
+                        border: 1px solid rgba(255,255,255,0.1);
+                        padding: 1px;
+                        cursor: pointer;
+                        background: none;
+                    }
+                    .typo-val { color: #5eead4; font-size: 10px; font-weight: 700; min-width: 28px; }
+
+                    /* ─── Scaled Resume Canvas ─── */
+                    .resume-canvas-outer {
+                        flex: 1;
+                        overflow-y: auto;
+                        overflow-x: hidden;
+                        position: relative;
+                        background: #e2e8f0;
+                        padding: 8px;
+                    }
+                    .resume-canvas-outer::-webkit-scrollbar { width: 4px; }
+                    .resume-canvas-outer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
+                    .resume-canvas-scaler {
+                        transform-origin: top left;
+                        display: block;
+                        position: relative;
+                    }
+                    .resume-canvas-inner {
+                        background: white;
+                        overflow: visible;
+                        width: 860px;
+                        min-height: 900px;
+                    }
+
+                    /* ─── Preview Dot ─── */
+                    .preview-dot { width: 9px; height: 9px; border-radius: 50%; }
+                    @keyframes pvPulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+                    /* ─── Mobile: Tab switch Form / Preview ─── */
+                    #mobile-preview-tabs { display: none; gap: 0; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 14px; }
+                    .mob-tab { flex: 1; padding: 9px; text-align: center; font-size: 12px; font-weight: 700; cursor: pointer; background: #1e293b; color: #64748b; border: none; transition: all 0.2s; font-family: inherit; }
+                    .mob-tab.active { background: #0d9488; color: white; }
+
+                    @media (max-width: 1024px) {
+                        .resume-split.split-mode { grid-template-columns: 1fr !important; }
+                        .resume-split.split-mode .resume-preview-panel { display: none !important; height: 80vh; border-radius: 12px; }
+                        .resume-split.split-mode.mobile-preview-active .resume-preview-panel { display: flex !important; }
+                        .resume-split.split-mode.mobile-preview-active #resume-form-panel { display: none !important; }
+                        #mobile-preview-tabs { display: flex !important; }
+                    }
+                </style>
                 <div id="resume-management-container" class="admin-section hidden glass-panel p-6 md:p-8 rounded-2xl mb-8 border border-slate-700/50 relative overflow-hidden">
-                    <div class="flex justify-between items-center mb-8 border-l-4 border-teal-500 pl-4">
-                        <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 tracking-tight shadow-sm inline-block m-0 border-0 mb-0">Manage Resume</h2>
-                        <a href="/resume.html" target="_blank" class="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-6 rounded-xl shadow-lg hover:from-indigo-400 hover:to-blue-400 transition-all duration-300 flex items-center space-x-2 border border-indigo-400/20">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                            <span>Preview</span>
-                        </a>
+                    <!-- Header -->
+                    <div class="flex justify-between items-center mb-6 border-l-4 border-teal-500 pl-4">
+                        <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 tracking-tight inline-block">Manage Resume</h2>
+                        <div class="flex items-center gap-3">
+                            <!-- Live Preview Toggle -->
+                            <div class="flex items-center gap-2 bg-slate-800/60 border border-slate-700 rounded-xl px-3 py-2 cursor-pointer" title="Toggle live side-by-side preview">
+                                <div id="preview-toggle-dot" class="w-8 h-4 bg-slate-600 rounded-full relative transition-all duration-300" onclick="toggleResumePreview()">
+                                    <div id="preview-toggle-thumb" class="absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-all duration-300"></div>
+                                </div>
+                                <span class="text-xs font-semibold text-slate-400 whitespace-nowrap">Live Preview</span>
+                                <span id="preview-status-badge" class="text-[10px] font-bold text-slate-500 bg-slate-700 px-1.5 py-0.5 rounded">OFF</span>
+                            </div>
+                            <a href="/resume.html" target="_blank" class="bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold py-2 px-5 rounded-xl hover:from-indigo-400 hover:to-blue-400 transition-all flex items-center gap-2 text-sm">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                Open Full
+                            </a>
+                        </div>
                     </div>
-                    
+
+                    <!-- Mobile-only: Form / Preview toggle tabs (shown when Live Preview is ON) -->
+                    <div id="mobile-preview-tabs">
+                        <button class="mob-tab active" id="mob-tab-form" onclick="mobileTabSwitch('form')">&#9998; Edit Form</button>
+                        <button class="mob-tab" id="mob-tab-preview" onclick="mobileTabSwitch('preview')">&#128065; Live Preview</button>
+                    </div>
+
+                    <!-- Split Layout Wrapper -->
+                    <div class="resume-split" id="resume-split-wrapper">
+                        <!-- Form Panel -->
+                        <div id="resume-form-panel">
                     <form id="resume-form" class="space-y-8">
                         <!-- NEW: Template Selection -->
                         <div class="bg-slate-900/50 p-6 rounded-xl border border-slate-700/80 shadow-inner">
@@ -514,7 +656,68 @@
                             <p id="resume-status-message" class="text-center mt-4 h-6 text-sm font-semibold"></p>
                         </div>
                     </form>
-                </div>
+                        </div><!-- /resume-form-panel -->
+
+                        <!-- Live Preview Panel -->
+                        <div class="resume-preview-panel" id="resume-preview-panel">
+                            <div class="resume-preview-topbar">
+                                <div style="display:flex;align-items:center;gap:5px;">
+                                    <div class="preview-dot" style="background:#ef4444;"></div>
+                                    <div class="preview-dot" style="background:#f59e0b;"></div>
+                                    <div class="preview-dot" style="background:#10b981;"></div>
+                                    <span style="font-size:10px;color:#475569;margin-left:8px;font-weight:600;">Live Preview</span>
+                                    <span id="preview-live-dot" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#10b981;margin-left:4px;animation:pvPulse 1.5s infinite;"></span>
+                                </div>
+                                <div style="display:flex;gap:6px;align-items:center;">
+                                    <button onclick="downloadPreviewPdf()" style="background:linear-gradient(135deg,#059669,#0d9488);color:white;border:none;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;">&#11015; Download PDF</button>
+                                    <a href="/resume.html" target="_blank" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#94a3b8;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:600;text-decoration:none;">&#8599; Open Full</a>
+                                </div>
+                            </div>
+                            <div class="typo-controls">
+                                <div class="typo-ctrl">
+                                    <span>Font</span>
+                                    <select id="pv-font" onchange="applyTypoToPreview()">
+                                        <option value="'Inter', sans-serif">Inter</option>
+                                        <option value="'Roboto', sans-serif">Roboto</option>
+                                        <option value="'Lato', sans-serif">Lato</option>
+                                        <option value="'EB Garamond', serif">Garamond</option>
+                                        <option value="Georgia, serif">Georgia</option>
+                                    </select>
+                                </div>
+                                <div class="typo-ctrl">
+                                    <span>Size</span>
+                                    <input type="range" id="pv-size" min="10" max="16" step="0.5" value="13" oninput="applyTypoToPreview()">
+                                    <span class="typo-val" id="pv-size-val">13px</span>
+                                </div>
+                                <div class="typo-ctrl">
+                                    <span>Line</span>
+                                    <input type="range" id="pv-lh" min="1.2" max="2.0" step="0.05" value="1.5" oninput="applyTypoToPreview()">
+                                    <span class="typo-val" id="pv-lh-val">1.5</span>
+                                </div>
+                                <div class="typo-ctrl">
+                                    <span>Gap</span>
+                                    <input type="range" id="pv-gap" min="8" max="36" step="2" value="20" oninput="applyTypoToPreview()">
+                                    <span class="typo-val" id="pv-gap-val">20px</span>
+                                </div>
+                                <div class="typo-ctrl">
+                                    <span>Accent</span>
+                                    <input type="color" id="pv-accent" value="#1e3a5f" oninput="applyTypoToPreview()">
+                                </div>
+                            </div>
+                            <div class="resume-canvas-outer" id="resume-canvas-outer">
+                                <div class="resume-canvas-scaler" id="resume-canvas-scaler">
+                                    <div class="resume-canvas-inner" id="resume-canvas-inner" style="width:860px;">
+                                        <div style="padding:60px;text-align:center;color:#94a3b8;font-family:Inter,sans-serif;font-size:13px;">
+                                            <p style="margin-bottom:6px;font-weight:600;">Live Preview</p>
+                                            <p style="font-size:11px;">Fill in the form fields to see the resume update here in real time.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><!-- /resume-preview-panel -->
+                    </div><!-- /resume-split -->
+                    <p style="font-size:10px;color:#475569;text-align:center;margin-top:8px;">Preview updates as you type &bull; Typography changes are saved with the resume</p>
+                </div><!-- /resume-management-container -->
 
 
                 <!-- ============================================== -->
@@ -735,9 +938,553 @@
                 <iframe id="preview-iframe" class="w-full h-[60vh] bg-white border-0 rounded-md"></iframe>
             </div>
         </div>
+    </div>
     <!-- Scroll to Top Button -->
     <button id="scroll-to-top" title="Scroll to Top" class="fixed bottom-8 right-8 bg-gradient-to-r from-teal-500 to-emerald-500 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-all duration-300 opacity-0 invisible z-50">
         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
     </button>
+
+    <!-- AI Data Bot Floating Button -->
+    <button id="ai-bot-toggle" title="Open AI Data Bot" class="fixed bottom-8 left-8 md:left-72 bg-gradient-to-r from-indigo-500 to-purple-600 text-white w-16 h-16 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(99,102,241,0.5)] hover:scale-110 transition-all duration-300 z-50 group border border-indigo-400/30">
+        <svg class="w-8 h-8 group-hover:rotate-12 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+        <div class="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-slate-950"></div>
+    </button>
+
+    <!-- AI Data Bot Modal -->
+    <div id="ai-bot-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+        <div class="glass-panel p-6 md:p-8 rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.9)] border border-slate-700/50 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-700/50">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-indigo-500/20 rounded-xl flex items-center justify-center border border-indigo-500/30">
+                        <svg class="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white leading-tight">Advanced AI Data Bot</h3>
+                        <p class="text-xs text-indigo-400 font-medium uppercase tracking-widest">Smart Extraction & Grammar Fix</p>
+                    </div>
+                </div>
+                <button id="close-ai-bot" class="text-slate-400 hover:text-white transition-colors p-2 hover:bg-slate-800 rounded-full">
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l18 18" /></svg>
+                </button>
+            </div>
+            
+            <div id="ai-input-view" class="flex-1 overflow-y-auto space-y-6 pr-2">
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-slate-300 uppercase tracking-wide">Method 1: Paste Rough Text</label>
+                    <textarea id="ai-bot-input" placeholder="Paste experience details, project info, etc. 
+Example: worked as dev at apple from 2021 to now. i built some cool ios apps." rows="5" class="w-full bg-slate-900/50 border border-slate-700/80 p-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/70 text-slate-200 placeholder-slate-600 shadow-inner resize-none transition-all"></textarea>
+                </div>
+                
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-800"></div></div>
+                    <div class="relative flex justify-center text-xs uppercase"><span class="bg-slate-900 px-3 text-slate-500 font-bold tracking-widest">OR</span></div>
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-slate-300 uppercase tracking-wide">Method 2: Extract from Image / File</label>
+                    <div id="ai-drop-zone" class="border-2 border-dashed border-slate-700 hover:border-indigo-500/50 rounded-2xl p-6 transition-all cursor-pointer group bg-slate-800/20 text-center">
+                        <input type="file" id="ai-file-input" class="hidden" accept="image/*">
+                        <svg class="mx-auto h-10 w-10 text-slate-600 group-hover:text-indigo-400 transition-colors mb-2" stroke="currentColor" fill="none" viewBox="0 0 48 48"><path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                        <p class="text-slate-400 text-sm font-medium" id="ai-file-status">Drop image or <span class="text-indigo-400 underline">browse</span></p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between bg-slate-800/40 p-4 rounded-2xl border border-slate-700/50">
+                    <div>
+                        <p class="text-sm font-bold text-slate-200">Smart Refine & Grammar Fix</p>
+                        <p class="text-[10px] text-slate-500">Auto-fix spelling & professionalize tone</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="ai-grammar-fix" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-500"></div>
+                    </label>
+                </div>
+
+                <div id="ai-process-status" class="hidden bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-4 animate-pulse">
+                    <div class="flex items-center space-x-3">
+                        <div class="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
+                            <div id="ai-progress-bar" class="h-full bg-indigo-500 transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <span id="ai-status-text" class="text-xs font-bold text-indigo-400 min-w-[60px]">Analyzing...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NEW: Results View (Hidden initially) -->
+            <div id="ai-results-view" class="hidden flex-1 flex flex-col overflow-hidden">
+                <div class="mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-sm font-bold text-indigo-400 uppercase tracking-widest">Detected Data</h4>
+                        <span id="ai-detected-section" class="bg-indigo-500/20 text-indigo-300 text-[10px] font-bold px-2 py-1 rounded uppercase border border-indigo-500/30">Section: Experience</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mb-4">Review the extracted fields below. You can correct them manually if needed.</p>
+                </div>
+                
+                <div id="ai-results-fields" class="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
+                    <!-- Fields will be injected here -->
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-slate-700/50 flex gap-3">
+                    <button id="ai-back-btn" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-xl border border-slate-700 transition-all">Back</button>
+                    <button id="ai-fill-btn" class="flex-[2] bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-3 rounded-xl hover:brightness-110 shadow-lg shadow-indigo-500/20 transition-all">Confirm & Fill Form</button>
+                </div>
+            </div>
+
+            <div id="ai-input-actions" class="mt-8 flex gap-4">
+                <button id="ai-process-btn" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-4 rounded-2xl hover:brightness-110 shadow-lg shadow-indigo-500/20 transition-all active:scale-[0.98] flex items-center justify-center space-x-2">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    <span>Extract & Refine</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+// ====================================================================
+// RESUME LIVE PREVIEW — Real-Time Client-Side Renderer (Admin Only)
+// ====================================================================
+let previewEnabled = false;
+let pvDebounceTimer = null;
+
+// Download PDF from preview - prints the live canvas content directly
+function downloadPreviewPdf() {
+    const inner = document.getElementById('resume-canvas-inner');
+    if (!inner) { window.open('/resume.html','_blank'); return; }
+
+    // Collect typography variables from controls
+    const font   = document.getElementById('pv-font')?.value || "'Inter', sans-serif";
+    const size   = document.getElementById('pv-size')?.value || '13';
+    const lh     = document.getElementById('pv-lh')?.value   || '1.5';
+    const gap    = document.getElementById('pv-gap')?.value  || '20';
+    const accent = document.getElementById('pv-accent')?.value || '#1e3a5f';
+    const r = parseInt(accent.slice(1,3),16), g = parseInt(accent.slice(3,5),16), b = parseInt(accent.slice(5,7),16);
+    const al = `rgb(${Math.min(255,r+60)},${Math.min(255,g+60)},${Math.min(255,b+80)})`;
+
+    const printStyles = `
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Lato:wght@400;700&family=EB+Garamond:wght@400;700&display=swap');
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+        :root {
+            --resume-font: ${font};
+            --resume-size: ${size}px;
+            --resume-line-height: ${lh};
+            --resume-section-gap: ${gap}px;
+            --resume-accent: ${accent};
+            --resume-accent-light: ${al};
+            --resume-padding: 40px;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: var(--resume-font); font-size: var(--resume-size); line-height: var(--resume-line-height); background: white; color: #1e293b; -webkit-print-color-adjust: exact; }
+        .resume-classic { padding: var(--resume-padding); max-width: 860px; margin: 0 auto; }
+        .rc-header { display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:14px; margin-bottom:14px; border-bottom:2px solid var(--resume-accent); }
+        .rc-name { font-size:1.9em; font-weight:700; color:var(--resume-accent); letter-spacing:-.02em; line-height:1.1; }
+        .rc-title { font-size:.88em; color:#64748b; font-weight:500; letter-spacing:.1em; text-transform:uppercase; margin-top:4px; }
+        .rc-contact { display:flex; flex-wrap:wrap; gap:5px 14px; margin-top:8px; font-size:.78em; color:#475569; }
+        .rc-contact span { display:flex; align-items:center; gap:4px; }
+        .rc-contact i { color:var(--resume-accent); width:12px; }
+        .rc-photo { width:90px; height:110px; object-fit:cover; border-radius:3px; border:2px solid #e2e8f0; margin-left:16px; }
+        .rc-photo.circle { border-radius:50%; height:90px; }
+        .section-title { font-size:.7em; font-weight:700; text-transform:uppercase; letter-spacing:.14em; color:var(--resume-accent); border-bottom:1.5px solid var(--resume-accent); padding-bottom:3px; margin-bottom:8px; margin-top:var(--resume-section-gap); }
+        .exp-item,.edu-item,.proj-item { margin-bottom:9px; }
+        .exp-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:2px; }
+        .exp-company { font-weight:700; color:#1e293b; font-size:.9em; }
+        .exp-date { font-size:.76em; color:#64748b; white-space:nowrap; }
+        .exp-role { font-style:italic; color:#475569; font-size:.84em; margin-bottom:3px; }
+        .exp-desc { color:#374151; font-size:.85em; }
+        .skills-wrap { display:flex; flex-wrap:wrap; gap:5px; }
+        .skill-tag { background:#f1f5f9; border:1px solid #e2e8f0; color:#334155; padding:2px 9px; border-radius:3px; font-size:.78em; font-weight:500; }
+        .lang-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:5px; }
+        .lang-item { font-size:.82em; }
+        .resume-modern { display:grid; grid-template-columns:190px 1fr; min-height:800px; }
+        .rm-sidebar { background:var(--resume-accent); padding:26px 18px; color:#e0f2fe; }
+        .rm-photo { width:72px; height:72px; border-radius:50%; object-fit:cover; border:3px solid rgba(255,255,255,.2); display:block; margin:0 auto 12px; }
+        .rm-name { font-size:1.05em; font-weight:700; color:#fff; text-align:center; line-height:1.2; margin-bottom:3px; }
+        .rm-role { font-size:.68em; color:rgba(255,255,255,.55); text-align:center; text-transform:uppercase; letter-spacing:.08em; margin-bottom:16px; }
+        .rm-sb-section { margin-bottom:14px; }
+        .rm-sb-title { font-size:.6em; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:rgba(255,255,255,.38); border-bottom:1px solid rgba(255,255,255,.1); padding-bottom:4px; margin-bottom:7px; }
+        .rm-contact-item { display:flex; gap:6px; align-items:flex-start; margin-bottom:5px; font-size:.72em; color:rgba(255,255,255,.7); word-break:break-word; }
+        .rm-contact-item i { width:11px; flex-shrink:0; color:#5eead4; }
+        .rm-skill-list { display:flex; flex-direction:column; gap:4px; }
+        .rm-skill-item { font-size:.72em; color:rgba(255,255,255,.78); display:flex; align-items:center; gap:5px; }
+        .rm-skill-item::before { content:''; width:4px; height:4px; border-radius:50%; background:#5eead4; flex-shrink:0; }
+        .rm-lang-name { font-size:.73em; color:rgba(255,255,255,.85); font-weight:600; }
+        .rm-lang-level { font-size:.66em; color:rgba(255,255,255,.4); }
+        .rm-lang-item { margin-bottom:5px; }
+        .rm-main { padding:26px 22px; background:#fff; }
+        .rm-section-title { font-size:.66em; font-weight:700; text-transform:uppercase; letter-spacing:.13em; color:var(--resume-accent-light); border-bottom:1.5px solid #e2e8f0; padding-bottom:3px; margin-bottom:10px; margin-top:var(--resume-section-gap); }
+        .rm-exp-item { margin-bottom:12px; }
+        .rm-exp-header { display:flex; justify-content:space-between; align-items:flex-start; }
+        .rm-exp-company { font-weight:700; color:#1e293b; font-size:.88em; }
+        .rm-exp-date { font-size:.72em; color:#64748b; background:#f8fafc; border:1px solid #e2e8f0; padding:1px 6px; border-radius:20px; white-space:nowrap; }
+        .rm-exp-role { font-size:.8em; color:var(--resume-accent-light); font-weight:500; margin:2px 0 4px; }
+        .rm-exp-desc { font-size:.82em; color:#475569; }
+        .rm-summary { font-size:.84em; color:#475569; margin-bottom:4px; }
+        .resume-minimal { padding:var(--resume-padding); max-width:700px; margin:0 auto; }
+        .min-header { text-align:center; margin-bottom:22px; padding-bottom:18px; border-bottom:1px solid #e2e8f0; }
+        .min-name { font-size:1.8em; font-weight:300; letter-spacing:.2em; text-transform:uppercase; color:#0f172a; margin-bottom:5px; }
+        .min-title { font-size:.74em; text-transform:uppercase; letter-spacing:.18em; color:#94a3b8; margin-bottom:12px; }
+        .min-contact { display:flex; flex-wrap:wrap; justify-content:center; gap:3px 10px; font-size:.76em; color:#64748b; }
+        .min-contact span { display:flex; align-items:center; gap:4px; }
+        .min-section-title { font-size:.64em; letter-spacing:.2em; text-transform:uppercase; color:#94a3b8; text-align:center; margin:var(--resume-section-gap) 0 10px; position:relative; }
+        .min-section-title::before,.min-section-title::after { content:''; position:absolute; top:50%; width:28%; height:1px; background:#e2e8f0; }
+        .min-section-title::before { left:0; }
+        .min-section-title::after { right:0; }
+        .min-exp-item { margin-bottom:11px; }
+        .min-exp-header { display:flex; justify-content:space-between; align-items:baseline; }
+        .min-exp-company { font-weight:700; color:#0f172a; font-size:.88em; }
+        .min-exp-date { font-size:.74em; color:#94a3b8; }
+        .min-exp-role { font-size:.8em; color:#64748b; margin-bottom:3px; font-style:italic; }
+        .min-exp-desc { font-size:.82em; color:#475569; }
+        .min-skills { display:flex; flex-wrap:wrap; justify-content:center; gap:5px; }
+        .min-skill { border:1px solid #cbd5e1; color:#475569; padding:2px 10px; border-radius:2px; font-size:.78em; }
+        .ql-editor p { margin-bottom: 4px; }
+        .ql-editor ul { padding-left: 18px; }
+        @media print { @page { margin: 0; size: A4; } body { margin: 0; } }
+    `;
+
+    const printWin = window.open('', '_blank', 'width=900,height=700');
+    if (!printWin) { alert('Please allow pop-ups to download the PDF.'); return; }
+
+    printWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Resume</title><style>${printStyles}</style></head><body>${inner.innerHTML}</body></html>`);
+    printWin.document.close();
+    printWin.focus();
+    setTimeout(() => { printWin.print(); }, 800);
+}
+
+// Mobile tab switcher (Form | Preview)
+function mobileTabSwitch(tab) {
+    const wrapper = document.getElementById('resume-split-wrapper');
+    const tabForm = document.getElementById('mob-tab-form');
+    const tabPrev = document.getElementById('mob-tab-preview');
+    if (!wrapper) return;
+    if (tab === 'preview') {
+        wrapper.classList.add('mobile-preview-active');
+        if (tabPrev) { tabPrev.classList.add('active'); tabPrev.style.cssText='background:#0d9488;color:white'; }
+        if (tabForm) { tabForm.classList.remove('active'); tabForm.style.cssText='background:#1e293b;color:#64748b'; }
+        setTimeout(() => { scaleCanvas(); scheduleRender(0); }, 80);
+    } else {
+        wrapper.classList.remove('mobile-preview-active');
+        if (tabForm) { tabForm.classList.add('active'); tabForm.style.cssText='background:#0d9488;color:white'; }
+        if (tabPrev) { tabPrev.classList.remove('active'); tabPrev.style.cssText='background:#1e293b;color:#64748b'; }
+    }
+}
+
+function toggleResumePreview() {
+    previewEnabled = !previewEnabled;
+    const wrapper = document.getElementById('resume-split-wrapper');
+    const badge   = document.getElementById('preview-status-badge');
+    const thumb   = document.getElementById('preview-toggle-thumb');
+    const dot     = document.getElementById('preview-toggle-dot');
+    if (previewEnabled) {
+        wrapper.classList.add('split-mode');
+        badge.textContent = 'ON';
+        badge.style.cssText = 'color:#5eead4;background:rgba(20,184,166,0.15)';
+        dot.style.background = '#0d9488';
+        thumb.style.transform = 'translateX(16px)';
+        setTimeout(() => { scaleCanvas(); scheduleRender(0); }, 120);
+    } else {
+        wrapper.classList.remove('split-mode');
+        badge.textContent = 'OFF';
+        badge.style.cssText = 'color:#64748b;background:#1e293b';
+        dot.style.background = '#475569';
+        thumb.style.transform = 'translateX(0)';
+    }
+}
+
+function scaleCanvas() {
+    const outer  = document.getElementById('resume-canvas-outer');
+    const scaler = document.getElementById('resume-canvas-scaler');
+    const inner  = document.getElementById('resume-canvas-inner');
+    if (!outer || !scaler || !inner) return;
+    const ow = Math.max(100, (outer.clientWidth || outer.offsetWidth) - 16);
+    const iw = 860;
+    const scale = ow / iw;
+    // Apply CSS scale
+    const contentH = (inner.scrollHeight || inner.offsetHeight || 900) + 20; // +20 for bottom padding
+    scaler.style.height = contentH + 'px';
+    // Use negative margin to make the parent scrollable area match the visual scaled height
+    scaler.style.marginBottom = (-contentH * (1 - scale)) + 'px';
+    scaler.style.marginRight  = (-iw * (1 - scale)) + 'px';
+}
+
+function applyTypoToPreview() {
+    const g = id => document.getElementById(id);
+    const font = g('pv-font')?.value || "'Inter',sans-serif";
+    const size = g('pv-size')?.value || '13';
+    const lh   = g('pv-lh')?.value   || '1.5';
+    const gap  = g('pv-gap')?.value  || '20';
+    const acc  = g('pv-accent')?.value || '#1e3a5f';
+    if (g('pv-size-val')) g('pv-size-val').textContent = size + 'px';
+    if (g('pv-lh-val'))   g('pv-lh-val').textContent   = parseFloat(lh).toFixed(2);
+    if (g('pv-gap-val'))  g('pv-gap-val').textContent  = gap + 'px';
+    setCanvasVars(font, size, lh, gap, acc);
+    scheduleRender(0);
+}
+
+function setCanvasVars(font, size, lh, gap, acc) {
+    const inner = document.getElementById('resume-canvas-inner');
+    if (!inner) return;
+    const r=parseInt(acc.slice(1,3),16), gv=parseInt(acc.slice(3,5),16), b=parseInt(acc.slice(5,7),16);
+    const al = `rgb(${Math.min(255,r+60)},${Math.min(255,gv+60)},${Math.min(255,b+80)})`;
+    inner.style.setProperty('--resume-font', font);
+    inner.style.setProperty('--resume-size', size+'px');
+    inner.style.setProperty('--resume-line-height', lh);
+    inner.style.setProperty('--resume-section-gap', gap+'px');
+    inner.style.setProperty('--resume-accent', acc);
+    inner.style.setProperty('--resume-accent-light', al);
+    inner.style.setProperty('--resume-padding', '40px');
+    inner.style.fontFamily = font;
+    inner.style.fontSize   = size+'px';
+    inner.style.lineHeight = lh;
+}
+
+function scheduleRender(ms) {
+    if (!previewEnabled) return;
+    clearTimeout(pvDebounceTimer);
+    pvDebounceTimer = setTimeout(renderLivePreview, ms === undefined ? 350 : ms);
+}
+
+function pvE(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function collectFormData() {
+    const v   = id => document.getElementById(id)?.value?.trim() || '';
+    const tpl = document.querySelector('input[name="selectedTemplate"]:checked')?.value || 'classic';
+
+    // Get summary from Quill editor if available, otherwise fallback to hidden input
+    const summaryEl = document.querySelector('#resume-summary-editor .ql-editor');
+    const summaryHtml = summaryEl ? summaryEl.innerHTML : (document.getElementById('resume-summary')?.value || '');
+
+    const p = {
+        name:v('resume-name'), title:v('resume-title'), email:v('resume-email'),
+        phone:v('resume-phone'), address:v('resume-address'), linkedin:v('resume-linkedin'),
+        github:v('resume-github'), summary: summaryHtml,
+        photoUrl:v('resume-photoUrl'), photoShape:v('resume-photo-shape') || 'square',
+    };
+
+    // Skills: use .skill-input (class from createSkillRow)
+    const skills = [...document.querySelectorAll('.skill-input')].map(i => i.value.trim()).filter(Boolean);
+
+    // Experience: .resume-experience-item containers, inputs use .exp-company, .exp-position etc.
+    const experience = [...document.querySelectorAll('.resume-experience-item')].map(r => ({
+        company:     r.querySelector('.exp-company')?.value || '',
+        position:    r.querySelector('.exp-position')?.value || '',
+        startDate:   r.querySelector('.exp-start')?.value || '',
+        endDate:     r.querySelector('.exp-end')?.value || '',
+        // Quill stores HTML in .ql-editor inside .exp-desc-editor
+        description: r.querySelector('.exp-desc-editor .ql-editor')?.innerHTML ||
+                     r.quillInstance?.root?.innerHTML || '',
+    })).filter(e => e.company || e.position);
+
+    // Projects: .resume-project-item containers
+    const projects = [...document.querySelectorAll('.resume-project-item')].map(r => ({
+        name:        r.querySelector('.proj-name')?.value || '',
+        link:        r.querySelector('.proj-link')?.value || '',
+        description: r.querySelector('.proj-desc-editor .ql-editor')?.innerHTML ||
+                     r.quillInstance?.root?.innerHTML || '',
+    })).filter(pr => pr.name);
+
+    // Education: .resume-education-item containers, inputs use .edu-inst, .edu-deg etc.
+    const education = [...document.querySelectorAll('.resume-education-item')].map(r => ({
+        institution: r.querySelector('.edu-inst')?.value || '',
+        degree:      r.querySelector('.edu-deg')?.value || '',
+        startDate:   r.querySelector('.edu-start')?.value || '',
+        endDate:     r.querySelector('.edu-end')?.value || '',
+        scoreType:   r.querySelector('.edu-score-type')?.value || 'CGPA',
+        scoreValue:  r.querySelector('.edu-score-value')?.value || '',
+        description: r.querySelector('.edu-desc-editor .ql-editor')?.innerHTML ||
+                     r.quillInstance?.root?.innerHTML || '',
+    })).filter(ed => ed.institution || ed.degree);
+
+    // Languages: .resume-language-item containers, inputs use .lang-name, .lang-level
+    const languages = [...document.querySelectorAll('.resume-language-item')].map(r => ({
+        language:    r.querySelector('.lang-name')?.value || '',
+        proficiency: r.querySelector('.lang-level')?.value || '',
+    })).filter(l => l.language);
+
+    // Sections: read from resumeSections global (set by renderSectionConfig)
+    const sections = (typeof resumeSections !== 'undefined' && resumeSections?.length) ? resumeSections : null;
+
+    return { selectedTemplate: tpl, personalInfo: p, experience, education, skills, projects, languages, sections };
+}
+
+function buildSec(sec, p, experience, education, skills, projects, languages, tpl) {
+    switch(sec.id) {
+        case 'summary':
+            if (!p.summary) return '';
+            if (tpl==='modern')  return `<div class="rm-summary">${p.summary}</div>`;
+            if (tpl==='minimal') return `<div style="text-align:center;font-size:.9em;color:#475569;">${p.summary}</div>`;
+            return `<div class="exp-desc">${p.summary}</div>`;
+        case 'experience':
+            if (!experience?.length) return '';
+            return experience.map(e=>{
+                if (tpl==='modern')  return `<div class="rm-exp-item"><div class="rm-exp-header"><span class="rm-exp-company">${pvE(e.company)}</span><span class="rm-exp-date">${pvE(e.startDate)}&ndash;${pvE(e.endDate)}</span></div><div class="rm-exp-role">${pvE(e.position)}</div><div class="rm-exp-desc">${e.description}</div></div>`;
+                if (tpl==='minimal') return `<div class="min-exp-item"><div class="min-exp-header"><span class="min-exp-company">${pvE(e.company)}</span><span class="min-exp-date">${pvE(e.startDate)}&ndash;${pvE(e.endDate)}</span></div><div class="min-exp-role">${pvE(e.position)}</div><div class="min-exp-desc">${e.description}</div></div>`;
+                return `<div class="exp-item"><div class="exp-header"><span class="exp-company">${pvE(e.company)}</span><span class="exp-date">${pvE(e.startDate)}&ndash;${pvE(e.endDate)}</span></div><div class="exp-role">${pvE(e.position)}</div><div class="exp-desc">${e.description}</div></div>`;
+            }).join('');
+        case 'projects':
+            if (!projects?.length) return '';
+            return projects.map(pr=>{
+                const linkH = pr.link ? ` <a href="${pvE(pr.link)}" target="_blank" style="text-decoration:underline;font-size:0.8em;color:var(--resume-accent-light);margin-left:8px;">${pvE(pr.link.replace(/https?:\/\//,'').substring(0,30))}</a>` : '';
+                if (tpl==='modern')  return `<div class="rm-exp-item"><div class="rm-exp-header"><span class="rm-exp-company">${pvE(pr.name)}</span>${linkH}</div><div class="rm-exp-desc ql-editor">${pr.description}</div></div>`;
+                if (tpl==='minimal') return `<div class="min-exp-item"><div class="min-exp-header"><span class="min-exp-company">${pvE(pr.name)}</span>${linkH}</div><div class="min-exp-desc ql-editor">${pr.description}</div></div>`;
+                return `<div class="proj-item"><div class="exp-header"><span class="exp-company">${pvE(pr.name)}</span>${linkH}</div><div class="exp-desc ql-editor">${pr.description}</div></div>`;
+            }).join('');
+        case 'education':
+            if (!education?.length) return '';
+            return education.map(ed=>{
+                const scoreH = ed.scoreValue ? ` · ${pvE(ed.scoreType)}: ${pvE(ed.scoreValue)}` : '';
+                if (tpl==='modern')  return `<div class="rm-exp-item"><div class="rm-exp-header"><span class="rm-exp-company">${pvE(ed.institution)}</span><span class="rm-exp-date">${pvE(ed.startDate)}&ndash;${pvE(ed.endDate)}</span></div><div class="rm-exp-role">${pvE(ed.degree)}${scoreH}</div><div class="rm-exp-desc ql-editor">${ed.description||''}</div></div>`;
+                if (tpl==='minimal') return `<div class="min-exp-item"><div class="min-exp-header"><span class="min-exp-company">${pvE(ed.institution)}</span><span class="min-exp-date">${pvE(ed.startDate)}&ndash;${pvE(ed.endDate)}</span></div><div class="min-exp-role">${pvE(ed.degree)}${scoreH}</div><div class="min-exp-desc ql-editor">${ed.description||''}</div></div>`;
+                return `<div class="edu-item"><div class="exp-header"><div><div class="exp-company">${pvE(ed.institution)}</div><div class="exp-role">${pvE(ed.degree)}${scoreH}</div></div><span class="exp-date">${pvE(ed.startDate)}&ndash;${pvE(ed.endDate)}</span></div><div class="exp-desc ql-editor">${ed.description||''}</div></div>`;
+            }).join('');
+        case 'skills':
+            if (!skills?.length) return '';
+            if (tpl==='minimal') return `<div class="min-skills">${skills.map(s=>`<span class="min-skill">${pvE(s)}</span>`).join('')}</div>`;
+            return `<div class="skills-wrap">${skills.map(s=>`<span class="skill-tag">${pvE(s)}</span>`).join('')}</div>`;
+        case 'languages':
+            if (!languages?.length) return '';
+            if (tpl==='minimal') return `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:5px;">${languages.map(l=>`<div style="text-align:center;font-size:.85em;"><strong>${pvE(l.language)}</strong><br><span style="color:#94a3b8;">${pvE(l.proficiency)}</span></div>`).join('')}</div>`;
+            return `<div class="lang-grid">${languages.map(l=>`<div class="lang-item"><strong>${pvE(l.language)}</strong> &mdash; ${pvE(l.proficiency)}</div>`).join('')}</div>`;
+        default: return '';
+    }
+}
+
+function renderLivePreview() {
+    if (!previewEnabled) return;
+    const canvas = document.getElementById('resume-canvas-inner');
+    if (!canvas) return;
+    const {selectedTemplate:tpl, personalInfo:p, experience, education, skills, projects, languages, sections} = collectFormData();
+    const defs = [{id:'summary',name:'Summary',order:0,isVisible:true},{id:'experience',name:'Experience',order:1,isVisible:true},{id:'projects',name:'Projects',order:2,isVisible:true},{id:'education',name:'Education',order:3,isVisible:true},{id:'skills',name:'Skills',order:4,isVisible:true},{id:'languages',name:'Languages',order:5,isVisible:true}];
+    const ordered = [...(sections||defs)].sort((a,b)=>a.order-b.order).filter(s=>s.isVisible);
+    let html = '';
+    if (tpl==='modern') {
+        const sbIds=['skills','languages'];
+        const mainSx=ordered.filter(s=>!sbIds.includes(s.id));
+        const skSec=ordered.find(s=>s.id==='skills');
+        const lgSec=ordered.find(s=>s.id==='languages');
+        const mainH=mainSx.map(s=>{const c=buildSec(s,p,experience,education,skills,projects,languages,tpl);return c?`<div><div class="rm-section-title">${pvE(s.name)}</div>${c}</div>`:''}).join('');
+        html=`<div class="resume-modern"><div class="rm-sidebar">${p.photoUrl?`<img src="${pvE(p.photoUrl)}" class="rm-photo" alt="">`:''}<div class="rm-name">${pvE(p.name)||'Your Name'}</div><div class="rm-role">${pvE(p.title)||'Title'}</div><div class="rm-sb-section"><div class="rm-sb-title">Contact</div>${p.email?`<div class="rm-contact-item"><i class="fa-solid fa-envelope"></i>${pvE(p.email)}</div>`:''}${p.phone?`<div class="rm-contact-item"><i class="fa-solid fa-phone"></i>${pvE(p.phone)}</div>`:''}${p.address?`<div class="rm-contact-item"><i class="fa-solid fa-location-dot"></i>${pvE(p.address)}</div>`:''}${p.linkedin?`<div class="rm-contact-item"><i class="fa-brands fa-linkedin"></i>LinkedIn</div>`:''}${p.github?`<div class="rm-contact-item"><i class="fa-brands fa-github"></i>GitHub</div>`:''}</div>${skSec&&skills.length?`<div class="rm-sb-section"><div class="rm-sb-title">Skills</div><div class="rm-skill-list">${skills.map(s=>`<div class="rm-skill-item">${pvE(s)}</div>`).join('')}</div></div>`:''}${lgSec&&languages.length?`<div class="rm-sb-section"><div class="rm-sb-title">Languages</div>${languages.map(l=>`<div class="rm-lang-item"><div class="rm-lang-name">${pvE(l.language)}</div><div class="rm-lang-level">${pvE(l.proficiency)}</div></div>`).join('')}</div>`:''}</div><div class="rm-main">${mainH||'<div style="padding:20px;color:#94a3b8;font-size:12px;">Fill the form to see preview.</div>'}</div></div>`;
+    } else if (tpl==='minimal') {
+        const contact=[
+            p.email   && `<span><i class="fa-solid fa-envelope"></i>${pvE(p.email)}</span>`,
+            p.phone   && `<span><i class="fa-solid fa-phone"></i>${pvE(p.phone)}</span>`,
+            p.address && `<span><i class="fa-solid fa-location-dot"></i>${pvE(p.address)}</span>`,
+            p.linkedin && `<span><i class="fa-brands fa-linkedin"></i>LinkedIn</span>`,
+            p.github   && `<span><i class="fa-brands fa-github"></i>GitHub</span>`
+        ].filter(Boolean).join('');
+        const secsH=ordered.map(s=>{const c=buildSec(s,p,experience,education,skills,projects,languages,tpl);return c?`<div><div class="min-section-title">${pvE(s.name)}</div>${c}</div>`:''}).join('');
+        html=`<div class="resume-minimal"><div class="min-header">${p.photoUrl?`<img src="${pvE(p.photoUrl)}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 12px;display:block;border:3px solid #e2e8f0;" alt="">`:''}<div class="min-name">${pvE(p.name)||'YOUR NAME'}</div><div class="min-title">${pvE(p.title)||'Title'}</div><div class="min-contact">${contact}</div></div>${secsH||'<div style="padding:20px;text-align:center;color:#94a3b8;font-size:12px;">Fill the form.</div>'}</div>`;
+    } else {
+        const contact=[
+            p.address && `<span><i class="fa-solid fa-location-dot"></i>${pvE(p.address)}</span>`,
+            p.phone   && `<span><i class="fa-solid fa-phone"></i>${pvE(p.phone)}</span>`,
+            p.email   && `<span><i class="fa-solid fa-envelope"></i>${pvE(p.email)}</span>`,
+            p.linkedin && `<span><i class="fa-brands fa-linkedin"></i>LinkedIn</span>`,
+            p.github   && `<span><i class="fa-brands fa-github"></i>GitHub</span>`
+        ].filter(Boolean).join('');
+        const secsH=ordered.map(s=>{const c=buildSec(s,p,experience,education,skills,projects,languages,tpl);return c?`<div><div class="section-title">${pvE(s.name)}</div>${c}</div>`:''}).join('');
+        html=`<div class="resume-classic"><div class="rc-header"><div style="flex:1;"><div class="rc-name">${pvE(p.name)||'Your Name'}</div><div class="rc-title">${pvE(p.title)||'Your Title'}</div><div class="rc-contact">${contact}</div></div>${p.photoUrl?`<img src="${pvE(p.photoUrl)}" class="rc-photo ${p.photoShape==='circle'?'circle':''}" alt="">`:''}</div>${secsH||'<div style="padding:20px;color:#94a3b8;font-size:12px;">Fill the form to see preview.</div>'}</div>`;
+    }
+    canvas.innerHTML = html;
+    const font=document.getElementById('pv-font')?.value||"'Inter',sans-serif";
+    const size=document.getElementById('pv-size')?.value||'13';
+    const lh=document.getElementById('pv-lh')?.value||'1.5';
+    const gap=document.getElementById('pv-gap')?.value||'20';
+    const acc=document.getElementById('pv-accent')?.value||'#1e3a5f';
+    setCanvasVars(font, size, lh, gap, acc);
+    setTimeout(scaleCanvas, 150); setTimeout(scaleCanvas, 600);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const form  = document.getElementById('resume-form');
+    const panel = document.getElementById('resume-form-panel');
+    if (form) {
+        form.addEventListener('input',  () => scheduleRender(350));
+        form.addEventListener('change', () => scheduleRender(350));
+    }
+    if (panel) {
+        new MutationObserver(() => scheduleRender(500)).observe(panel, {childList:true, subtree:true});
+    }
+    window.addEventListener('resize', () => { if (previewEnabled) scaleCanvas(); });
+});
+
+// Inject resume CSS into dashboard scope so canvas renders correctly
+(function injectStyles() {
+    if (document.getElementById('pv-resume-styles')) return;
+    const s = document.createElement('style');
+    s.id = 'pv-resume-styles';
+    s.textContent = `.resume-canvas-inner{--resume-font:'Inter',sans-serif;--resume-size:13px;--resume-line-height:1.5;--resume-section-gap:20px;--resume-padding:40px;--resume-accent:#1e3a5f;--resume-accent-light:#2563eb;font-family:var(--resume-font);font-size:var(--resume-size);line-height:var(--resume-line-height);}
+.resume-canvas-inner .resume-classic{padding:var(--resume-padding);}
+.resume-canvas-inner .rc-header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:14px;margin-bottom:14px;border-bottom:2px solid var(--resume-accent);}
+.resume-canvas-inner .rc-name{font-size:1.9em;font-weight:700;color:var(--resume-accent);letter-spacing:-.02em;line-height:1.1;}
+.resume-canvas-inner .rc-title{font-size:.88em;color:#64748b;font-weight:500;letter-spacing:.1em;text-transform:uppercase;margin-top:4px;}
+.resume-canvas-inner .rc-contact{display:flex;flex-wrap:wrap;gap:5px 14px;margin-top:8px;font-size:.78em;color:#475569;}
+.resume-canvas-inner .rc-contact span{display:flex;align-items:center;gap:4px;}
+.resume-canvas-inner .rc-contact i{color:var(--resume-accent);width:12px;}
+.resume-canvas-inner .rc-photo{width:90px;height:110px;object-fit:cover;border-radius:3px;border:2px solid #e2e8f0;margin-left:16px;}
+.resume-canvas-inner .rc-photo.circle{border-radius:50%;height:90px;}
+.resume-canvas-inner .section-title{font-size:.7em;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:var(--resume-accent);border-bottom:1.5px solid var(--resume-accent);padding-bottom:3px;margin-bottom:8px;margin-top:var(--resume-section-gap);}
+.resume-canvas-inner .exp-item,.resume-canvas-inner .edu-item,.resume-canvas-inner .proj-item{margin-bottom:9px;}
+.resume-canvas-inner .exp-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px;}
+.resume-canvas-inner .exp-company{font-weight:700;color:#1e293b;font-size:.9em;}
+.resume-canvas-inner .exp-date{font-size:.76em;color:#64748b;white-space:nowrap;}
+.resume-canvas-inner .exp-role{font-style:italic;color:#475569;font-size:.84em;margin-bottom:3px;}
+.resume-canvas-inner .exp-desc{color:#374151;font-size:.85em;}
+.resume-canvas-inner .skills-wrap{display:flex;flex-wrap:wrap;gap:5px;}
+.resume-canvas-inner .skill-tag{background:#f1f5f9;border:1px solid #e2e8f0;color:#334155;padding:2px 9px;border-radius:3px;font-size:.78em;font-weight:500;}
+.resume-canvas-inner .lang-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:5px;}
+.resume-canvas-inner .lang-item{font-size:.82em;}
+.resume-canvas-inner .resume-modern{display:grid;grid-template-columns:190px 1fr;min-height:800px;}
+.resume-canvas-inner .rm-sidebar{background:var(--resume-accent);padding:26px 18px;color:#e0f2fe;}
+.resume-canvas-inner .rm-photo{width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,.2);display:block;margin:0 auto 12px;}
+.resume-canvas-inner .rm-name{font-size:1.05em;font-weight:700;color:#fff;text-align:center;line-height:1.2;margin-bottom:3px;}
+.resume-canvas-inner .rm-role{font-size:.68em;color:rgba(255,255,255,.55);text-align:center;text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;}
+.resume-canvas-inner .rm-sb-section{margin-bottom:14px;}
+.resume-canvas-inner .rm-sb-title{font-size:.6em;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.38);border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:4px;margin-bottom:7px;}
+.resume-canvas-inner .rm-contact-item{display:flex;gap:6px;align-items:flex-start;margin-bottom:5px;font-size:.72em;color:rgba(255,255,255,.7);word-break:break-word;}
+.resume-canvas-inner .rm-contact-item i{width:11px;flex-shrink:0;color:#5eead4;}
+.resume-canvas-inner .rm-skill-list{display:flex;flex-direction:column;gap:4px;}
+.resume-canvas-inner .rm-skill-item{font-size:.72em;color:rgba(255,255,255,.78);display:flex;align-items:center;gap:5px;}
+.resume-canvas-inner .rm-skill-item::before{content:'';width:4px;height:4px;border-radius:50%;background:#5eead4;flex-shrink:0;}
+.resume-canvas-inner .rm-lang-name{font-size:.73em;color:rgba(255,255,255,.85);font-weight:600;}
+.resume-canvas-inner .rm-lang-level{font-size:.66em;color:rgba(255,255,255,.4);}
+.resume-canvas-inner .rm-lang-item{margin-bottom:5px;}
+.resume-canvas-inner .rm-main{padding:26px 22px;background:#fff;}
+.resume-canvas-inner .rm-section-title{font-size:.66em;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--resume-accent-light);border-bottom:1.5px solid #e2e8f0;padding-bottom:3px;margin-bottom:10px;margin-top:var(--resume-section-gap);}
+.resume-canvas-inner .rm-section-title:first-child{margin-top:0;}
+.resume-canvas-inner .rm-exp-item{margin-bottom:12px;}
+.resume-canvas-inner .rm-exp-header{display:flex;justify-content:space-between;align-items:flex-start;}
+.resume-canvas-inner .rm-exp-company{font-weight:700;color:#1e293b;font-size:.88em;}
+.resume-canvas-inner .rm-exp-date{font-size:.72em;color:#64748b;background:#f8fafc;border:1px solid #e2e8f0;padding:1px 6px;border-radius:20px;white-space:nowrap;}
+.resume-canvas-inner .rm-exp-role{font-size:.8em;color:var(--resume-accent-light);font-weight:500;margin:2px 0 4px;}
+.resume-canvas-inner .rm-exp-desc{font-size:.82em;color:#475569;}
+.resume-canvas-inner .rm-summary{font-size:.84em;color:#475569;margin-bottom:4px;}
+.resume-canvas-inner .resume-minimal{padding:var(--resume-padding);max-width:700px;margin:0 auto;}
+.resume-canvas-inner .min-header{text-align:center;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid #e2e8f0;}
+.resume-canvas-inner .min-name{font-size:1.8em;font-weight:300;letter-spacing:.2em;text-transform:uppercase;color:#0f172a;margin-bottom:5px;}
+.resume-canvas-inner .min-title{font-size:.74em;text-transform:uppercase;letter-spacing:.18em;color:#94a3b8;margin-bottom:12px;}
+.resume-canvas-inner .min-contact{display:flex;flex-wrap:wrap;justify-content:center;gap:3px 10px;font-size:.76em;color:#64748b;}
+.resume-canvas-inner .min-contact span{display:flex;align-items:center;gap:4px;}
+.resume-canvas-inner .min-contact i{color:#94a3b8;}
+.resume-canvas-inner .min-section-title{font-size:.64em;letter-spacing:.2em;text-transform:uppercase;color:#94a3b8;text-align:center;margin:var(--resume-section-gap) 0 10px;position:relative;}
+.resume-canvas-inner .min-section-title::before,.resume-canvas-inner .min-section-title::after{content:'';position:absolute;top:50%;width:28%;height:1px;background:#e2e8f0;}
+.resume-canvas-inner .min-section-title::before{left:0;}
+.resume-canvas-inner .min-section-title::after{right:0;}
+.resume-canvas-inner .min-exp-item{margin-bottom:11px;}
+.resume-canvas-inner .min-exp-header{display:flex;justify-content:space-between;align-items:baseline;}
+.resume-canvas-inner .min-exp-company{font-weight:700;color:#0f172a;font-size:.88em;}
+.resume-canvas-inner .min-exp-date{font-size:.74em;color:#94a3b8;}
+.resume-canvas-inner .min-exp-role{font-size:.8em;color:#64748b;margin-bottom:3px;font-style:italic;}
+.resume-canvas-inner .min-exp-desc{font-size:.82em;color:#475569;}
+.resume-canvas-inner .min-skills{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;}
+.resume-canvas-inner .min-skill{border:1px solid #cbd5e1;color:#475569;padding:2px 10px;border-radius:2px;font-size:.78em;}`;
+    document.head.appendChild(s);
+})();
+</script>
 </body>
 </html>

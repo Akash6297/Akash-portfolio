@@ -45,7 +45,14 @@ const resumeSchema = new mongoose.Schema({
         order: { type: Number, required: true },
         isVisible: { type: Boolean, default: true }
     }],
-    selectedTemplate: { type: String, default: 'classic' }
+    selectedTemplate: { type: String, default: 'classic' },
+    typography: {
+        font:        { type: String, default: "'Inter', sans-serif" },
+        size:        { type: Number, default: 13 },
+        lineHeight:  { type: Number, default: 1.5 },
+        sectionGap:  { type: Number, default: 20 },
+        accentColor: { type: String, default: '#1e3a5f' }
+    }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Resume', resumeSchema);

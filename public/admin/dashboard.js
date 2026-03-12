@@ -58,6 +58,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const replyModal = document.getElementById('reply-modal');
     const closeReplyModalBtn = document.getElementById('close-reply-modal');
     const replyForm = document.getElementById('reply-form');
+    
+    // AI Bot elements
+    const aiBotToggle = document.getElementById('ai-bot-toggle');
+    const aiBotModal = document.getElementById('ai-bot-modal');
+    const closeAiBotBtn = document.getElementById('close-ai-bot');
+    const aiBotInput = document.getElementById('ai-bot-input');
+    const aiDropZone = document.getElementById('ai-drop-zone');
+    const aiFileInput = document.getElementById('ai-file-input');
+    const aiProcessBtn = document.getElementById('ai-process-btn');
+    const aiProcessStatus = document.getElementById('ai-process-status');
+    const aiProgressBar = document.getElementById('ai-progress-bar');
+    const aiStatusText = document.getElementById('ai-status-text');
+    const aiFileStatus = document.getElementById('ai-file-status');
+
 
     // Shared elements
     const logoutBtn = document.getElementById('logout-button');
@@ -1087,6 +1101,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 { id: 'skills', name: 'Skills', order: 4, isVisible: true },
                 { id: 'languages', name: 'Languages', order: 5, isVisible: true }
             ];
+            // ── Populate Typography preview controls from saved data ──
+            if (resume.typography) {
+                const ty = resume.typography;
+                const pvFont   = document.getElementById('pv-font');
+                const pvSize   = document.getElementById('pv-size');
+                const pvLh     = document.getElementById('pv-lh');
+                const pvGap    = document.getElementById('pv-gap');
+                const pvAccent = document.getElementById('pv-accent');
+                const pvSizeV  = document.getElementById('pv-size-val');
+                const pvLhV    = document.getElementById('pv-lh-val');
+                const pvGapV   = document.getElementById('pv-gap-val');
+                if (pvFont   && ty.font)        pvFont.value   = ty.font;
+                if (pvSize   && ty.size)        { pvSize.value   = ty.size;       if (pvSizeV) pvSizeV.textContent = ty.size + 'px'; }
+                if (pvLh     && ty.lineHeight)  { pvLh.value     = ty.lineHeight; if (pvLhV)   pvLhV.textContent   = parseFloat(ty.lineHeight).toFixed(2); }
+                if (pvGap    && ty.sectionGap)  { pvGap.value    = ty.sectionGap; if (pvGapV)  pvGapV.textContent  = ty.sectionGap + 'px'; }
+                if (pvAccent && ty.accentColor) pvAccent.value = ty.accentColor;
+            }
+
             renderSectionConfig();
             
         } catch (error) {
@@ -1381,6 +1413,16 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('languages', JSON.stringify(languages));
             formData.append('sections', JSON.stringify(resumeSections));
 
+            // ── Include typography settings from preview controls ──
+            const typography = {
+                font:        document.getElementById('pv-font')?.value   || "'Inter', sans-serif",
+                size:        parseFloat(document.getElementById('pv-size')?.value  || 13),
+                lineHeight:  parseFloat(document.getElementById('pv-lh')?.value   || 1.5),
+                sectionGap:  parseFloat(document.getElementById('pv-gap')?.value  || 20),
+                accentColor: document.getElementById('pv-accent')?.value || '#1e3a5f'
+            };
+            formData.append('typography', JSON.stringify(typography));
+
             const submitBtn = e.target.querySelector('button[type="submit"]');
             const ogText = submitBtn.innerHTML;
             submitBtn.innerHTML = 'Saving...';
@@ -1407,19 +1449,378 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- SCROLL TO TOP LOGIC ---
     const scrollToTopBtn = document.getElementById('scroll-to-top');
     if (scrollToTopBtn) {
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 300) {
-                scrollToTopBtn.style.opacity = '1';
-                scrollToTopBtn.style.visibility = 'visible';
-            } else {
-                scrollToTopBtn.style.opacity = '0';
-                scrollToTopBtn.style.visibility = 'hidden';
+    }
+
+    // --- SUPER ADVANCED AI DATA BOT LOGIC ---
+    if (aiBotToggle) {
+        const aiInputView = document.getElementById('ai-input-view');
+        const aiResultsView = document.getElementById('ai-results-view');
+        const aiInputActions = document.getElementById('ai-input-actions');
+        const aiResultsFields = document.getElementById('ai-results-fields');
+        const aiDetectedSection = document.getElementById('ai-detected-section');
+        const aiGrammarToggle = document.getElementById('ai-grammar-fix');
+        const aiFillBtn = document.getElementById('ai-fill-btn');
+        const aiBackBtn = document.getElementById('ai-back-btn');
+        let suggestionsPanel = document.getElementById('ai-suggestions-panel');
+
+        let lastExtractedData = null;
+
+        // ─── SECTION TIPS ─────────────────────────────────────────────
+        const sectionTips = {
+            'experience-management': [
+                '💼 "Software Engineer at Google, Jan 2021 - Present. Led backend API development."',
+                '📅 Include dates like "Jan 2020 to Dec 2022" or "2019 - Present".',
+                '🏢 Format: "Job Title at Company, start - end. What you achieved."',
+            ],
+            'projects-management': [
+                '🚀 "E-commerce app using React & Node.js. Live at https://myapp.com"',
+                '🔗 Include a GitHub or live URL for auto-detection.',
+                '🏷️ Mention: "Tech Stack: React, Tailwind, MongoDB"',
+            ],
+            'services-management': [
+                '⚡ "Full Stack Web Development — I build end-to-end web solutions."',
+                '💡 Describe what you offer and what the client will get.',
+            ],
+            'about-management': [
+                '👤 "Passionate developer with 5 years of experience. Skills: JS, Python, AWS"',
+                '📝 Write 2 paragraphs: one about yourself, one about expertise.',
+            ],
+            'hero-management': [
+                '👋 "Hello! I am a Full Stack Developer building amazing web experiences."',
+                '✨ Keep it short and punchy — greeting plus your headline.',
+            ],
+            'resume-management': [
+                '📄 "Name: John Doe. Email: john@email.com. Senior Developer with 5 years."',
+                '🎓 Include education: "Studied CS at MIT, 2015-2019"',
+            ],
+            'bookings-management': [
+                '📅 This section shows incoming meeting requests from your portfolio visitors.',
+                '💬 Clients use the booking form on your site, they appear here automatically.',
+            ]
+        };
+
+        // ─── CLOSE / OPEN (FIXED - SEPARATED) ────────────────────────
+        const closeAiBot = () => {
+            aiBotModal.classList.add('hidden');
+            document.body.style.overflow = '';
+        };
+
+        const openAiBot = () => {
+            // Reset UI state without closing modal
+            aiInputView.classList.remove('hidden');
+            aiInputActions.classList.remove('hidden');
+            aiResultsView.classList.add('hidden');
+            aiBotInput.value = '';
+            aiFileInput.value = '';
+            aiFileStatus.innerHTML = 'Drop image or <span class="text-indigo-400 underline cursor-pointer">browse</span>';
+            aiProcessStatus.classList.add('hidden');
+            if (aiResultsFields) aiResultsFields.innerHTML = '';
+            lastExtractedData = null;
+            if (suggestionsPanel) suggestionsPanel.classList.remove('hidden');
+            // NOW open the modal
+            aiBotModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => aiBotInput.focus(), 100);
+        };
+
+        aiBotToggle.addEventListener('click', openAiBot);
+        closeAiBotBtn.addEventListener('click', closeAiBot);
+
+        // Backdrop click closes
+        aiBotModal.addEventListener('click', (e) => {
+            if (e.target === aiBotModal) closeAiBot();
+        });
+
+        // Escape key closes
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !aiBotModal.classList.contains('hidden')) {
+                closeAiBot();
             }
         });
 
-        scrollToTopBtn.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+        aiBackBtn.addEventListener('click', () => {
+            aiResultsView.classList.add('hidden');
+            aiInputView.classList.remove('hidden');
+            aiInputActions.classList.remove('hidden');
+            if (suggestionsPanel) suggestionsPanel.classList.remove('hidden');
+        });
+
+        // ─── DRAG & DROP / FILE HANDLING ────────────
+        aiDropZone.addEventListener('click', () => aiFileInput.click());
+        aiDropZone.addEventListener('dragover', (e) => { e.preventDefault(); aiDropZone.classList.add('border-indigo-500', 'bg-indigo-500/5'); });
+        aiDropZone.addEventListener('dragleave', () => { aiDropZone.classList.remove('border-indigo-500', 'bg-indigo-500/5'); });
+        aiDropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            aiDropZone.classList.remove('border-indigo-500', 'bg-indigo-500/5');
+            if (e.dataTransfer.files.length) {
+                const dt = new DataTransfer();
+                dt.items.add(e.dataTransfer.files[0]);
+                aiFileInput.files = dt.files;
+                showImagePreview(e.dataTransfer.files[0]);
+            }
+        });
+
+        aiFileInput.addEventListener('change', () => {
+            if (aiFileInput.files.length) showImagePreview(aiFileInput.files[0]);
+        });
+
+        const showImagePreview = (file) => {
+            if (!file.type.startsWith('image/')) {
+                aiFileStatus.innerHTML = '<span class="text-amber-400">⚠️ Please upload an image file (PNG, JPG, WebP).</span>';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                aiFileStatus.innerHTML = `<div class="flex items-center gap-3">
+                    <img src="${ev.target.result}" class="w-14 h-14 object-cover rounded-lg border-2 border-indigo-500/40 flex-shrink-0">
+                    <div class="text-left">
+                        <p class="text-sm font-semibold text-indigo-300">✅ ${file.name}</p>
+                        <p class="text-xs text-slate-500">${(file.size/1024).toFixed(1)} KB — Ready for OCR</p>
+                        <p class="text-[10px] text-slate-600 mt-0.5">Click "Extract & Refine" to scan the text</p>
+                    </div></div>`;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // ─── LIVE SMART SUGGESTIONS ─────────────────────
+        const renderDefaultTips = () => `<div class="bg-slate-800/50 border border-slate-700/40 rounded-xl p-3 mt-3">
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">💡 Smart Tips — start typing to see live AI guidance</p>
+            <ul class="space-y-1 text-xs text-slate-500">
+                <li>• Paste a job description → auto-fills <strong class="text-slate-400">Experience</strong></li>
+                <li>• Paste project details → auto-fills <strong class="text-slate-400">Projects</strong></li>
+                <li>• Upload a resume image → <strong class="text-slate-400">OCR reads it automatically</strong></li>
+                <li>• Toggle “Smart Refine” to professionalize tone</li>
+            </ul></div>`;
+
+        const updateSuggestions = () => {
+            if (!suggestionsPanel) return;
+            const text = aiBotInput.value.trim();
+            if (!text) { suggestionsPanel.innerHTML = renderDefaultTips(); return; }
+            const sec = detectSection(text);
+            const tips = sectionTips[sec] || [];
+            const name = sec.replace('-management','').replace(/-/g,' ');
+            const capName = name.charAt(0).toUpperCase() + name.slice(1);
+            suggestionsPanel.innerHTML = `<div class="bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-3 mt-3">
+                <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-2">🤖 Detected Section: <strong>${capName}</strong></p>
+                <ul class="space-y-1.5">${tips.map(t=>`<li class="text-xs text-slate-400">${t}</li>`).join('')}</ul>
+            </div>`;
+        };
+
+        // Inject suggestions panel dynamically
+        if (!suggestionsPanel) {
+            suggestionsPanel = document.createElement('div');
+            suggestionsPanel.id = 'ai-suggestions-panel';
+            suggestionsPanel.innerHTML = renderDefaultTips();
+            aiBotInput.parentElement.appendChild(suggestionsPanel);
+        }
+
+        aiBotInput.addEventListener('input', updateSuggestions);
+
+        // Professionalize text (Simple client-side logic)
+        const professionalize = (text) => {
+            if (!text) return text;
+            let result = text.trim();
+            // Fix start case
+            result = result.charAt(0).toUpperCase() + result.slice(1);
+            // Replacements for common "weak" words
+            const replacements = [
+                { r: /\b(made|built|did)\b/gi, w: 'Developed' },
+                { r: /\b(helped)\b/gi, w: 'Collaborated on' },
+                { r: /\b(used|use)\b/gi, w: 'Utilized' },
+                { r: /\b(worked on)\b/gi, w: 'Spearheaded' },
+                { r: /\b(very|really)\b/gi, w: 'significantly' },
+                { r: /\b(good)\b/gi, w: 'exceptional' },
+                { r: /\b(fix|fixed)\b/gi, w: 'resolved' },
+                { r: /\b(cool|awesome|great)\b/gi, w: 'professional' },
+                { r: /\b(i am)\b/gi, w: 'Experienced' },
+                { r: /\b(stuff|things)\b/gi, w: 'functionalities' },
+                { r: /\b(looked after|took care of)\b/gi, w: 'Maintained' },
+                { r: /\b(got)\b/gi, w: 'Achieved' }
+            ];
+            replacements.forEach(pair => result = result.replace(pair.r, pair.w));
+            return result;
+        };
+
+        const detectSection = (text) => {
+            const lowerText = text.toLowerCase();
+            const scores = {
+                'hero-management': (lowerText.match(/hero|intro|greeting|headline|bio|profile|photo|looking for|hire/gi) || []).length * 1.5,
+                'about-management': (lowerText.match(/about|skills|bio|paragraph|me|myself|background/gi) || []).length,
+                'experience-management': (lowerText.match(/work|job|experience|position|role|company|employment|career|history/gi) || []).length * 1.2,
+                'projects-management': (lowerText.match(/project|build|app|website|demo|link|git|repo|portfolio|github/gi) || []).length * 1.2,
+                'services-management': (lowerText.match(/service|offer|expert|solution|provide|features/gi) || []).length * 1.5,
+                'resume-management': (lowerText.match(/resume|education|degree|university|school|language|proficiency|college|curriculum/gi) || []).length * 2,
+                'bookings-management': (lowerText.match(/book|meeting|schedule|calendar|appointment|slot|available/gi) || []).length * 2
+            };
+            
+            let bestSection = 'experience-management';
+            let maxScore = 0;
+            for (const section in scores) {
+                if (scores[section] > maxScore) {
+                    maxScore = scores[section];
+                    bestSection = section;
+                }
+            }
+            return bestSection;
+        };
+
+        const extractFields = (text, section, refine = true) => {
+            const lines = text.split('\n').filter(l => l.trim().length > 2);
+            const data = {};
+            const cleanText = text.replace(/\n/g, ' ');
+
+            if (section === 'experience-management') {
+                data['experience-title'] = lines[0]?.split(/at|for|company/i)[0]?.trim().substring(0, 50) || '';
+                data['experience-company'] = (cleanText.match(/(?:at|for|company:?)\s+([^,.-]{2,30})/i) || [null, lines[1] || ''])[1].trim();
+                data['experience-dateRange'] = (cleanText.match(/(\d{2}\/\d{4}|\d{4}|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[^,.-]*\s*(?:-|to|until)\s*([^,.-]*\d{4}|Present)/i) || [null, ''])[0];
+                data['experience-description'] = lines.length > 1 ? lines.slice(1).join('\n') : text;
+            } else if (section === 'projects-management') {
+                data['project-name'] = lines[0]?.substring(0, 50) || '';
+                data['project-tags'] = (cleanText.match(/(?:tags|tools|tech|stack):?\s*([^.\n]+)/i) || [null, 'React, Node.js'])[1].trim();
+                data['project-liveUrl'] = (cleanText.match(/https?:\/\/[^\s]+(?:\.com|\.io|\.app|\.net|\.dev)/i) || [''])[0];
+                data['project-description'] = lines.length > 1 ? lines.slice(1).join('\n') : text;
+            } else if (section === 'services-management') {
+                data['service-title'] = lines[0]?.substring(0, 50) || '';
+                data['service-description'] = lines.length > 1 ? lines.slice(1).join('\n') : text;
+                data['service-iconSvg'] = '<!-- Paste SVG Here -->';
+            } else if (section === 'about-management') {
+                data['about-p1'] = lines[0] || '';
+                data['about-p2'] = lines[1] || '';
+                data['about-skills'] = (cleanText.match(/(?:skills|expertise|know):?\s*([^.\n]+)/i) || [null, ''])[1].trim();
+            } else if (section === 'hero-management') {
+                data['hero-greeting'] = lines.find(l => l.match(/hi|hello|hey|welcome/i)) || 'Hello, I am';
+                data['hero-headline'] = lines.find(l => l.length < 50 && !l.match(/hi|hello|hey/i)) || 'Full Stack Developer';
+                data['hero-bio'] = lines.filter(l => l.length > 50).join(' ') || text;
+            } else if (section === 'resume-management') {
+                data['resume-name'] = (cleanText.match(/(?:i am|name is|name:?)\s+([^,.\n]{2,30})/i) || [null, ''])[1].trim() || lines[0];
+                data['resume-title'] = lines.find(l => l.match(/developer|engineer|designer|manager/i)) || '';
+                data['resume-email'] = (cleanText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/) || [''])[0];
+                data['resume-summary'] = cleanText.substring(0, 400);
+            }
+
+            // Apply professional refinement if toggled
+            if (refine) {
+                for (let key in data) {
+                    if (key.includes('description') || key.includes('bio') || key.includes('summary') || key.includes('p1') || key.includes('p2')) {
+                        data[key] = professionalize(data[key]);
+                    }
+                }
+            }
+            return data;
+        };
+
+        const renderResults = (section, fields) => {
+            aiInputView.classList.add('hidden');
+            aiInputActions.classList.add('hidden');
+            aiResultsView.classList.remove('hidden');
+            
+            aiDetectedSection.textContent = `Section: ${section.split('-')[0]}`;
+            aiResultsFields.innerHTML = '';
+            
+            for (const [id, value] of Object.entries(fields)) {
+                const label = id.replace(/-/g, ' ').replace(section.split('-')[0], '').trim();
+                const fieldHtml = `
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">${label}</label>
+                        ${id.includes('description') || id.includes('bio') || id.includes('summary') || id.includes('p1') ? 
+                            `<textarea class="ai-result-input w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-slate-300 text-sm focus:border-indigo-500 transition-all font-sans" data-id="${id}" rows="3">${value}</textarea>` :
+                            `<input type="text" class="ai-result-input w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-slate-300 text-sm focus:border-indigo-500 transition-all" data-id="${id}" value="${value}">`
+                        }
+                    </div>
+                `;
+                aiResultsFields.insertAdjacentHTML('beforeend', fieldHtml);
+            }
+        };
+
+        aiProcessBtn.addEventListener('click', async () => {
+            let text = aiBotInput.value.trim();
+            const file = aiFileInput.files[0];
+
+            if (!text && !file) return showToast('Please paste text or upload an image.', 'error');
+
+            aiProcessStatus.classList.remove('hidden');
+            aiProcessBtn.disabled = true;
+            aiProgressBar.style.width = '5%';
+            aiStatusText.textContent = 'Starting...';
+
+            try {
+                if (file) {
+                    if (!file.type.startsWith('image/')) {
+                        showToast('Please upload a valid image file.', 'error');
+                        return;
+                    }
+                    if (typeof Tesseract === 'undefined') {
+                        showToast('⚠️ OCR (Tesseract) not loaded. Check your internet.', 'error');
+                        return;
+                    }
+                    aiStatusText.textContent = 'Reading image with OCR...';
+                    aiProgressBar.style.width = '15%';
+                    const result = await Tesseract.recognize(file, 'eng', {
+                        logger: m => {
+                            if (m.status === 'recognizing text') {
+                                const pct = Math.min(90, Math.floor(m.progress * 75) + 15);
+                                aiProgressBar.style.width = `${pct}%`;
+                                aiStatusText.textContent = `OCR: ${Math.floor(m.progress * 100)}%`;
+                            }
+                        }
+                    });
+                    text = result.data.text;
+                    if (!text || text.trim().length < 5) {
+                        showToast('⚠️ Could not read image text. Try a clearer, higher-res image.', 'error');
+                        return;
+                    }
+                    aiBotInput.value = text; // Show extracted text for user review
+                    updateSuggestions();
+                    aiStatusText.textContent = 'OCR Complete ✓';
+                    aiProgressBar.style.width = '95%';
+                    await new Promise(r => setTimeout(r, 600));
+                }
+
+                aiStatusText.textContent = 'Analyzing...';
+                aiProgressBar.style.width = '98%';
+                await new Promise(r => setTimeout(r, 150));
+
+                const section = detectSection(text);
+                const fields = extractFields(text, section, aiGrammarToggle ? aiGrammarToggle.checked : true);
+                lastExtractedData = { section, fields };
+                renderResults(section, fields);
+
+            } catch (err) {
+                console.error('AI Bot Error:', err);
+                showToast(`AI failed: ${err.message || 'Unknown error'}`, 'error');
+            } finally {
+                aiProcessBtn.disabled = false;
+                aiProcessStatus.classList.add('hidden');
+                aiProgressBar.style.width = '0%';
+            }
+        });
+
+        aiFillBtn.addEventListener('click', () => {
+            if (!lastExtractedData) return showToast('Process text first.', 'error');
+
+            const updatedFields = {};
+            document.querySelectorAll('.ai-result-input').forEach(input => {
+                updatedFields[input.dataset.id] = input.value;
+            });
+
+            showSection(lastExtractedData.section);
+
+            let filled = 0;
+            for (const [id, value] of Object.entries(updatedFields)) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.value = value;
+                    if (id === 'resume-summary' && typeof summaryQuill !== 'undefined' && summaryQuill) {
+                        summaryQuill.root.innerHTML = value;
+                    }
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                    filled++;
+                }
+            }
+
+            showToast(`✅ ${filled} field${filled !== 1 ? 's' : ''} auto-filled!`, 'success');
+            closeAiBot();
         });
     }
-
 });
+
