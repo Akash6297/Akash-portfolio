@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
@@ -352,7 +352,7 @@
                             <!-- We set min attribute via JS to today -->
                             <input type="date" id="booking-date" name="date" required 
                                 class="w-full bg-slate-900/40 border border-slate-700/60 rounded-xl py-3.5 px-5 text-white focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all shadow-inner placeholder-slate-500 backdrop-blur-md [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert">
-                            <p class="text-xs text-slate-500 mt-1">Available Monday - Friday</p>
+                            <p class="text-xs text-slate-500 mt-1">Available Monday - Sunday</p>
                         </div>
                         
                         <div>
@@ -945,17 +945,7 @@ const menuButton = document.getElementById("mobile-menu-button");
     dateInput.min = `${yyyy}-${mm}-${dd}`;
 
     dateInput.addEventListener('input', (e) => {
-        const selectedDate = new Date(e.target.value);
-        const day = selectedDate.getUTCDay();
-        // 0 is Sunday, 6 is Saturday
-        if (day === 0 || day === 6) {
-            e.target.setCustomValidity('Meetings are only available Monday through Friday.');
-            timeSelect.innerHTML = '<option value="" disabled selected>Please select a weekday</option>';
-            timeSelect.disabled = true;
-        } else {
-            e.target.setCustomValidity('');
-            fetchAvailableSlots(e.target.value);
-        }
+        fetchAvailableSlots(e.target.value);
     });
 
     // 2. Open / Close Modal Logic

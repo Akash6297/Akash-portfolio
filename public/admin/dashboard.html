@@ -740,171 +740,215 @@
                         </div><!-- /resume-preview-panel -->
                     </div><!-- /resume-split -->
                     <p style="font-size:10px;color:#475569;text-align:center;margin-top:8px;">Preview updates as you type &bull; Typography changes are saved with the resume</p>
-                </div><!-- /resume-management-container -->
+                </div> <!-- End resume-management-container -->
 
-
-                <!-- ============================================== -->
-                <!-- BOOKINGS MANAGEMENT SECTION (NEW) -->
-                <!-- ============================================== -->
+                <!-- Bookings Management Section -->
                 <div id="bookings-management-container" class="admin-section hidden glass-panel p-6 md:p-8 rounded-2xl mb-8 border border-slate-700/50 relative overflow-hidden">
-                    <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 mb-8 border-l-4 border-teal-500 pl-4 tracking-tight shadow-sm inline-block">Meeting Bookings</h2>
-                    
-                    <div class="mb-6 flex justify-between items-center bg-slate-700/50 p-4 rounded-lg border border-slate-600">
-                        <div class="flex items-center space-x-4">
-                            <span class="text-slate-300">Filter Status:</span>
-                            <select id="booking-status-filter" class="bg-slate-700 border border-slate-600 rounded-md py-2 px-4 text-white focus:outline-none focus:ring-2 focus:ring-teal-500">
-                                <option value="all">All</option>
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 border-l-4 border-teal-500 pl-4">
+                        <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 tracking-tight shadow-sm inline-block">Manage Bookings</h2>
+                        <div class="flex items-center gap-3">
+                             <select id="booking-status-filter" class="bg-slate-900/80 border border-slate-700 p-2.5 rounded-xl text-sm focus:ring-2 focus:ring-teal-500/50 text-slate-300">
+                                <option value="all">All Bookings</option>
                                 <option value="pending">Pending</option>
                                 <option value="confirmed">Confirmed</option>
-                                <option value="completed">Completed</option>
                                 <option value="rejected">Rejected</option>
+                                <option value="completed">Completed</option>
                             </select>
-                        </div>
-                        <button id="refresh-bookings-btn" class="bg-slate-600 hover:bg-slate-500 text-white p-2 rounded-full transition-colors" title="Refresh Bookings">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                        </button>
-                    </div>
-
-                    <div class="bg-slate-800 rounded-lg overflow-hidden border border-slate-700">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left whitespace-nowrap">
-                                <thead class="bg-slate-700 text-slate-300">
-                                    <tr>
-                                        <th class="p-4 font-semibold tracking-wide">Date & Time</th>
-                                        <th class="p-4 font-semibold tracking-wide">Name</th>
-                                        <th class="p-4 font-semibold tracking-wide">Email</th>
-                                        <th class="p-4 font-semibold tracking-wide">Status</th>
-                                        <th class="p-4 font-semibold tracking-wide">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="bookings-table-body" class="divide-y divide-slate-700/50">
-                                    <!-- Rows populated by JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                        <div id="no-bookings-message" class="hidden text-center text-slate-500 py-12">
-                            <p>No bookings found.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ============================================== -->
-                <!-- THIS IS THE FIX: This section is now moved out -->
-                <!-- ============================================== -->
-                <div id="messages-management-container" class="admin-section hidden">
-                    <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 mb-8 border-l-4 border-teal-500 pl-4 tracking-tight shadow-sm inline-block">Contact Messages</h2>
-                    <div id="messages-list" class="space-y-4">
-                        <!-- Message cards will be injected by JS -->
-                    </div>
-                    <div id="no-messages" class="hidden text-center text-slate-500 py-12">
-                        <p>You have no new messages.</p>
-                    </div>
-                </div>
-
-                 <!-- NEW: EMAIL TEMPLATE BUILDER SECTION -->
-            <div id="email-templates-container" class="admin-section hidden">
-                <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 mb-8 border-l-4 border-teal-500 pl-4 tracking-tight shadow-sm inline-block">Email Template Builder</h2>
-                <div id="email-templates-list" class="space-y-8">
-                    <!-- The builder will be loaded here by JS -->
-                </div>
-            </div>
-            
-
-
-                <!-- Admin Settings Section (Corrected) -->
-                <div id="admin-settings-container" class="admin-section hidden glass-panel p-6 md:p-8 rounded-2xl mb-8 border border-slate-700/50 relative overflow-hidden">
-                    <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 mb-8 border-l-4 border-teal-500 pl-4 tracking-tight shadow-sm inline-block">Admin Settings</h2>
-
-                    <!-- View for Normal Admins -->
-                    <div id="normal-admin-view" class="hidden">
-                        <!-- OTP Request View -->
-                        <div id="otp-request-view">
-                            <p class="mb-4">For security, you must verify your identity to access these settings.</p>
-                            <button id="request-otp-btn" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:from-blue-500 hover:to-indigo-500 shadow-[0_4px_15px_rgba(37,99,235,0.3)] border border-blue-400/20 animated-button">Send Verification Code</button>
-                            <p id="otp-request-status" class="mt-4 h-6"></p>
-                        </div>
-
-                        <!-- OTP Verify View (hidden by default) -->
-                        <div id="otp-verify-view" class="hidden">
-                            <form id="otp-verify-form" class="space-y-4 max-w-sm">
-                                <label for="otp-input" class="block text-slate-300">An OTP has been sent to your email. Please enter it below.</label>
-                                <input type="text" id="otp-input" name="otp" required class="w-full bg-slate-900/50 border border-slate-700/80 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-400 text-slate-200 placeholder-slate-500 shadow-inner" placeholder="6-digit code">
-                                <button type="submit" class="w-full bg-teal-500 text-white font-semibold py-3 rounded-md hover:bg-teal-600">Verify</button>
-                                <p id="otp-verify-status" class="mt-4 h-6"></p>
-                            </form>
-                        </div>
-
-                        <!-- Admin Content View (hidden by default) -->
-                        <div id="admin-content-view" class="hidden space-y-12">
-                            <!-- Change Password Form -->
-                            <form id="change-password-form" class="space-y-4">
-                                <h3 class="text-2xl font-semibold text-white">Change Your Password</h3>
-                                <div><label for="current-password" class="block mb-2">Current Password</label><input type="password" id="current-password" name="currentPassword" required class="w-full bg-slate-700 p-2 rounded-md"></div>
-                                <div><label for="new-password" class="block mb-2">New Password (min. 8 characters)</label><input type="password" id="new-password" name="newPassword" required class="w-full bg-slate-700 p-2 rounded-md"></div>
-                                <button type="submit" class="bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-bold py-3 px-6 rounded-xl hover:from-amber-400 hover:to-yellow-400 border border-yellow-400/20 animated-button">Update Password</button>
-                                <p id="change-password-status" class="mt-4 h-6"></p>
-                            </form>
-                            
-                            <!-- Create New Admin Form -->
-                            <form id="create-admin-form" class="space-y-4 border-t border-slate-700 pt-8">
-                                <h3 class="text-2xl font-semibold text-white">Create New Admin User</h3>
-                                <div><label for="new-username" class="block mb-2">New Username</label><input type="text" id="new-username" name="newUsername" required class="w-full bg-slate-700 p-2 rounded-md"></div>
-                                <div><label for="new-email" class="block mb-2">New Admin's Email</label><input type="email" id="new-email" name="newEmail" required class="w-full bg-slate-700 p-2 rounded-md"></div>
-                                <div><label for="new-admin-password" class="block mb-2">New Password (min. 8 characters)</label><input type="password" id="new-admin-password" name="newPassword" required class="w-full bg-slate-700 p-2 rounded-md"></div>
-                                <button type="submit" class="bg-gradient-to-r from-emerald-600 to-green-600 text-white font-bold py-3 px-6 rounded-xl hover:from-emerald-500 hover:to-green-500 border border-green-400/20 animated-button">Create Admin</button>
-                                <p id="create-admin-status" class="mt-4 h-6"></p>
-                            </form>
+                            <button id="refresh-bookings-btn" class="bg-slate-800 p-2.5 rounded-xl border border-slate-700 hover:bg-slate-700 transition-all text-teal-400" title="Refresh Bookings">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                            </button>
                         </div>
                     </div>
 
-                    <!-- View for Super Admin (no OTP needed) -->
-                    <div id="super-admin-view" class="hidden space-y-12">
-                        <div>
-                            <h3 class="text-2xl font-semibold text-white mb-4 tracking-tight">Manage Admin Accounts</h3>
-                            <div class="bg-slate-900/60 rounded-2xl border border-slate-700/50 overflow-x-auto shadow-[inset_0_2px_15px_rgba(0,0,0,0.2)]">
-                                <table class="w-full text-left">
-                                    <thead class="bg-slate-800/90 text-teal-400 uppercase text-xs font-bold tracking-widest"><tr><th class="p-4 md:p-5">Username</th><th class="p-4 md:p-5">Email</th><th class="p-4 md:p-5">Actions</th></tr></thead>
-                                    <tbody id="users-table-body"></tbody>
-                                </table>
+                    <!-- Booking Settings Area (Enhanced for Weekly) -->
+                    <div class="bg-slate-900/40 p-6 rounded-2xl border border-slate-700/30 mb-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-bold text-teal-400 flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/></svg>
+                                Weekly Availability Settings
+                            </h3>
+                            <button id="save-booking-settings-btn" class="bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold py-2 px-6 rounded-xl hover:brightness-110 shadow-lg shadow-teal-500/20 transition-all border border-teal-400/20">Save All Settings</button>
+                        </div>
+
+                        <!-- Days Tabs -->
+                        <div class="flex flex-wrap gap-2 mb-6 p-1 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                            <button class="day-tab px-4 py-2 rounded-lg text-sm font-bold transition-all active bg-teal-500/20 text-teal-400 border border-teal-500/30" data-day="1">Mon</button>
+                            <button class="day-tab px-4 py-2 rounded-lg text-sm font-bold transition-all text-slate-400 hover:bg-slate-700/50" data-day="2">Tue</button>
+                            <button class="day-tab px-4 py-2 rounded-lg text-sm font-bold transition-all text-slate-400 hover:bg-slate-700/50" data-day="3">Wed</button>
+                            <button class="day-tab px-4 py-2 rounded-lg text-sm font-bold transition-all text-slate-400 hover:bg-slate-700/50" data-day="4">Thu</button>
+                            <button class="day-tab px-4 py-2 rounded-lg text-sm font-bold transition-all text-slate-400 hover:bg-slate-700/50" data-day="5">Fri</button>
+                            <button class="day-tab px-4 py-2 rounded-lg text-sm font-bold transition-all text-slate-400 hover:bg-slate-700/50" data-day="6">Sat</button>
+                            <button class="day-tab px-4 py-2 rounded-lg text-sm font-bold transition-all text-slate-400 hover:bg-slate-700/50" data-day="0">Sun</button>
+                        </div>
+
+                        <!-- Daily Config View -->
+                        <div id="daily-config-container" class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                                <div class="md:col-span-1">
+                                    <label class="block mb-2 text-xs font-bold text-slate-400 uppercase tracking-widest">Max Meetings (<span id="current-day-name">Monday</span>)</label>
+                                    <input type="number" id="daily-max-bookings" class="w-full bg-slate-900/60 border border-slate-700 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/50 text-white" min="0" max="20" value="5">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <p class="text-xs text-slate-500 mb-2 italic">Set time slots below. The number of slots will synchronize with your daily limit.</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block mb-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Available Time Slots</label>
+                                <div id="daily-slots-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <!-- Dynamic Slot Inputs -->
+                                </div>
                             </div>
                         </div>
-                        
-                        <div class="border-t border-slate-700/50 pt-8">
-                                <h3 class="text-2xl font-semibold text-white mb-6">Create New Admin User</h3>
-                                <form id="create-admin-form-super" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div><label for="new-username-super" class="block mb-2 text-sm font-semibold text-slate-300">New Username</label><input type="text" id="new-username-super" name="newUsername" required class="w-full bg-slate-900/50 border border-slate-700/80 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-400 text-slate-200"></div>
-                                    <div><label for="new-email-super" class="block mb-2 text-sm font-semibold text-slate-300">New Admin's Email</label><input type="email" id="new-email-super" name="newEmail" required class="w-full bg-slate-900/50 border border-slate-700/80 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-400 text-slate-200"></div>
-                                    <div class="md:col-span-2"><label for="new-admin-password-super" class="block mb-2 text-sm font-semibold text-slate-300">New Password (min. 8 characters)</label><input type="password" id="new-admin-password-super" name="newPassword" required class="w-full bg-slate-900/50 border border-slate-700/80 p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/70 focus:border-teal-400 text-slate-200"></div>
-                                    <button type="submit" class="md:col-span-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white font-bold py-3.5 px-6 rounded-xl hover:from-emerald-500 hover:to-green-500 shadow-[0_4px_15px_rgba(5,150,105,0.3)] border border-green-400/20 animated-button transition-all">Create Admin Account</button>
-                                    <p id="create-admin-status-super" class="md:col-span-2 mt-2 h-6"></p>
-                                </form>
+                    </div>
+
+                    <div class="bg-slate-900/60 rounded-2xl border border-slate-700/50 overflow-x-auto shadow-[inset_0_2px_15px_rgba(0,0,0,0.2)]">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-800/90 text-teal-400 uppercase text-xs font-bold tracking-widest">
+                                <tr>
+                                    <th class="p-4 md:p-5 whitespace-nowrap">Time/Date</th>
+                                    <th class="p-4 md:p-5 whitespace-nowrap">Client</th>
+                                    <th class="p-4 md:p-5 whitespace-nowrap">Email/Link</th>
+                                    <th class="p-4 md:p-5 whitespace-nowrap">Status</th>
+                                    <th class="p-4 md:p-5 whitespace-nowrap">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bookings-table-body"></tbody>
+                        </table>
+                        <div id="no-bookings-message" class="hidden p-10 text-center">
+                            <svg class="mx-auto h-12 w-12 text-slate-700 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                            <p class="text-slate-500 font-medium">No bookings found matching your filter.</p>
                         </div>
                     </div>
                 </div>
+
+                <!-- Messages Management Section -->
+                <div id="messages-management-container" class="admin-section hidden glass-panel p-6 md:p-8 rounded-2xl mb-8 border border-slate-700/50 relative overflow-hidden">
+                    <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 mb-8 border-l-4 border-teal-500 pl-4 tracking-tight shadow-sm inline-block">Message Center</h2>
+                    <div id="messages-list" class="space-y-4"></div>
+                    <div id="no-messages" class="hidden p-10 text-center">
+                        <svg class="mx-auto h-12 w-12 text-slate-700 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
+                        <p class="text-slate-500 font-medium">No messages yet. They'll appear here when someone contacts you.</p>
+                    </div>
                 </div>
-            </main>
+
+                <!-- Email Templates Section -->
+                <div id="email-templates-container" class="admin-section hidden mb-8">
+                    <div class="flex items-center gap-4 mb-4 border-l-4 border-teal-500 pl-4">
+                        <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 tracking-tight shadow-sm inline-block">Email Template Builder</h2>
+                        <span class="bg-slate-800 text-teal-400 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest border border-slate-700">Dynamic UI</span>
+                    </div>
+                    <div id="email-templates-list" class="space-y-12"></div>
+                </div>
+
+                <!-- Admin Settings Section -->
+                <div id="admin-settings-container" class="admin-section hidden glass-panel p-6 md:p-8 rounded-2xl mb-8 border border-slate-700/50 relative overflow-hidden">
+                    <h2 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-300 mb-8 border-l-4 border-teal-500 pl-4 tracking-tight shadow-sm inline-block">Admin Settings</h2>
+                    
+                    <!-- OTP Request View -->
+                    <div id="otp-request-view" class="text-center py-10">
+                        <div class="w-20 h-20 bg-teal-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-teal-500/30">
+                            <svg class="h-10 w-10 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">Security Verification</h3>
+                        <p class="text-slate-400 mb-8 max-w-sm mx-auto">To access password and admin settings, we'll send a one-time password (OTP) to your registered email.</p>
+                        <button id="request-otp-btn" class="bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold py-3 px-8 rounded-xl hover:brightness-110 shadow-lg shadow-teal-500/20 transition-all border border-teal-400/20">Send OTP to Email</button>
+                        <p id="otp-request-status" class="mt-4 h-6"></p>
+                    </div>
+
+                    <!-- OTP Verify View -->
+                    <div id="otp-verify-view" class="hidden text-center py-10">
+                         <div class="w-20 h-20 bg-teal-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-teal-500/30">
+                            <svg class="h-10 w-10 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2">Enter Verification Code</h3>
+                        <p class="text-slate-400 mb-8">We've sent a code to your email. Please enter it below.</p>
+                        <form id="otp-verify-form" class="max-w-xs mx-auto">
+                            <input type="text" id="otp-input" maxlength="6" class="w-full bg-slate-900 border border-slate-700 p-4 rounded-xl text-center text-2xl font-bold tracking-[0.5em] text-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-500 mb-4" placeholder="000000" required>
+                            <button type="submit" class="w-full bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold py-3 rounded-xl hover:brightness-110 shadow-lg shadow-teal-500/20 transition-all border border-teal-400/20">Verify & Continue</button>
+                        </form>
+                        <p id="otp-verify-status" class="mt-4 h-6"></p>
+                    </div>
+
+                    <!-- Admin Content View (Locked behind OTP) -->
+                    <div id="admin-content-view" class="hidden space-y-12">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <!-- Change Password -->
+                            <div class="bg-slate-900/40 p-6 rounded-2xl border border-slate-700/30">
+                                <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                                    <svg class="h-5 w-5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                                    Change Password
+                                </h3>
+                                <form id="change-password-form" class="space-y-4">
+                                    <div><label for="current-password" class="block mb-2 text-xs font-bold text-slate-400 uppercase tracking-widest">Current Password</label><input type="password" id="current-password" name="currentPassword" required class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white"></div>
+                                    <div><label for="new-password" class="block mb-2 text-xs font-bold text-slate-400 uppercase tracking-widest">New Password</label><input type="password" id="new-password" name="newPassword" required class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white"></div>
+                                    <button type="submit" class="w-full bg-slate-800 text-white font-bold py-3 rounded-xl border border-slate-700 hover:bg-slate-700 transition-all">Update Password</button>
+                                </form>
+                                <p id="change-password-status" class="mt-4 h-6"></p>
+                            </div>
+
+                            <!-- Create Admin (Only Super Admin) -->
+                            <div id="super-admin-view" class="hidden bg-slate-900/40 p-6 rounded-2xl border border-slate-700/30">
+                                <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                                    <svg class="h-5 w-5 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                                    Create New Admin
+                                </h3>
+                                <form id="create-admin-form" class="space-y-4">
+                                    <div><label for="admin-username" class="block mb-2 text-xs font-bold text-slate-400 uppercase tracking-widest">Username</label><input type="text" id="admin-username" name="username" required class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white"></div>
+                                    <div><label for="admin-email" class="block mb-2 text-xs font-bold text-slate-400 uppercase tracking-widest">Email</label><input type="email" id="admin-email" name="email" required class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white"></div>
+                                    <div><label for="admin-password" class="block mb-2 text-xs font-bold text-slate-400 uppercase tracking-widest">Password</label><input type="password" id="admin-password" name="password" required class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white"></div>
+                                    <button type="submit" class="w-full bg-teal-500 text-white font-bold py-3 rounded-xl hover:bg-teal-400 shadow-lg shadow-teal-500/20 transition-all">Create Admin Account</button>
+                                </form>
+                                <p id="create-admin-status" class="mt-4 h-6"></p>
+                            </div>
+
+                            <div id="normal-admin-view" class="hidden flex flex-col items-center justify-center text-center p-8 bg-slate-900/40 rounded-2xl border border-slate-700/30">
+                                <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4"><svg class="h-8 w-8 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+                                <p class="text-slate-400 text-sm">Create Admin functionality is restricted to the Super Admin.</p>
+                            </div>
+                        </div>
+
+                        <!-- Manage Users (Only Super Admin) -->
+                        <div id="users-management-area" class="bg-slate-900/60 rounded-2xl border border-slate-700/50 overflow-x-auto shadow-[inset_0_2px_15px_rgba(0,0,0,0.2)]">
+                            <div class="p-6 border-b border-slate-700/50 bg-slate-800/40 flex items-center justify-between">
+                                <h3 class="text-lg font-bold text-white">System Administrators</h3>
+                                <span class="bg-slate-700 text-slate-400 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-widest border border-slate-600">Admin Only</span>
+                            </div>
+                            <table class="w-full text-left">
+                                <thead class="bg-slate-800/90 text-teal-400 uppercase text-xs font-bold tracking-widest">
+                                    <tr>
+                                        <th class="p-4 md:p-5 whitespace-nowrap">Username</th>
+                                        <th class="p-4 md:p-5 whitespace-nowrap">Email</th>
+                                        <th class="p-4 md:p-5 whitespace-nowrap">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </main> <!-- Close <main> -->
+        </div> <!-- Close Side Area -->
+    </div> <!-- Close Main Wrapper -->
+
+    <!-- Edit User Modal -->
+    <div id="edit-user-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+        <div class="glass-panel p-6 md:p-8 rounded-2xl shadow-[0_15px_50px_-12px_rgba(0,0,0,0.8)] border border-slate-700/50 w-full max-w-md">
+            <h3 class="text-2xl font-bold text-white mb-6">Edit Administrator</h3>
+            <form id="edit-user-form" class="space-y-4">
+                <input type="hidden" id="edit-user-id">
+                <div><label for="edit-username" class="block mb-2 text-xs font-bold text-slate-400 uppercase tracking-widest">Username</label><input type="text" id="edit-username" name="username" required class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white"></div>
+                <div><label for="edit-email" class="block mb-2 text-xs font-bold text-slate-400 uppercase tracking-widest">Email</label><input type="email" id="edit-email" name="email" required class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white"></div>
+                <div><label for="edit-new-password" class="block mb-2 text-xs font-bold text-slate-400 uppercase tracking-widest">New Password (Optional)</label><input type="password" id="edit-new-password" name="newPassword" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white"></div>
+                <p class="text-xs text-slate-500">Leave password blank to keep it unchanged.</p>
+                <div class="flex justify-end space-x-4 pt-4">
+                    <button type="button" id="cancel-edit-user" class="bg-slate-700 text-white font-semibold py-2 px-6 rounded-xl border border-slate-600 hover:bg-slate-600 transition-all">Cancel</button>
+                    <button type="submit" class="bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold py-2 px-6 rounded-xl hover:brightness-110 shadow-lg shadow-teal-500/20 transition-all border border-teal-400/20">Save Changes</button>
+                </div>
+            </form>
         </div>
     </div>
-
-    
-<!-- NEW: Edit User Modal (add this with your other modals) -->
-<div id="edit-user-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-    <div class="glass-panel p-6 md:p-8 rounded-2xl shadow-[0_15px_50px_-12px_rgba(0,0,0,0.8)] border border-slate-700/50 w-full max-w-md">
-        <h3 class="text-2xl font-bold text-white mb-4">Edit Admin User</h3>
-        <form id="edit-user-form" class="space-y-4">
-            <input type="hidden" id="edit-user-id">
-            <div><label for="edit-username" class="block mb-2">Username</label><input type="text" id="edit-username" name="username" required class="w-full bg-slate-700 p-2 rounded-md"></div>
-            <div><label for="edit-email" class="block mb-2">Email</label><input type="email" id="edit-email" name="email" required class="w-full bg-slate-700 p-2 rounded-md"></div>
-            <div><label for="edit-new-password" class="block mb-2">New Password (Optional)</label><input type="password" id="edit-new-password" name="newPassword" class="w-full bg-slate-700 p-2 rounded-md"></div>
-            <p class="text-xs text-slate-500">Leave password blank to keep it unchanged.</p>
-            <div class="flex justify-end space-x-4 pt-4">
-                <button type="button" id="cancel-edit-user" class="bg-slate-600 ...">Cancel</button>
-                <button type="submit" class="bg-teal-500 ...">Save Changes</button>
-            </div>
-        </form>
-    </div>
-</div>
-    
     <!-- Delete Confirmation Modal -->
     <div id="delete-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
         <div class="glass-panel p-8 md:p-10 rounded-2xl text-center shadow-[0_15px_50px_-12px_rgba(0,0,0,0.8)] border border-slate-700/50">

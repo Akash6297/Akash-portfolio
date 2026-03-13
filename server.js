@@ -23,6 +23,7 @@ const Hero = require('./models/hero');
 const Message = require('./models/message');
 const EmailTemplate = require('./models/emailTemplate');
 const Booking = require('./models/booking');
+const BookingSetting = require('./models/bookingSetting');
 const Resume = require('./models/resume');
 
 // --- Multer, App, Port, DB Connection, Middleware (UNCHANGED) ---
@@ -279,19 +280,33 @@ app.get('/api/available-slots', async (req, res) => {
         const { date } = req.query; // YYYY-MM-DD
         if (!date) return res.status(400).json({ message: 'Date is required' });
 
-        // Generate all possible slots (10:00 AM to 5:00 PM, 30 min intervals)
-        const allSlots = [
-            "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", 
-            "12:00 PM", "12:30 PM", "01:00 PM", "01:30 PM", 
-            "02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM", 
-            "04:00 PM", "04:30 PM", "05:00 PM"
-        ];
+        // Get settings or use defaults
+        let settings = await BookingSetting.findOne();
+        if (!settings) {
+            settings = new BookingSetting();
+            await settings.save();
+        }
+
+        // Get day of week (0-6) from date
+        const dayOfWeek = new Date(date).getDay();
+        const daySettings = settings.weeklySchedule.get(dayOfWeek.toString()) || {
+            maxBookings: 5,
+            slots: ["10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM"]
+        };
+
+        const allSlots = daySettings.slots;
+        const maxPerDay = daySettings.maxBookings;
 
         // Find bookings for this date that are NOT rejected
         const existingBookings = await Booking.find({ 
             date, 
             status: { $ne: 'rejected' } 
         });
+
+        // Check if daily limit reached
+        if (existingBookings.length >= maxPerDay) {
+            return res.json({ availableSlots: [], message: 'This day is fully booked.' });
+        }
 
         const bookedTimes = existingBookings.map(b => b.time);
         
@@ -313,6 +328,24 @@ app.post('/api/bookings', async (req, res) => {
         // Basic validation
         if (!name || !email || !date || !time) {
             return res.status(400).json({ success: false, message: 'Missing required fields' });
+        }
+
+        // Check daily limit again on submission
+        let settings = await BookingSetting.findOne();
+        if (!settings) {
+            settings = new BookingSetting();
+            await settings.save();
+        }
+
+        const dayOfWeek = new Date(date).getDay();
+        const daySettings = settings.weeklySchedule.get(dayOfWeek.toString()) || {
+            maxBookings: 5,
+            slots: ["10:00 AM", "11:00 AM", "12:00 PM", "01:00 PM", "02:00 PM"]
+        };
+
+        const existingCount = await Booking.countDocuments({ date, status: { $ne: 'rejected' } });
+        if (existingCount >= daySettings.maxBookings) {
+            return res.status(400).json({ success: false, message: 'This day is already fully booked.' });
         }
 
         // Check for double booking just in case
@@ -432,6 +465,34 @@ app.put('/api/admin/bookings/:id/status', requireLogin, async (req, res) => {
         res.json({ success: true, booking });
     } catch (error) {
         res.status(500).json({ message: 'Failed to update booking status.' });
+    }
+});
+
+// --- Admin Booking Settings Routes ---
+app.get('/api/admin/booking-settings', requireLogin, async (req, res) => {
+    try {
+        let settings = await BookingSetting.findOne();
+        if (!settings) {
+            settings = new BookingSetting();
+            await settings.save();
+        }
+        res.json(settings);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch settings.' });
+    }
+});
+
+app.put('/api/admin/booking-settings', requireLogin, async (req, res) => {
+    try {
+        const { weeklySchedule } = req.body;
+        const settings = await BookingSetting.findOneAndUpdate(
+            {},
+            { weeklySchedule, updatedAt: Date.now() },
+            { new: true, upsert: true }
+        );
+        res.json(settings);
+    } catch (error) {
+        res.status(400).json({ message: 'Failed to update settings.' });
     }
 });
 

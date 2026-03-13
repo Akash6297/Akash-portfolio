@@ -7,18 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const adminSections = document.querySelectorAll('.admin-section');
     
     // Forms and Tables
-    const navLinks = {
-        'dashboard-link': document.getElementById('dashboard-container'),
-        'projects-management': document.getElementById('projects-management-container'),
-        'services-management': document.getElementById('services-management-container'),
-        'resume-management': document.getElementById('resume-management-container'),
-        'experience-management': document.getElementById('experience-management-container'),
-        'about-management': document.getElementById('about-management-container'),
-        'messages-management': document.getElementById('messages-management-container'),
-        'booking-management': document.getElementById('booking-management-container'),
-        'email-templates-management': document.getElementById('email-templates-management-container'),
-        'settings-management': document.getElementById('settings-management-container')
-    };
+
     const heroForm = document.getElementById('hero-form');
     const projectForm = document.getElementById('project-form');
     const projectsTableBody = document.getElementById('projects-table-body');
@@ -906,34 +895,54 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // --- UI FUNCTIONALITY: SECTION TOGGLING ---
     const showSection = (sectionId) => {
-        sidebarLinks.forEach(link => link.classList.remove('active'));
+        // Hide all sections
         adminSections.forEach(section => section.classList.add('hidden'));
+        
+        // Show target section
+        const targetSection = document.getElementById(`${sectionId}-container`);
+        if (targetSection) {
+            targetSection.classList.remove('hidden');
+        }
 
-        const activeLink = document.querySelector(`.sidebar-link[data-section="${sectionId}"]`);
-        if (activeLink) activeLink.classList.add('active');
+        // Update sidebar links
+        sidebarLinks.forEach(link => {
+            if (link.dataset.section === sectionId) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
 
-        const selectedSection = document.getElementById(`${sectionId}-container`);
-        if (selectedSection) {
-            selectedSection.classList.remove('hidden');
-            
-            if (sectionId === 'admin-settings') {
-                if (currentUserIsSuperAdmin) {
-                    superAdminView.classList.remove('hidden');
-                    normalAdminView.classList.add('hidden');
-                    fetchUsers();
-                } else {
-                    normalAdminView.classList.remove('hidden');
-                    superAdminView.classList.add('hidden');
-                }
-            } else if (sectionId === 'hero-management') fetchHeroData();
-            else if (sectionId === 'about-management') fetchAboutData();
-            else if (sectionId === 'resume-management') loadResume();
-            else if (sectionId === 'experience-management') fetchExperiences();
-            else if (sectionId === 'projects-management') fetchProjects();
-            else if (sectionId === 'services-management') fetchServices();
-            else if (sectionId === 'messages-management') fetchMessages();
-            else if (sectionId === 'bookings-management') fetchBookings();
-            else if (sectionId === 'email-templates') fetchEmailTemplates();
+        // Fetch data for the section
+        if (sectionId === 'hero-management') fetchHeroData();
+        if (sectionId === 'about-management') fetchAboutData();
+        if (sectionId === 'experience-management') fetchExperiences();
+        if (sectionId === 'projects-management') fetchProjects();
+        if (sectionId === 'services-management') fetchServices();
+        if (sectionId === 'resume-management') if (typeof loadResume === 'function') loadResume();
+        if (sectionId === 'bookings-management') {
+            fetchBookings();
+            fetchBookingSettings();
+        }
+        if (sectionId === 'messages-management') fetchMessages();
+        if (sectionId === 'email-templates') fetchEmailTemplates();
+        if (sectionId === 'admin-settings') {
+            otpRequestView.classList.remove('hidden');
+            otpVerifyView.classList.add('hidden');
+            adminContentView.classList.add('hidden');
+            checkAdminStatusAndUI();
+        }
+    };
+
+    const checkAdminStatusAndUI = async () => {
+        await checkAdminStatus(); // Assuming checkAdminStatus is defined elsewhere
+        if (currentUserIsSuperAdmin) {
+            superAdminView.classList.remove('hidden');
+            normalAdminView.classList.add('hidden'); // Ensure normal admin view is hidden
+            fetchUsers();
+        } else {
+            normalAdminView.classList.remove('hidden'); // Ensure normal admin view is shown
+            superAdminView.classList.add('hidden');
         }
     };
 
@@ -1820,6 +1829,104 @@ document.addEventListener('DOMContentLoaded', () => {
 
             showToast(`✅ ${filled} field${filled !== 1 ? 's' : ''} auto-filled!`, 'success');
             closeAiBot();
+        });
+    }
+
+    // --- BOOKING SETTINGS LOGIC (Enhanced for Weekly) ---
+    let weeklySchedule = {};
+    let activeDay = "1"; // Default to Monday
+
+    const fetchBookingSettings = async () => {
+        const data = await apiRequest('GET', '/api/admin/booking-settings');
+        if (data && data.weeklySchedule) {
+            weeklySchedule = data.weeklySchedule;
+            renderDailySettings();
+        }
+    };
+
+    const renderDailySettings = () => {
+        const slotsGrid = document.getElementById('daily-slots-grid');
+        const maxInput = document.getElementById('daily-max-bookings');
+        const dayNameSpan = document.getElementById('current-day-name');
+        if (!slotsGrid || !maxInput) return;
+
+        const dayConfig = weeklySchedule[activeDay] || { maxBookings: 5, slots: [] };
+        
+        // Update UI labels and active states
+        const dayNames = { "1": "Monday", "2": "Tuesday", "3": "Wednesday", "4": "Thursday", "5": "Friday", "6": "Saturday", "0": "Sunday" };
+        dayNameSpan.textContent = dayNames[activeDay];
+        
+        document.querySelectorAll('.day-tab').forEach(btn => {
+            if (btn.dataset.day === activeDay) {
+                btn.classList.add('bg-teal-500/20', 'text-teal-400', 'border-teal-500/30');
+                btn.classList.remove('text-slate-400', 'hover:bg-slate-700/50');
+            } else {
+                btn.classList.remove('bg-teal-500/20', 'text-teal-400', 'border-teal-500/30');
+                btn.classList.add('text-slate-400', 'hover:bg-slate-700/50');
+            }
+        });
+
+        maxInput.value = dayConfig.maxBookings;
+        slotsGrid.innerHTML = '';
+
+        // Generate dynamic slots based on maxBookings
+        for (let i = 0; i < dayConfig.maxBookings; i++) {
+            const timeVal = dayConfig.slots[i] || "10:00 AM";
+            const [time, period] = timeVal.split(' ');
+            
+            const slotHtml = `
+                <div class="flex items-center gap-2 bg-slate-900/60 p-2 rounded-xl border border-slate-700/50">
+                    <input type="text" class="slot-time-input w-full bg-transparent border-none text-white text-sm focus:outline-none" value="${time}" placeholder="10:00">
+                    <select class="slot-period-input bg-slate-800 border-none text-teal-400 text-[10px] font-bold py-1 px-2 rounded-lg cursor-pointer transition-all hover:bg-slate-700">
+                        <option value="AM" ${period === 'AM' ? 'selected' : ''}>AM</option>
+                        <option value="PM" ${period === 'PM' ? 'selected' : ''}>PM</option>
+                    </select>
+                </div>
+            `;
+            slotsGrid.insertAdjacentHTML('beforeend', slotHtml);
+        }
+    };
+
+    // Tab Switching
+    document.querySelectorAll('.day-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+            activeDay = btn.dataset.day;
+            renderDailySettings();
+        });
+    });
+
+    // Sync slots when max bookings change
+    document.getElementById('daily-max-bookings')?.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value) || 0;
+        // Temporarily store current input values to avoid losing them
+        saveCurrentDayState();
+        weeklySchedule[activeDay].maxBookings = val;
+        renderDailySettings();
+    });
+
+    const saveCurrentDayState = () => {
+        const max = parseInt(document.getElementById('daily-max-bookings').value) || 0;
+        const slots = [];
+        document.querySelectorAll('#daily-slots-grid .flex').forEach(row => {
+            const time = row.querySelector('.slot-time-input').value.trim();
+            const period = row.querySelector('.slot-period-input').value;
+            if (time) slots.push(`${time} ${period}`);
+        });
+        weeklySchedule[activeDay] = { maxBookings: max, slots };
+    };
+
+    const saveBookingSettingsBtn = document.getElementById('save-booking-settings-btn');
+    if (saveBookingSettingsBtn) {
+        saveBookingSettingsBtn.addEventListener('click', async () => {
+            saveCurrentDayState(); // Capture the state of the currently active tab
+            
+            const result = await apiRequest('PUT', '/api/admin/booking-settings', {
+                weeklySchedule
+            });
+
+            if (result) {
+                showToast('Weekly booking schedule updated successfully!');
+            }
         });
     }
 });

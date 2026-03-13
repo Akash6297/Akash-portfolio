@@ -14,4 +14,7 @@ const bookingSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
+// Ensure a person cannot book the same slot twice
+bookingSchema.index({ date: 1, time: 1 }, { unique: true });
+
 module.exports = mongoose.model('Booking', bookingSchema);
