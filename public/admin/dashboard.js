@@ -84,19 +84,40 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     };
 
+    const setupImagePreview = (fileInputId, previewImgId, placeholderId) => {
+        const fileInput = document.getElementById(fileInputId);
+        const previewImg = document.getElementById(previewImgId);
+        const placeholder = document.getElementById(placeholderId);
+        if (!fileInput || !previewImg) return;
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImg.src = e.target.result;
+                    previewImg.classList.remove('hidden');
+                    if (placeholder) placeholder.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    };
+
  let currentUserIsSuperAdmin = false;
     let allUsers = [];
 
     // --- API REQUEST HELPER (UPDATED) ---
     const apiRequest = async (method, url, body = null) => {
         try {
-            const options = {
-                method,
-                headers: {
-                    'Content-Type': 'application/json'
+            const options = { method };
+            if (body) {
+                if (body instanceof FormData) {
+                    options.body = body;
+                } else {
+                    options.headers = { 'Content-Type': 'application/json' };
+                    options.body = JSON.stringify(body);
                 }
-            };
-            if (body) options.body = JSON.stringify(body);
+            }
             const response = await fetch(url, options);
             if (response.status === 401) {
                 window.location.href = '/login.html';
@@ -122,8 +143,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     checkAdminStatus();
+
+    setupImagePreview('project-image-file', 'project-image-preview', 'project-image-placeholder');
+    setupImagePreview('service-image-file', 'service-image-preview', 'service-image-placeholder');
     
-     // --- UI FUNCTIONALITY: SECTION TOGGLING (CORRECTED) ---
+    // --- UI FUNCTIONALITY: SECTION TOGGLING (CORRECTED) ---
   
 
     sidebarLinks.forEach(link => {
@@ -339,19 +363,28 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!services) return;
         servicesTableBody.innerHTML = '';
         services.forEach(service => {
+            const iconHtml = service.imageUrl 
+                ? `<img src="${service.imageUrl}" class="w-12 h-12 object-cover rounded-xl border border-slate-600 shadow-lg">`
+                : `<div class="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center text-slate-500 overflow-hidden border border-slate-700">${service.iconSvg || '?'}</div>`;
+            
             const row = `
-                <tr data-id="${service._id}">
-                    <td class="p-4 border-t border-slate-700">${service.title}</td>
-                    <td class="p-4 border-t border-slate-700">${service.description.substring(0, 50)}...</td>
+                <tr data-id="${service._id}" class="hover:bg-slate-800/30 transition-colors">
                     <td class="p-4 border-t border-slate-700">
-                        <button class="edit-service-btn bg-teal-500/10 text-teal-400 border border-teal-500/30 hover:bg-teal-500 hover:text-white p-2 rounded-lg transition-all duration-300 mr-1">
-                            <svg class="w-4 h-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                        </button>
-
-                        <button class="delete-btn bg-red-600/10 text-red-500 border border-red-500/30 hover:bg-red-600 hover:text-white p-2 rounded-lg transition-all duration-300" data-type="service" title="Delete Service">
-                    <svg class="w-4 h-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                </button>
-
+                        <div class="flex items-center space-x-4">
+                            ${iconHtml}
+                            <span class="font-bold text-slate-200">${service.title}</span>
+                        </div>
+                    </td>
+                    <td class="p-4 border-t border-slate-700 text-slate-400 text-sm">${service.description.substring(0, 60)}...</td>
+                    <td class="p-4 border-t border-slate-700 text-right">
+                        <div class="flex items-center justify-end space-x-2">
+                            <button class="edit-service-btn bg-teal-500/10 text-teal-400 border border-teal-500/30 hover:bg-teal-500 hover:text-white p-2.5 rounded-xl transition-all duration-300 group" title="Edit Service">
+                                <svg class="w-4 h-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                            </button>
+                            <button class="delete-btn bg-red-600/10 text-red-500 border border-red-500/30 hover:bg-red-600 hover:text-white p-2.5 rounded-xl transition-all duration-300" data-type="service" title="Delete Service">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                        </div>
                     </td>
                 </tr>`;
             servicesTableBody.insertAdjacentHTML('beforeend', row);
@@ -361,21 +394,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearServiceForm = () => {
         serviceForm.reset();
         serviceForm.querySelector('#service-id').value = '';
+        serviceForm.querySelector('#service-imageUrl').value = '';
+        const preview = document.getElementById('service-image-preview');
+        const placeholder = document.getElementById('service-image-placeholder');
+        if (preview) { preview.src = ''; preview.classList.add('hidden'); }
+        if (placeholder) placeholder.classList.remove('hidden');
     };
 
     serviceForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = serviceForm.querySelector('#service-id').value;
-        const data = Object.fromEntries(new FormData(serviceForm).entries());
+        const formData = new FormData(serviceForm);
         
         const url = id ? `/api/admin/services/${id}` : '/api/admin/services';
         const method = id ? 'PUT' : 'POST';
 
-        const result = await apiRequest(method, url, data);
+        const result = await apiRequest(method, url, formData);
         if (result) {
             clearServiceForm();
             await fetchServices();
-        }showToast('Service section updated successfully!');
+            showToast('Service saved successfully!');
+        }
     });
 
     clearServiceFormBtn.addEventListener('click', clearServiceForm);
@@ -392,8 +431,20 @@ document.addEventListener('DOMContentLoaded', () => {
             serviceForm.querySelector('#service-id').value = service._id;
             serviceForm.querySelector('#service-title').value = service.title;
             serviceForm.querySelector('#service-description').value = service.description;
-            serviceForm.querySelector('#service-iconSvg').value = service.iconSvg;
-            // Removed scroll, as the section is already visible
+            serviceForm.querySelector('#service-iconSvg').value = service.iconSvg || '';
+            serviceForm.querySelector('#service-imageUrl').value = service.imageUrl || '';
+            
+            const preview = document.getElementById('service-image-preview');
+            const placeholder = document.getElementById('service-image-placeholder');
+            if (service.imageUrl) {
+                preview.src = service.imageUrl;
+                preview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            } else {
+                preview.src = '';
+                preview.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+            }
         }
         
         if (target.classList.contains('delete-btn')) {

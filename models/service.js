@@ -4,7 +4,8 @@ const mongoose = require('mongoose');
 const serviceSchema = new mongoose.Schema({
     title: { type: String, required: true },
     description: { type: String, required: true },
-    iconSvg: { type: String, required: true }, // We'll store the SVG content as a string
+    iconSvg: { type: String, required: false }, // Made optional to support images
+    imageUrl: { type: String, required: false } // New field for service images
 });
 
 module.exports = mongoose.model('Service', serviceSchema);

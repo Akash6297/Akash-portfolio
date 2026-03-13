@@ -8,7 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/logo.png">
 <style>
     body {
         font-family: 'Poppins', sans-serif;
@@ -117,8 +118,32 @@
   </div>
 
   <!-- Preloader -->
-  <div id="preloader" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-[100]">
-    <div class="w-16 h-16 border-4 border-slate-700 border-t-teal-500 rounded-full animate-spin"></div>
+  <div id="preloader" class="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-[200] transition-opacity duration-700 ease-in-out">
+    <div class="relative flex flex-col items-center">
+        <!-- Logo reflection/glow -->
+        <div class="absolute w-32 h-32 bg-teal-500/20 rounded-full blur-3xl animate-pulse"></div>
+        
+        <!-- Modern Spinner -->
+        <div class="relative w-24 h-24 mb-6">
+            <div class="absolute inset-0 border-[3px] border-slate-800 rounded-full"></div>
+            <div class="absolute inset-0 border-t-[3px] border-teal-400 rounded-full animate-spin [animation-duration:0.8s]"></div>
+            <div class="absolute inset-3 border-t-[3px] border-cyan-400 rounded-full animate-spin [animation-direction:reverse] [animation-duration:1.2s]"></div>
+            
+            <!-- Center Dot -->
+            <div class="absolute inset-[40%] bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-pulse"></div>
+        </div>
+        
+        <!-- Animated Text -->
+        <div class="flex space-x-1">
+            <span class="text-white text-xs font-black tracking-widest uppercase opacity-40 animate-pulse">L</span>
+            <span class="text-white text-xs font-black tracking-widest uppercase opacity-40 animate-pulse [animation-delay:0.1s]">o</span>
+            <span class="text-white text-xs font-black tracking-widest uppercase opacity-40 animate-pulse [animation-delay:0.2s]">a</span>
+            <span class="text-white text-xs font-black tracking-widest uppercase opacity-40 animate-pulse [animation-delay:0.3s]">d</span>
+            <span class="text-white text-xs font-black tracking-widest uppercase opacity-40 animate-pulse [animation-delay:0.4s]">i</span>
+            <span class="text-white text-xs font-black tracking-widest uppercase opacity-40 animate-pulse [animation-delay:0.5s]">n</span>
+            <span class="text-white text-xs font-black tracking-widest uppercase opacity-40 animate-pulse [animation-delay:0.6s]">g</span>
+        </div>
+    </div>
   </div>
   
   <!-- ============================================ -->
@@ -127,8 +152,15 @@
   <!-- ============================================ -->
   <header id="main-header" class="fixed top-0 left-0 w-full z-[100] transition-all duration-500">
       <nav class="container mx-auto flex items-center justify-between p-4">
-          <a href="#" class="text-2xl font-bold text-white hover:text-teal-400 transition-colors duration-300">
-              Akash Mandal
+          <a href="#" class="flex items-center group">
+              <div class="w-10 h-10 md:w-12 md:h-12 relative mr-2 md:mr-3 transition-all duration-500 group-hover:scale-110 group-hover:rotate-[5deg]">
+                  <div class="absolute inset-0 bg-teal-500 rounded-xl blur-lg opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                  <img src="/logo.png" alt="Akash Logo" class="relative w-full h-full object-cover rounded-xl border border-white/10 shadow-2xl">
+              </div>
+              <div class="flex flex-col">
+                  <span class="text-lg md:text-xl font-black text-white tracking-tighter leading-none group-hover:text-teal-400 transition-colors">AKASH<span class="text-teal-500">.</span></span>
+                  <span class="text-[10px] font-bold text-slate-500 tracking-[0.2em] uppercase leading-none mt-1 group-hover:text-slate-400 transition-colors">Portfolio</span>
+              </div>
           </a>
           <ul id="desktop-nav" class="hidden md:flex items-center space-x-8">
               <li><a href="#about" data-navlink="about" class="nav-link text-slate-300 relative">About</a></li>
@@ -509,7 +541,13 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
             <!-- About Column -->
             <div>
-                <a href="#" class="text-2xl font-bold text-white">Akash Mandal</a>
+                <a href="#" class="flex items-center group mb-4">
+                    <div class="w-10 h-10 relative mr-3 transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-teal-500 rounded-lg blur opacity-20 transition-opacity"></div>
+                        <img src="/logo.png" alt="Logo" class="relative w-full h-full object-cover rounded-lg border border-white/5 shadow-xl">
+                    </div>
+                    <span class="text-xl font-black text-white tracking-widest uppercase group-hover:text-teal-400 transition-colors">AKASH<span class="text-teal-500">.</span></span>
+                </a>
                 <p class="text-slate-400 mt-2">Let's create something amazing together. Reach out and let's start a conversation.</p>
             </div>
             
@@ -547,12 +585,50 @@
 </footer>
 
 <!-- Floating Action Buttons -->
-<a href="https://wa.me/916297321207?text=Hello%2C%20I'm%20interested%20in%20your%20services." target="_blank" id="whatsapp-button" class="fixed bottom-5 left-5 z-50 bg-green-500 text-white p-3 rounded-full shadow-lg hover:bg-green-600 transition-transform hover:scale-110">
+<!-- WhatsApp Integration (Lead Form) -->
+<button id="whatsapp-button" class="fixed bottom-8 left-8 z-[1000] bg-green-500 text-white p-4 rounded-full shadow-[0_0_20px_rgba(34,197,94,0.4)] hover:bg-green-600 transition-all hover:scale-110 group" title="Chat on WhatsApp">
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99 0-3.903-.52-5.58-1.45L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.886-.001 2.267.655 4.398 1.849 6.22l-1.054 3.858 3.996-1.057.009-.008z"/></svg>
-</a>
-<button id="scroll-to-top" class="hidden fixed bottom-5 right-5 z-50 bg-teal-500 text-white p-3 rounded-full shadow-lg hover:bg-teal-600 transition-opacity duration-300">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>
 </button>
+
+<div id="whatsapp-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[1001] p-4 opacity-0 transition-opacity duration-300">
+    <div class="glass-card bg-slate-900/95 rounded-3xl border border-slate-700 w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300">
+        <div class="bg-green-600/20 border-b border-green-500/30 p-6 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white shadow-lg">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99 0-3.903-.52-5.58-1.45L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.886-.001 2.267.655 4.398 1.849 6.22l-1.054 3.858 3.996-1.057.009-.008z"/></svg>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-white">Chat on WhatsApp</h3>
+                    <p class="text-green-400 text-xs">I typically reply within a few hours</p>
+                </div>
+            </div>
+            <button id="close-whatsapp-modal" class="text-slate-400 hover:text-white- transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div class="p-6">
+            <form id="whatsapp-lead-form" class="space-y-4">
+                <div>
+                    <label for="wa-name" class="block text-sm font-medium text-slate-300 mb-1">Your Name</label>
+                    <input type="text" id="wa-name" name="name" required class="w-full bg-slate-900/40 border border-slate-700/60 rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-all shadow-inner placeholder-slate-500" placeholder="John Doe">
+                </div>
+                <div>
+                    <label for="wa-contact" class="block text-sm font-medium text-slate-300 mb-1">Phone or Email</label>
+                    <input type="text" id="wa-contact" name="contact" required class="w-full bg-slate-900/40 border border-slate-700/60 rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-all shadow-inner placeholder-slate-500" placeholder="+1 234 567 8900">
+                </div>
+                <div>
+                    <label for="wa-message" class="block text-sm font-medium text-slate-300 mb-1">Initial Message (Optional)</label>
+                    <textarea id="wa-message" name="message" rows="2" class="w-full bg-slate-900/40 border border-slate-700/60 rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-green-500 transition-all shadow-inner placeholder-slate-500" placeholder="Hello! I want to discuss a project."></textarea>
+                </div>
+                <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3.5 rounded-xl transition-all duration-300 shadow-[0_4px_20px_rgba(34,197,94,0.3)] flex items-center justify-center gap-2">
+                    Start Conversation
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
 
   <!-- JAVASCRIPT for Mobile Menu -->
   <!-- ============================================ -->
@@ -760,24 +836,49 @@ const menuButton = document.getElementById("mobile-menu-button");
         projectsGrid.innerHTML = '';
         projects.forEach(project => {
           const projectCard = `
-            <div class="flex flex-col h-full glass-card border border-slate-700/50 rounded-xl overflow-hidden group hover:-translate-y-2 transition-all duration-300 hover:shadow-xl hover:shadow-teal-500/20 transform hover:-translate-y-3 transition-all duration-500 reveal">
+            <div class="flex flex-col h-full glass-card border border-slate-700/50 rounded-2xl overflow-hidden group hover:-translate-y-4 transition-all duration-500 hover:shadow-2xl hover:shadow-teal-500/30 reveal">
+              <!-- Image Container -->
               <div class="relative overflow-hidden w-full aspect-video">
-                <img src="${project.imageUrl}" alt="${project.name}" class="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110">
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent opacity-0 group-hover:opacity-80 transition-opacity duration-300 pointer-events-none"></div>
-              </div>
-              <div class="flex flex-col grow p-6 relative">
-                <h3 class="text-xl font-bold text-white mb-2 group-hover:text-teal-400 transition-colors">${project.name}</h3>
-                <p class="text-slate-400 mb-4 line-clamp-3">${project.description}</p>
-                <div class="flex flex-wrap gap-2 mb-6">
-                  ${project.tags.map(tag => `<span class="bg-teal-500/10 text-teal-300 font-semibold py-1.5 px-3.5 rounded-full text-[0.65rem] uppercase tracking-wider border border-teal-500/30 backdrop-blur-md">${tag}</span>`).join('')}
+                <img src="${project.imageUrl}" alt="${project.name}" class="w-full h-full object-cover transform transition-transform duration-1000 group-hover:scale-110">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500"></div>
+                
+                <!-- Floating tags on top of image -->
+                <div class="absolute top-4 left-4 flex flex-wrap gap-2">
+                  ${project.tags.slice(0, 2).map(tag => `<span class="bg-slate-900/80 backdrop-blur-md text-teal-400 text-[10px] uppercase font-bold px-2 py-1 rounded-md border border-teal-500/30">${tag}</span>`).join('')}
                 </div>
-                <div class="flex space-x-4 mt-auto pt-4 border-t border-slate-700/50">
-                  <a href="${project.liveUrl}" target="_blank" rel="noopener noreferrer" class="flex items-center text-sm font-semibold text-white hover:text-teal-400 transition-colors">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg> Live Demo
-                  </a>
-                  <a href="${project.sourceUrl}" target="_blank" rel="noopener noreferrer" class="flex items-center text-sm font-semibold text-white hover:text-teal-400 transition-colors">
-                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.91 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg> Source Code
-                  </a>
+              </div>
+
+              <!-- Content Container -->
+              <div class="flex flex-col grow p-7 relative bg-gradient-to-b from-slate-800/20 to-transparent">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-2xl font-bold text-white group-hover:text-teal-400 transition-colors leading-tight">${project.name}</h3>
+                    <div class="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></div>
+                </div>
+                
+                <p class="text-slate-400 mb-6 line-clamp-2 text-sm leading-relaxed">${project.description}</p>
+                
+                <!-- All Tags -->
+                <div class="flex flex-wrap gap-2 mb-8">
+                  ${project.tags.map(tag => `<span class="bg-teal-500/5 text-teal-300 font-medium py-1 px-3 rounded-lg text-[10px] border border-teal-500/10 hover:border-teal-500/40 transition-colors">${tag}</span>`).join('')}
+                </div>
+
+                <!-- Footer Links -->
+                <div class="flex items-center gap-6 mt-auto pt-5 border-t border-slate-700/50">
+                  ${project.liveUrl ? `
+                  <a href="${project.liveUrl}" target="_blank" rel="noopener noreferrer" class="group/link flex items-center text-sm font-bold text-slate-200 hover:text-teal-400 transition-all duration-300">
+                    <span class="mr-2 p-1.5 rounded-lg bg-teal-500/10 group-hover/link:bg-teal-500/20 transition-colors">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </span>
+                    Live Demo
+                  </a>` : ''}
+                  
+                  ${project.sourceUrl ? `
+                  <a href="${project.sourceUrl}" target="_blank" rel="noopener noreferrer" class="group/link flex items-center text-sm font-bold text-slate-200 hover:text-teal-400 transition-all duration-300">
+                    <span class="mr-2 p-1.5 rounded-lg bg-slate-700/50 group-hover/link:bg-slate-700/80 transition-colors text-white">
+                      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.91 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    </span>
+                    Code
+                  </a>` : ''}
                 </div>
               </div>
             </div>`;
@@ -799,15 +900,39 @@ const menuButton = document.getElementById("mobile-menu-button");
 
       servicesGrid.innerHTML = ''; // Clear existing content
 
-      services.forEach(service => {
+      services.forEach((service, index) => {
+        // Different gradient for each card for variety
+        const gradients = [
+            'from-teal-400 to-cyan-500',
+            'from-emerald-400 to-teal-500',
+            'from-cyan-400 to-blue-500',
+            'from-indigo-400 to-cyan-500'
+        ];
+        const gradient = gradients[index % gradients.length];
+        
+        const iconHtml = service.imageUrl 
+            ? `<img src="${service.imageUrl}" alt="${service.title}" class="w-full h-full object-cover rounded-3xl transform group-hover:scale-110 transition-transform duration-500 shadow-2xl">`
+            : `<div class="w-10 h-10 text-teal-400 group-hover:scale-110 transition-transform duration-500">${service.iconSvg}</div>`;
+
         const serviceCard = `
-          <div class="glass-card border border-slate-700/50 p-8 rounded-xl text-center transform hover:-translate-y-2 transition-all duration-300 hover:shadow-xl hover:shadow-teal-500/20 transform hover:-translate-y-3 transition-all duration-500 reveal">
-            <!-- THIS IS THE UPDATED LINE -->
-            <div class="inline-block bg-slate-700 p-4 rounded-full mb-4 w-16 h-16 flex items-center justify-center text-teal-300 bg-gradient-to-br from-slate-700 to-slate-800 border border-slate-600 shadow-[inset_0_2px_4px_rgba(255,255,255,0.05)]">
-              ${service.iconSvg}
+          <div class="group relative glass-card border border-white/5 p-10 rounded-[2.5rem] text-center transition-all duration-700 hover:-translate-y-4 hover:shadow-[0_20px_50px_-20px_rgba(45,212,191,0.3)] reveal overflow-hidden">
+            <!-- Background Glow -->
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-teal-500/10 rounded-full blur-3xl group-hover:bg-teal-500/20 transition-colors duration-700"></div>
+            
+            <!-- Icon/Image Container (Large & Vivid) -->
+            <div class="relative inline-flex items-center justify-center mb-8">
+                <div class="absolute inset-0 bg-gradient-to-br ${gradient} opacity-20 rounded-3xl blur-xl group-hover:opacity-40 transition-opacity duration-700"></div>
+                <div class="relative w-24 h-24 flex items-center justify-center bg-slate-800/80 rounded-3xl border border-white/10 shadow-2xl transform group-hover:rotate-[10deg] transition-transform duration-500 overflow-hidden">
+                    ${iconHtml}
+                </div>
             </div>
-            <h3 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-300 mb-3 tracking-tight">${service.title}</h3>
-            <p class="text-slate-400">${service.description}</p>
+
+            <!-- Content -->
+            <h3 class="text-2xl font-black text-white mb-4 tracking-tight group-hover:text-teal-300 transition-colors duration-300">${service.title}</h3>
+            <p class="text-slate-400 text-sm leading-relaxed font-medium transition-colors duration-300 group-hover:text-slate-300">${service.description}</p>
+            
+            <!-- Bottom Accent -->
+            <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-1 bg-gradient-to-r ${gradient} group-hover:w-1/2 transition-all duration-700 rounded-t-full"></div>
           </div>`;
         servicesGrid.innerHTML += serviceCard;
       });
@@ -1049,6 +1174,87 @@ const menuButton = document.getElementById("mobile-menu-button");
             bookingSpinner.classList.add('hidden');
         }
     });
+
+    // ==========================================
+    // ==========================================
+    // --- WHATSAPP LEAD FORM LOGIC (REFINED) ---
+    // ==========================================
+    const whatsappBtn = document.getElementById('whatsapp-button');
+    const whatsappModal = document.getElementById('whatsapp-modal');
+    const closeWhatsappBtn = document.getElementById('close-whatsapp-modal');
+    const whatsappForm = document.getElementById('whatsapp-lead-form');
+
+    const toggleWhatsappModal = (show) => {
+        if (!whatsappModal) return;
+        if (show) {
+            whatsappModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent background scroll
+            setTimeout(() => {
+                whatsappModal.classList.remove('opacity-0');
+                if (whatsappModal.querySelector('div')) whatsappModal.querySelector('div').classList.remove('scale-95');
+            }, 10);
+        } else {
+            whatsappModal.classList.add('opacity-0');
+            if (whatsappModal.querySelector('div')) whatsappModal.querySelector('div').classList.add('scale-95');
+            document.body.style.overflow = ''; // Restore scroll
+            setTimeout(() => {
+                whatsappModal.classList.add('hidden');
+            }, 300);
+        }
+    };
+
+    if (whatsappBtn) {
+        whatsappBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleWhatsappModal(true);
+        });
+    }
+
+    if (closeWhatsappBtn) {
+        closeWhatsappBtn.addEventListener('click', () => toggleWhatsappModal(false));
+    }
+
+    window.addEventListener('click', (e) => {
+        if (e.target === whatsappModal) toggleWhatsappModal(false);
+    });
+
+    if (whatsappForm) {
+        whatsappForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const submitBtn = whatsappForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Starting...';
+
+            const formData = new FormData(whatsappForm);
+            const name = formData.get('name');
+            const contact = formData.get('contact');
+            const userMsg = formData.get('message') || "I'm interested in your services.";
+
+            const messageText = `Hello Akash Mandal!\n\nI'm contacting you via your portfolio.\n\n*Name:* ${name}\n*Contact:* ${contact}\n*Message:* ${userMsg}`;
+            const encodedMsg = encodeURIComponent(messageText);
+            const waUrl = `https://wa.me/916297321207?text=${encodedMsg}`;
+
+            // Log lead in background
+            fetch('/api/leads/whatsapp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, contact, message: userMsg })
+            }).catch(err => console.error('Lead log error:', err));
+
+            // Redirect immediately
+            window.location.href = waUrl;
+            
+            // Cleanup
+            setTimeout(() => {
+                toggleWhatsappModal(false);
+                whatsappForm.reset();
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }, 1000);
+        });
+    }
 
   });
 </script>

@@ -849,12 +849,22 @@ app.delete('/api/admin/projects/:id', requireLogin, async (req, res) => {
 });
 
 // --- PROTECTED CRUD API ROUTES FOR SERVICES ---
-app.post('/api/admin/services', requireLogin, async (req, res) => {
+app.post('/api/admin/services', requireLogin, upload.single('serviceImage'), async (req, res) => {
     try {
-        const newService = new Service(req.body);
+        const serviceData = { ...req.body };
+        if (req.file) {
+            const formData = new FormData();
+            formData.append('image', req.file.buffer, { filename: req.file.originalname });
+            const response = await axios.post(`https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`, formData, { headers: formData.getHeaders() });
+            serviceData.imageUrl = response.data.data.url;
+        }
+        const newService = new Service(serviceData);
         await newService.save();
         res.status(201).json(newService);
-    } catch (error) { res.status(400).json({ message: error.message }); }
+    } catch (error) {
+        console.error('Error creating service:', error.response ? error.response.data : error.message);
+        res.status(400).json({ message: 'Error creating service.' });
+    }
 });
 
 app.get('/api/admin/services/:id', requireLogin, async (req, res) => {
@@ -864,11 +874,26 @@ app.get('/api/admin/services/:id', requireLogin, async (req, res) => {
     } catch (error) { res.status(404).json({ message: 'Service not found' }); }
 });
 
-app.put('/api/admin/services/:id', requireLogin, async (req, res) => {
+app.put('/api/admin/services/:id', requireLogin, upload.single('serviceImage'), async (req, res) => {
     try {
-        const updatedService = await Service.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const updateData = { ...req.body };
+        if (req.file) {
+            const formData = new FormData();
+            formData.append('image', req.file.buffer, { filename: req.file.originalname });
+            const response = await axios.post(`https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`, formData, { headers: formData.getHeaders() });
+            updateData.imageUrl = response.data.data.url;
+        } else {
+            // Keep the existing imageUrl if no new file is uploaded
+            const service = await Service.findById(req.params.id);
+            updateData.imageUrl = service ? service.imageUrl : '';
+        }
+
+        const updatedService = await Service.findByIdAndUpdate(req.params.id, updateData, { new: true });
         res.json(updatedService);
-    } catch (error) { res.status(400).json({ message: error.message }); }
+    } catch (error) {
+        console.error('Error updating service:', error.response ? error.response.data : error.message);
+        res.status(400).json({ message: 'Error updating service.' });
+    }
 });
 
 app.delete('/api/admin/services/:id', requireLogin, async (req, res) => {
@@ -984,6 +1009,23 @@ app.put('/api/admin/hero', requireLogin, upload.single('heroPhoto'), async (req,
     } catch (error) {
         console.error('Error updating hero section:', error.response ? error.response.data : error.message);
         res.status(400).json({ message: 'Error updating hero section.' });
+    }
+});
+
+// --- WhatsApp Lead Capture ---
+app.post('/api/leads/whatsapp', async (req, res) => {
+    try {
+        const { name, contact, message } = req.body;
+        const newLead = new Message({
+            name,
+            email: contact, // Mapping contact (phone or email) to email field
+            message: `[WhatsApp Lead]: ${message}`
+        });
+        await newLead.save();
+        res.json({ success: true, message: 'Lead captured successfully' });
+    } catch (error) {
+        console.error('Error capturing WhatsApp lead:', error);
+        res.status(500).json({ success: false, message: 'Failed to capture lead' });
     }
 });
 
