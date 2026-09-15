@@ -11,39 +11,45 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="/logo.png">
 <style>
+    html {
+        overflow-x: hidden;
+        max-width: 100%;
+    }
     body {
         font-family: 'Poppins', sans-serif;
         overflow-x: hidden;
+        max-width: 100%;
     }
-    
-    #main-header.header-scrolled { background-color: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+
+    #main-header.header-scrolled { background-color: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06); border-bottom: 1px solid rgba(15, 23, 42, 0.06); }
     .nav-link::after { content: ''; position: absolute; width: 100%; transform: scaleX(0); height: 2px; bottom: -6px; left: 0; background-color: #2dd4bf; transform-origin: bottom right; transition: transform 0.25s ease-out; }
     .nav-link:hover::after { transform: scaleX(1); transform-origin: bottom left; }
-    .nav-link.active-link { color: white; }
+    .nav-link.active-link { color: #0f172a; }
     .nav-link.active-link::after { transform: scaleX(1); transform-origin: bottom left; }
     #mobile-menu.menu-open { transform: translateY(0); }
     #mobile-menu-button.menu-open .line-1 { transform: translateY(9px) rotate(45deg); }
     #mobile-menu-button.menu-open .line-2 { opacity: 0; }
     #mobile-menu-button.menu-open .line-3 { transform: translateY(-9px) rotate(-45deg); }
+    #mobile-menu-button.menu-open .line { background-color: #ffffff; }
 
     @keyframes ripple-effect { to { transform: scale(4); opacity: 0; } }
     .ripple { position: fixed; border-radius: 50%; background: radial-gradient(circle, rgba(20, 184, 166, 0.5) 0%, rgba(20, 184, 166, 0) 70%); width: 150px; height: 150px; transform: translate(-50%, -50%); animation: ripple-effect 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards; pointer-events: none; z-index: -1; }
     
     .glass-card {
-        background: rgba(15, 23, 42, 0.6);
+        background: rgba(255, 255, 255, 0.72);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(15, 23, 42, 0.06);
+        box-shadow: 0 10px 40px -12px rgba(15, 23, 42, 0.14);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
     }
     .neon-text {
-        text-shadow: 0 0 10px rgba(45, 212, 191, 0.3), 0 0 20px rgba(45, 212, 191, 0.1);
+        text-shadow: 0 1px 1px rgba(15, 23, 42, 0.04);
     }
-    
+
     .gradient-border-button {
       position: relative;
-      background: #0f172a;
+      background: #ffffff;
       background-clip: padding-box;
       border: solid 2px transparent;
       border-radius: 0.75rem;
@@ -99,49 +105,113 @@
         opacity: 1;
         transform: translateY(0);
     }
+
+    /* ===== HERO WOW-FACTOR STYLES ===== */
+
+    /* Cursor-reactive spotlight glow */
+    #hero-spotlight {
+        background: radial-gradient(600px circle at var(--spot-x, 50%) var(--spot-y, 20%), rgba(45, 212, 191, 0.12), transparent 45%);
+        transition: background 0.1s ease-out;
+    }
+
+    /* Subtle filmic grain for a premium, non-flat feel */
+    .grain-overlay {
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        opacity: 0.035;
+        mix-blend-mode: multiply;
+    }
+
+    /* Organic morphing blob shape for the hero portrait */
+    @keyframes blob-morph {
+        0%, 100% { border-radius: 42% 58% 65% 35% / 55% 45% 55% 45%; }
+        25%      { border-radius: 58% 42% 35% 65% / 45% 60% 40% 55%; }
+        50%      { border-radius: 65% 35% 45% 55% / 35% 65% 40% 60%; }
+        75%      { border-radius: 35% 65% 55% 45% / 60% 40% 65% 35%; }
+    }
+    /* Only the soft blurred glow morphs; the portrait itself stays a true circle
+       so it never mismatches the circular rings drawn behind it. */
+    .hero-blob-glow { animation: blob-morph 14s ease-in-out infinite reverse; }
+
+    #hero-photo-wrap {
+        transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    #hero-photo-wrap:hover {
+        transform: scale(1.03);
+    }
+
+    /* Floating skill badges around the portrait */
+    @keyframes float-badge {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        50%      { transform: translateY(-10px) rotate(-3deg); }
+    }
+    .badge-float       { animation: float-badge 5s ease-in-out infinite; }
+    .badge-float-delay { animation: float-badge 6s ease-in-out infinite; animation-delay: 1s; }
+    .badge-float-delay2{ animation: float-badge 5.5s ease-in-out infinite; animation-delay: 2s; }
+
+    /* Typewriter caret */
+    @keyframes caret-blink { 0%, 45% { opacity: 1; } 46%, 100% { opacity: 0; } }
+    .typed-caret { animation: caret-blink 1s steps(1) infinite; }
+
+    /* Shine sweep across the primary CTA on hover */
+    .btn-shine { position: relative; overflow: hidden; }
+    .btn-shine::after {
+        content: '';
+        position: absolute;
+        top: 0; left: -75%;
+        width: 50%; height: 100%;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.45), transparent);
+        transform: skewX(-20deg);
+        transition: left 0.75s ease;
+    }
+    .btn-shine:hover::after { left: 125%; }
+
+    /* Scroll cue */
+    @keyframes scroll-dot {
+        0%   { transform: translateY(0); opacity: 1; }
+        80%  { transform: translateY(14px); opacity: 0; }
+        100% { opacity: 0; }
+    }
+    .animate-scroll-dot { animation: scroll-dot 1.6s ease-in-out infinite; }
 </style>
 </head>
-<body class="bg-slate-900 text-slate-300 relative">
+<body class="bg-white text-slate-600 relative">
 
   <!-- ============================================ -->
-  <!-- UNIFIED "AURORA GLOW" BACKGROUND -->
+  <!-- UNIFIED "AURORA GLOW" BACKGROUND (light) -->
   <!-- ============================================ -->
-    <div class="fixed top-0 left-0 w-full h-full -z-10 bg-slate-950 overflow-hidden">
-      <!-- Advanced Aurora Background -->
-      <div class="absolute w-[60rem] h-[60rem] bg-teal-500/20 rounded-full blur-[140px] animate-pulse-slow -top-40 -left-60 mix-blend-screen opacity-70"></div>
-      <div class="absolute w-[50rem] h-[50rem] bg-indigo-500/20 rounded-full blur-[140px] animate-pulse-slow bottom-0 -right-40 mix-blend-screen opacity-70" style="animation-delay: 2s;"></div>
-      <div class="absolute w-[40rem] h-[40rem] bg-emerald-500/15 rounded-full blur-[120px] animate-pulse-slow bottom-40 left-1/4 mix-blend-screen opacity-60" style="animation-delay: 4s;"></div>
-      <div class="absolute w-[35rem] h-[35rem] bg-cyan-500/10 rounded-full blur-[100px] animate-pulse-slow top-1/3 right-1/4 mix-blend-screen opacity-40" style="animation-delay: 6s;"></div>
-      
-      <!-- Subtle Pattern Overlay -->
-      <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTTAgNDBoNDBWMEgweiIgZmlsbD0ibm9uZSIvPjxwYXRoIGQ9Ik0wIDQwaDQwVjBIMHoiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjAyKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-40"></div>
+    <div class="fixed top-0 left-0 w-full h-full -z-10 bg-white overflow-hidden">
+      <!-- Soft, airy aurora wash -->
+      <div class="absolute w-[60rem] h-[60rem] bg-teal-200/50 rounded-full blur-[140px] animate-pulse-slow -top-40 -left-60 mix-blend-multiply opacity-70"></div>
+      <div class="absolute w-[50rem] h-[50rem] bg-indigo-200/40 rounded-full blur-[140px] animate-pulse-slow bottom-0 -right-40 mix-blend-multiply opacity-70" style="animation-delay: 2s;"></div>
+      <div class="absolute w-[40rem] h-[40rem] bg-emerald-200/40 rounded-full blur-[120px] animate-pulse-slow bottom-40 left-1/4 mix-blend-multiply opacity-60" style="animation-delay: 4s;"></div>
+      <div class="absolute w-[35rem] h-[35rem] bg-amber-200/30 rounded-full blur-[100px] animate-pulse-slow top-1/3 right-1/4 mix-blend-multiply opacity-50" style="animation-delay: 6s;"></div>
   </div>
 
   <!-- Preloader -->
-  <div id="preloader" class="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center z-[200] transition-opacity duration-700 ease-in-out">
+  <div id="preloader" class="fixed inset-0 bg-white flex flex-col items-center justify-center z-[200] transition-opacity duration-700 ease-in-out">
     <div class="relative flex flex-col items-center">
         <!-- Logo reflection/glow -->
-        <div class="absolute w-32 h-32 bg-teal-500/20 rounded-full blur-3xl animate-pulse"></div>
-        
+        <div class="absolute w-32 h-32 bg-teal-500/15 rounded-full blur-3xl animate-pulse"></div>
+
         <!-- Modern Spinner -->
         <div class="relative w-24 h-24 mb-6">
-            <div class="absolute inset-0 border-[3px] border-slate-800 rounded-full"></div>
-            <div class="absolute inset-0 border-t-[3px] border-teal-400 rounded-full animate-spin [animation-duration:0.8s]"></div>
-            <div class="absolute inset-3 border-t-[3px] border-cyan-400 rounded-full animate-spin [animation-direction:reverse] [animation-duration:1.2s]"></div>
-            
+            <div class="absolute inset-0 border-[3px] border-slate-200 rounded-full"></div>
+            <div class="absolute inset-0 border-t-[3px] border-teal-500 rounded-full animate-spin [animation-duration:0.8s]"></div>
+            <div class="absolute inset-3 border-t-[3px] border-cyan-500 rounded-full animate-spin [animation-direction:reverse] [animation-duration:1.2s]"></div>
+
             <!-- Center Dot -->
-            <div class="absolute inset-[40%] bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.5)] animate-pulse"></div>
+            <div class="absolute inset-[40%] bg-slate-800 rounded-full shadow-[0_0_15px_rgba(20,184,166,0.4)] animate-pulse"></div>
         </div>
-        
+
         <!-- Animated Text -->
         <div class="flex space-x-1">
-            <span class="text-white text-xs font-black tracking-widest uppercase opacity-40 animate-pulse">L</span>
-            <span class="text-white text-xs font-black tracking-widest uppercase opacity-40 animate-pulse [animation-delay:0.1s]">o</span>
-            <span class="text-white text-xs font-black tracking-widest uppercase opacity-40 animate-pulse [animation-delay:0.2s]">a</span>
-            <span class="text-white text-xs font-black tracking-widest uppercase opacity-40 animate-pulse [animation-delay:0.3s]">d</span>
-            <span class="text-white text-xs font-black tracking-widest uppercase opacity-40 animate-pulse [animation-delay:0.4s]">i</span>
-            <span class="text-white text-xs font-black tracking-widest uppercase opacity-40 animate-pulse [animation-delay:0.5s]">n</span>
-            <span class="text-white text-xs font-black tracking-widest uppercase opacity-40 animate-pulse [animation-delay:0.6s]">g</span>
+            <span class="text-slate-600 text-xs font-black tracking-widest uppercase opacity-60 animate-pulse">L</span>
+            <span class="text-slate-600 text-xs font-black tracking-widest uppercase opacity-60 animate-pulse [animation-delay:0.1s]">o</span>
+            <span class="text-slate-600 text-xs font-black tracking-widest uppercase opacity-60 animate-pulse [animation-delay:0.2s]">a</span>
+            <span class="text-slate-600 text-xs font-black tracking-widest uppercase opacity-60 animate-pulse [animation-delay:0.3s]">d</span>
+            <span class="text-slate-600 text-xs font-black tracking-widest uppercase opacity-60 animate-pulse [animation-delay:0.4s]">i</span>
+            <span class="text-slate-600 text-xs font-black tracking-widest uppercase opacity-60 animate-pulse [animation-delay:0.5s]">n</span>
+            <span class="text-slate-600 text-xs font-black tracking-widest uppercase opacity-60 animate-pulse [animation-delay:0.6s]">g</span>
         </div>
     </div>
   </div>
@@ -158,22 +228,22 @@
                   <img src="/logo.png" alt="Akash Logo" class="relative w-full h-full object-cover rounded-xl border border-white/10 shadow-2xl">
               </div>
               <div class="flex flex-col">
-                  <span class="text-lg md:text-xl font-black text-white tracking-tighter leading-none group-hover:text-teal-400 transition-colors">AKASH<span class="text-teal-500">.</span></span>
-                  <span class="text-[10px] font-bold text-slate-500 tracking-[0.2em] uppercase leading-none mt-1 group-hover:text-slate-400 transition-colors">Portfolio</span>
+                  <span class="text-lg md:text-xl font-black text-slate-900 tracking-tighter leading-none group-hover:text-teal-600 transition-colors">AKASH<span class="text-teal-500">.</span></span>
+                  <span class="text-[10px] font-bold text-slate-500 tracking-[0.2em] uppercase leading-none mt-1 group-hover:text-slate-600 transition-colors">Portfolio</span>
               </div>
           </a>
           <ul id="desktop-nav" class="hidden md:flex items-center space-x-8">
-              <li><a href="#about" data-navlink="about" class="nav-link text-slate-300 relative">About</a></li>
-              <li><a href="#experience" data-navlink="experience" class="nav-link text-slate-300 relative">Experience</a></li>
-              <li><a href="#projects" data-navlink="projects" class="nav-link text-slate-300 relative">Projects</a></li>
-              <li><a href="#services" data-navlink="services" class="nav-link text-slate-300 relative">Services</a></li>
-              <li><a href="#contact" data-navlink="contact" class="nav-link text-slate-300 relative">Contact</a></li>
+              <li><a href="#about" data-navlink="about" class="nav-link text-slate-600 relative">About</a></li>
+              <li><a href="#experience" data-navlink="experience" class="nav-link text-slate-600 relative">Experience</a></li>
+              <li><a href="#projects" data-navlink="projects" class="nav-link text-slate-600 relative">Projects</a></li>
+              <li><a href="#services" data-navlink="services" class="nav-link text-slate-600 relative">Services</a></li>
+              <li><a href="#contact" data-navlink="contact" class="nav-link text-slate-600 relative">Contact</a></li>
           </ul>
           <!-- This button has z-index of 50 to stay clickable -->
-          <button id="mobile-menu-button" class="md:hidden text-white z-50 w-8 h-8 flex flex-col justify-around">
-              <span class="line line-1 block h-0.5 w-full bg-white transition-transform duration-300 ease-in-out"></span>
-              <span class="line line-2 block h-0.5 w-full bg-white transition-opacity duration-300 ease-in-out"></span>
-              <span class="line line-3 block h-0.5 w-full bg-white transition-transform duration-300 ease-in-out"></span>
+          <button id="mobile-menu-button" class="md:hidden text-slate-800 z-50 w-8 h-8 flex flex-col justify-around">
+              <span class="line line-1 block h-0.5 w-full bg-slate-800 transition-transform duration-300 ease-in-out"></span>
+              <span class="line line-2 block h-0.5 w-full bg-slate-800 transition-opacity duration-300 ease-in-out"></span>
+              <span class="line line-3 block h-0.5 w-full bg-slate-800 transition-transform duration-300 ease-in-out"></span>
           </button>
       </nav>
 </header>
@@ -202,46 +272,117 @@
 <!-- ============================================ -->
 <!-- HERO SECTION (DYNAMIC & ANIMATED) -->
 <!-- ============================================ -->
-<section id="hero" class="min-h-screen flex items-center relative overflow-hidden ">
+<section id="hero" class="min-h-screen flex items-center relative overflow-hidden pt-28 pb-16">
 
 
-  <div class="container mx-auto px-4 w-full grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-12">
+  <div class="container mx-auto px-4 w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center relative z-10">
     <!-- Text Content -->
-    <div class="text-center md:text-left">
-      <span id="hero-greeting" class="text-teal-400 font-semibold text-lg"></span>
-      <h1 id="hero-headline" class="text-5xl md:text-7xl lg:text-8xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-emerald-300 to-cyan-300 mt-2 tracking-tighter neon-text drop-shadow-md pb-2"></h1>
-      <p id="hero-bio" class="mt-6 text-slate-400 text-lg md:text-xl font-light reveal max-w-2xl leading-relaxed"></p>
+    <div class="text-center md:text-left order-2 md:order-1">
+
+      <!-- Availability badge -->
+      <div class="inline-flex items-center gap-2 pl-2.5 pr-4 py-1.5 rounded-full glass-card border border-teal-500/20 mb-6">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+        </span>
+        <span class="text-xs font-semibold text-slate-600 tracking-wide">Open to new opportunities</span>
+      </div>
+
+      <span id="hero-greeting" class="text-teal-600 font-semibold text-lg block"></span>
+
+      <!-- Typewriter role kicker -->
+      <div class="mt-1 flex items-center justify-center md:justify-start text-lg md:text-xl font-semibold text-slate-500 h-8">
+        <span>I craft&nbsp;</span>
+        <span id="hero-roles" class="text-amber-600"></span>
+        <span class="typed-caret inline-block w-[2px] h-5 bg-amber-600 ml-1"></span>
+      </div>
+
+      <h1 id="hero-headline" class="text-5xl md:text-7xl lg:text-8xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 via-emerald-600 to-cyan-600 mt-2 tracking-tighter drop-shadow-sm pb-2"></h1>
+      <p id="hero-bio" class="mt-6 text-slate-600 text-lg md:text-xl font-light reveal max-w-2xl leading-relaxed"></p>
+
       <div class="mt-8 flex justify-center md:justify-start space-x-4 flex-wrap gap-y-4 reveal">
-        <a href="#contact" class="group relative inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-white transition-all duration-300 bg-gradient-to-r from-teal-500 to-emerald-500 border border-transparent rounded-xl overflow-hidden shadow-[0_0_20px_rgba(20,184,166,0.2)] hover:shadow-[0_0_30px_rgba(20,184,166,0.6)] hover:scale-105">
+        <a href="#contact" class="btn-shine group relative inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-white transition-all duration-300 bg-gradient-to-r from-teal-600 to-emerald-600 border border-transparent rounded-xl overflow-hidden shadow-[0_8px_24px_-8px_rgba(13,148,136,0.55)] hover:shadow-[0_12px_32px_-8px_rgba(13,148,136,0.7)] hover:scale-105">
           <span class="absolute w-0 h-0 transition-all duration-500 ease-out bg-white rounded-full group-hover:w-56 group-hover:h-56 opacity-10"></span>
           <span class="relative">Hire Me</span>
           <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
         </a>
-        <a href="#projects" class="gradient-border-button inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-slate-200 transition-all duration-300 hover:text-white shadow-lg shadow-teal-500/5 hover:shadow-teal-400/20 hover:-translate-y-1">
+        <a href="#projects" class="gradient-border-button inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-slate-700 transition-all duration-300 hover:text-teal-700 shadow-md shadow-slate-200/60 hover:shadow-lg hover:-translate-y-1">
           <span class="relative z-10">View Projects</span>
         </a>
-        <a href="/resume.html" target="_blank" class="gradient-border-button inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-teal-300 transition-all duration-300 hover:text-white shadow-lg shadow-teal-500/5 hover:shadow-teal-400/20 hover:-translate-y-1">
+        <a href="/resume.html" target="_blank" class="gradient-border-button inline-flex items-center justify-center px-8 py-3.5 text-base font-bold text-teal-700 transition-all duration-300 hover:text-teal-800 shadow-md shadow-slate-200/60 hover:shadow-lg hover:-translate-y-1">
           <span class="relative z-10">Resume</span>
           <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
         </a>
       </div>
+
+      <!-- Live stats, derived from real portfolio data -->
+      <div class="mt-12 grid grid-cols-3 gap-4 max-w-md mx-auto md:mx-0 reveal">
+        <div class="text-center md:text-left border-l-2 border-teal-500/40 pl-3">
+          <div class="text-3xl font-extrabold text-slate-900"><span id="stat-projects">0</span>+</div>
+          <div class="text-xs text-slate-500 uppercase tracking-wide mt-1">Projects Shipped</div>
+        </div>
+        <div class="text-center md:text-left border-l-2 border-teal-500/40 pl-3">
+          <div class="text-3xl font-extrabold text-slate-900"><span id="stat-skills">0</span>+</div>
+          <div class="text-xs text-slate-500 uppercase tracking-wide mt-1">Core Skills</div>
+        </div>
+        <div class="text-center md:text-left border-l-2 border-amber-500/50 pl-3">
+          <div class="text-3xl font-extrabold text-slate-900">100%</div>
+          <div class="text-xs text-slate-500 uppercase tracking-wide mt-1">Commitment</div>
+        </div>
+      </div>
+
+      <!-- Social dock -->
+      <div class="mt-8 flex items-center justify-center md:justify-start gap-3 reveal">
+        <a href="https://github.com/Akash6297" target="_blank" rel="noopener noreferrer" class="interactive-icon w-10 h-10 rounded-full glass-card border border-slate-200 flex items-center justify-center text-slate-500" title="GitHub">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.91 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+        <a href="#" target="_blank" rel="noopener noreferrer" class="interactive-icon w-10 h-10 rounded-full glass-card border border-slate-200 flex items-center justify-center text-slate-500" title="LinkedIn">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+        </a>
+        <a href="mailto:akashmandal6297@gmail.com" class="interactive-icon w-10 h-10 rounded-full glass-card border border-slate-200 flex items-center justify-center text-slate-500" title="Email">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+        </a>
+      </div>
     </div>
-    
-    <!-- Image with Animated Ring -->
-    <div class="flex justify-center p-4">
-      <div class="relative w-64 h-64 md:w-80 md:h-80">
-        <!-- The spinning ring -->
-        <div class="absolute -inset-4 rounded-full bg-gradient-to-r from-teal-500 to-cyan-500 opacity-20 blur-2xl animate-pulse-slow"></div>
-        <div class="absolute inset-0 border-[2px] border-dashed border-teal-500/40 rounded-full animate-spin [animation-duration:20s] hover:[animation-duration:5s] transition-all"></div>
-        <div class="absolute inset-2 border-[1px] border-solid border-teal-500/20 rounded-full"></div>
-        <div class="absolute inset-3 border-t-[3px] border-l-[3px] border-transparent border-t-teal-400 border-l-cyan-400 rounded-full animate-spin [animation-duration:8s] mix-blend-screen" style="animation-direction: reverse;"></div>
-        <!-- Image container -->
-        <div class="relative w-full h-full bg-slate-800 rounded-full flex items-center justify-center overflow-hidden shadow-2xl">
+
+    <!-- Image with animated rings & floating badges -->
+    <div class="order-1 md:order-2 flex justify-center p-4 relative">
+
+      <div class="hidden md:flex badge-float items-center gap-2 absolute left-2 top-4 glass-card border border-slate-200 px-3 py-2 rounded-xl shadow-xl z-20">
+        <svg class="w-4 h-4 text-amber-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M11.3 1.046a1 1 0 01.514 1.212L9.914 8.5h4.34a1 1 0 01.78 1.626l-8 10a1 1 0 01-1.774-.746L6.86 12.5H2.75a1 1 0 01-.78-1.626l8-10a1 1 0 011.33-.828z"/></svg>
+        <span class="text-xs font-bold text-slate-700 whitespace-nowrap">Fast Delivery</span>
+      </div>
+      <div class="hidden md:flex badge-float-delay items-center gap-2 absolute right-0 top-1/3 glass-card border border-slate-200 px-3 py-2 rounded-xl shadow-xl z-20">
+        <svg class="w-4 h-4 text-teal-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8L13 15l-4-4-6 6"/></svg>
+        <span class="text-xs font-bold text-slate-700 whitespace-nowrap">Growth Focused</span>
+      </div>
+      <div class="hidden md:flex badge-float-delay2 items-center gap-2 absolute left-0 bottom-8 glass-card border border-slate-200 px-3 py-2 rounded-xl shadow-xl z-20">
+        <svg class="w-4 h-4 text-cyan-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m8.485 2.515l-.707.707M21 12h-1M4 12H3m3.222-6.778l-.707-.707m2.121 12.02a5 5 0 116.728 0A4.978 4.978 0 0015 17h-6a4.978 4.978 0 00-1.636-1.86z"/></svg>
+        <span class="text-xs font-bold text-slate-700 whitespace-nowrap">Creative Solutions</span>
+      </div>
+
+      <div id="hero-photo-wrap" class="relative w-64 h-64 md:w-96 md:h-96">
+        <!-- Morphing glow behind the portrait -->
+        <div class="hero-blob-glow absolute -inset-6 bg-gradient-to-br from-teal-400 via-cyan-400 to-amber-300 opacity-40 blur-3xl"></div>
+        <!-- Orbit rings -->
+        <div class="absolute inset-0 border-[2px] border-dashed border-teal-500/50 rounded-full animate-spin [animation-duration:20s] hover:[animation-duration:5s] transition-all"></div>
+        <div class="absolute inset-3 border-[1px] border-solid border-teal-500/25 rounded-full"></div>
+        <div class="absolute inset-5 border-t-[3px] border-l-[3px] border-transparent border-t-teal-500 border-l-amber-500 rounded-full animate-spin [animation-duration:8s]" style="animation-direction: reverse;"></div>
+        <!-- Portrait -->
+        <div class="absolute inset-6 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden shadow-2xl ring-4 ring-white">
           <img id="hero-photo" src="" alt="Akash Mandal" class="object-cover w-full h-full">
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Scroll cue -->
+  <a href="#about" id="hero-scroll-cue" class="fixed bottom-6 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-2 z-30 group transition-opacity duration-500">
+    <span class="text-[10px] uppercase tracking-[0.3em] text-slate-500 group-hover:text-teal-600 transition-colors">Scroll</span>
+    <div class="w-5 h-9 rounded-full border border-slate-300 bg-white/50 backdrop-blur-sm group-hover:border-teal-500/60 flex justify-center p-1.5 transition-colors">
+      <div class="w-1 h-1 rounded-full bg-teal-500 animate-scroll-dot"></div>
+    </div>
+  </a>
 </section>
 
 <!-- ============================================ -->
@@ -250,38 +391,62 @@
 <section id="about" class="py-20">
   <div class="container mx-auto px-4">
     <div class="text-center mb-16 reveal">
-      <h2 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-teal-100 to-teal-400 tracking-tight drop-shadow-sm pb-2">About Me</h2>
-      <p class="text-teal-400">My journey and expertise</p>
+      <h2 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-700 via-cyan-600 to-emerald-600 tracking-tight pb-2">About Me</h2>
+      <p class="text-teal-600 font-medium">My journey and expertise</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
       <!-- Left Side: Illustration -->
-       <!-- Left Side: Illustration (NEW VERSION) -->
-      <div class="text-center hidden md:block">
-        <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="inline-block w-full max-w-sm">
-          <!-- Desk and Chair -->
-          <rect x="20" y="150" width="160" height="10" rx="5" fill="#1E293B"/>
-          <path d="M100 120 L100 150 M70 160 L70 175 L130 175 L130 160" stroke="#334155" stroke-width="6" stroke-linecap="round"/>
-          
-          <!-- Person -->
-          <circle cx="100" cy="90" r="15" fill="#475569"/>
-          <rect x="85" y="105" width="30" height="40" rx="15" fill="#475569"/>
-          
-          <!-- Laptop -->
-          <path d="M60 150 L65 120 L135 120 L140 150 Z" fill="#334155"/>
-          <rect x="70" y="122" width="60" height="3" rx="1.5" fill="#1E293B"/>
-          <rect x="75" y="128" width="50" height="2" rx="1" fill="#14B8A6"/>
-          <rect x="75" y="133" width="40" height="2" rx="1" fill="#14B8A6"/>
-          <rect x="75" y="138" width="45" height="2" rx="1" fill="#14B8A6"/>
-          
-          <!-- Animated Code Elements -->
-          <g class="animate-float">
-            <text fill="#2DD4BF" x="40" y="60" font-family="monospace" font-size="24" font-weight="bold" opacity="0.8">{ }</text>
-            <text fill="#2DD4BF" x="150" y="90" font-family="monospace" font-size="24" font-weight="bold" opacity="0.8"></></text>
-            <circle cx="165" cy="45" r="5" fill="#14B8A6" opacity="0.5"/>
-            <circle cx="30" cy="110" r="3" fill="#14B8A6" opacity="0.5"/>
-          </g>
-        </svg>
+      <div class="hidden md:flex justify-center reveal">
+        <div class="relative w-full max-w-sm">
+          <!-- Ambient blob glow, matches the hero portrait treatment -->
+          <div class="absolute -inset-8 bg-gradient-to-br from-teal-300 via-cyan-300 to-amber-200 opacity-40 blur-3xl rounded-full"></div>
+
+          <!-- Glass card frame, matches the site's glass-card language -->
+          <div class="relative glass-card border border-slate-200 rounded-[2rem] p-10 shadow-xl">
+            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full">
+              <defs>
+                <linearGradient id="aboutPersonGrad" x1="85" y1="75" x2="115" y2="145" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#0D9488"/>
+                  <stop offset="1" stop-color="#0891B2"/>
+                </linearGradient>
+                <linearGradient id="aboutLaptopGrad" x1="60" y1="120" x2="140" y2="150" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#0F766E"/>
+                  <stop offset="1" stop-color="#155E75"/>
+                </linearGradient>
+              </defs>
+
+              <!-- Desk and Chair -->
+              <rect x="20" y="150" width="160" height="10" rx="5" fill="#CBD5E1"/>
+              <path d="M100 120 L100 150 M70 160 L70 175 L130 175 L130 160" stroke="#94A3B8" stroke-width="6" stroke-linecap="round"/>
+
+              <!-- Person -->
+              <circle cx="100" cy="90" r="15" fill="url(#aboutPersonGrad)"/>
+              <rect x="85" y="105" width="30" height="40" rx="15" fill="url(#aboutPersonGrad)"/>
+
+              <!-- Laptop -->
+              <path d="M60 150 L65 120 L135 120 L140 150 Z" fill="url(#aboutLaptopGrad)"/>
+              <rect x="70" y="122" width="60" height="3" rx="1.5" fill="#0F172A"/>
+              <rect x="75" y="128" width="50" height="2" rx="1" fill="#5EEAD4"/>
+              <rect x="75" y="133" width="40" height="2" rx="1" fill="#67E8F9"/>
+              <rect x="75" y="138" width="45" height="2" rx="1" fill="#5EEAD4"/>
+
+              <!-- Animated Code Elements -->
+              <g class="animate-float">
+                <text fill="#0D9488" x="40" y="60" font-family="monospace" font-size="24" font-weight="bold" opacity="0.85">{ }</text>
+                <text fill="#0891B2" x="150" y="90" font-family="monospace" font-size="24" font-weight="bold" opacity="0.85"></></text>
+                <circle cx="165" cy="45" r="5" fill="#F59E0B" opacity="0.7"/>
+                <circle cx="30" cy="110" r="3" fill="#14B8A6" opacity="0.6"/>
+              </g>
+            </svg>
+          </div>
+
+          <!-- Floating accent badge, matches the hero's floating badges -->
+          <div class="hidden lg:flex badge-float items-center gap-2 absolute -right-4 -top-4 glass-card border border-slate-200 px-3 py-2 rounded-xl shadow-xl z-20">
+            <svg class="w-4 h-4 text-teal-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span class="text-xs font-bold text-slate-700 whitespace-nowrap">Clean Code</span>
+          </div>
+        </div>
       </div>
 
       <!-- Right Side: Text & Skills -->
@@ -289,8 +454,8 @@
         <div id="about-bio">
           <!-- Bio paragraphs will be injected here -->
         </div>
-        
-        <h3 class="text-2xl font-semibold text-white mt-8 mb-4">My Skills</h3>
+
+        <h3 class="text-2xl font-semibold text-slate-900 mt-8 mb-4">My Skills</h3>
         <div id="skills-container" class="flex flex-wrap gap-3">
           <!-- Skill tags will be injected here -->
         </div>
@@ -305,8 +470,8 @@
 <section id="experience" class="py-20">
   <div class="container mx-auto px-4">
     <div class="text-center mb-16 reveal">
-      <h2 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-teal-100 to-teal-400 tracking-tight drop-shadow-sm pb-2">My Experience</h2>
-      <p class="text-teal-400">A look at my professional journey</p>
+      <h2 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-700 via-cyan-600 to-emerald-600 tracking-tight pb-2">My Experience</h2>
+      <p class="text-teal-600 font-medium">A look at my professional journey</p>
     </div>
     <!-- The timeline will be injected here by JavaScript -->
     <div id="experience-timeline" class="relative max-w-3xl mx-auto">
@@ -323,8 +488,8 @@
   
   <div class="container mx-auto px-4">
     <div class="text-center mb-12 reveal">
-      <h2 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-teal-100 to-teal-400 tracking-tight drop-shadow-sm pb-2">My Projects</h2>
-      <p class="text-teal-400">A selection of my work</p>
+      <h2 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-700 via-cyan-600 to-emerald-600 tracking-tight pb-2">My Projects</h2>
+      <p class="text-teal-600 font-medium">A selection of my work</p>
     </div>
     <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       <!-- Project cards will be injected here by JavaScript -->
@@ -340,8 +505,8 @@
 
   <div class="container mx-auto px-4 relative z-10">
     <div class="text-center mb-12 reveal">
-      <h2 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-teal-100 to-teal-400 tracking-tight drop-shadow-sm pb-2">What I Offer</h2>
-      <p class="text-teal-400">Services to help you build your vision</p>
+      <h2 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-700 via-cyan-600 to-emerald-600 tracking-tight pb-2">What I Offer</h2>
+      <p class="text-teal-600 font-medium">Services to help you build your vision</p>
     </div>
     <div id="services-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       <!-- Service cards will be injected here by JavaScript -->
@@ -360,7 +525,7 @@
 <!-- CUSTOM BOOKING MODAL -->
 <!-- ============================================ -->
 <div id="booking-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 opacity-0 transition-opacity duration-300">
-    <div class="glass-card bg-slate-900/95 rounded-3xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] border border-slate-700 w-full max-w-2xl overflow-hidden transform scale-95 transition-transform duration-300">
+    <div class="bg-slate-900/95 backdrop-blur-xl rounded-3xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)] border border-slate-700 w-full max-w-2xl overflow-hidden transform scale-95 transition-transform duration-300">
         <!-- Modal Header -->
         <div class="bg-slate-800/80 border-b border-slate-700/50 p-6 md:p-8 backdrop-blur-xl flex justify-between items-center">
             <div>
@@ -444,8 +609,8 @@
   <div class="container mx-auto px-4">
     <!-- Section Title -->
     <div class="text-center mb-12 reveal">
-      <h2 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-teal-100 to-teal-400 tracking-tight drop-shadow-sm pb-2">Let's Connect</h2>
-      <p class="text-teal-400">Have a project in mind? I'd love to hear from you.</p>
+      <h2 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-700 via-cyan-600 to-emerald-600 tracking-tight pb-2">Let's Connect</h2>
+      <p class="text-teal-600 font-medium">Have a project in mind? I'd love to hear from you.</p>
     </div>
 
     <!-- CHANGED: Added animation style for fade-in-up effect -->
@@ -454,7 +619,7 @@
         
         <!-- Left Side: Contact Info & Illustration -->
         <!-- CHANGED: Adjusted padding and background for mobile responsiveness -->
-        <div class="p-6 md:p-8 md:bg-slate-800">
+        <div class="p-6 md:p-8 bg-slate-900">
           <h3 class="text-2xl font-bold text-white mb-6">Contact Information</h3>
           <ul class="space-y-6 text-slate-300">
             <li class="flex items-start space-x-4">
@@ -501,23 +666,23 @@
         <div class="p-6 md:p-8">
           <form id="contact-form" class="space-y-6">
             <div>
-              <label for="name" class="block text-sm font-medium text-slate-300 mb-2">Your Name</label>
-              <input type="text" id="name" name="name" required class="w-full bg-slate-900/40 border border-slate-700/60 rounded-xl py-3.5 px-5 text-white focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all shadow-inner placeholder-slate-500 backdrop-blur-md">
+              <label for="name" class="block text-sm font-medium text-slate-600 mb-2">Your Name</label>
+              <input type="text" id="name" name="name" required class="w-full bg-slate-50 border border-slate-300 rounded-xl py-3.5 px-5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all placeholder-slate-400">
             </div>
             <div>
-              <label for="email" class="block text-sm font-medium text-slate-300 mb-2">Your Email</label>
-              <input type="email" id="email" name="email" required class="w-full bg-slate-900/40 border border-slate-700/60 rounded-xl py-3.5 px-5 text-white focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-transparent transition-all shadow-inner placeholder-slate-500 backdrop-blur-md">
+              <label for="email" class="block text-sm font-medium text-slate-600 mb-2">Your Email</label>
+              <input type="email" id="email" name="email" required class="w-full bg-slate-50 border border-slate-300 rounded-xl py-3.5 px-5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all placeholder-slate-400">
             </div>
             <div>
-              <label for="message" class="block text-sm font-medium text-slate-300 mb-2">Message</label>
-              <textarea id="message" name="message" rows="5" required class="w-full bg-slate-700/50 border border-slate-600 rounded-md py-3 px-4 text-white resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all"></textarea>
+              <label for="message" class="block text-sm font-medium text-slate-600 mb-2">Message</label>
+              <textarea id="message" name="message" rows="5" required class="w-full bg-slate-50 border border-slate-300 rounded-md py-3 px-4 text-slate-900 resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all placeholder-slate-400"></textarea>
             </div>
-            <button id="submit-button" type="submit" class="w-full bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold py-4 px-6 rounded-xl hover:scale-[1.02] shadow-[0_4px_20px_rgba(20,184,166,0.3)] hover:shadow-[0_8px_30px_rgba(20,184,166,0.5)] transition-all duration-300 flex items-center justify-center disabled:opacity-50 border border-teal-400/20">
+            <button id="submit-button" type="submit" class="w-full bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-bold py-4 px-6 rounded-xl hover:scale-[1.02] shadow-[0_4px_20px_rgba(20,184,166,0.3)] hover:shadow-[0_8px_30px_rgba(20,184,166,0.5)] transition-all duration-300 flex items-center justify-center disabled:opacity-50 border border-teal-400/20">
               <span id="button-text">Send Message</span>
               <svg id="button-spinner" class="hidden w-5 h-5 animate-spin-fast" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
             </button>
             <p id="form-status" class="text-center mt-4 h-6"></p>
-          </div>
+          </form>
         </div>
 
       </div>
@@ -579,22 +744,23 @@
             </div>
         </div>
         <div class="text-center text-slate-500 mt-12 pt-8 border-t border-slate-700">
-            Â© <span id="current-year">2024</span> Akash Mandal. All Rights Reserved.
+            &copy; <span id="current-year">2024</span> Akash Mandal. All Rights Reserved.
         </div>
     </div>
 </footer>
 
 <!-- Floating Action Buttons -->
 <!-- WhatsApp Integration (Lead Form) -->
-<button id="whatsapp-button" class="fixed bottom-8 left-8 z-[1000] bg-green-500 text-white p-4 rounded-full shadow-[0_0_20px_rgba(34,197,94,0.4)] hover:bg-green-600 transition-all hover:scale-110 group" title="Chat on WhatsApp">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99 0-3.903-.52-5.58-1.45L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.886-.001 2.267.655 4.398 1.849 6.22l-1.054 3.858 3.996-1.057.009-.008z"/></svg>
+<button id="whatsapp-button" class="fixed bottom-8 left-8 z-[1000] bg-gradient-to-br from-green-400 to-emerald-600 text-white p-4 rounded-full ring-4 ring-white shadow-[0_8px_28px_-6px_rgba(16,185,129,0.6)] hover:shadow-[0_12px_36px_-6px_rgba(16,185,129,0.8)] transition-all hover:scale-110 group" title="Chat on WhatsApp">
+    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="currentColor" class="drop-shadow-sm"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99 0-3.903-.52-5.58-1.45L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.886-.001 2.267.655 4.398 1.849 6.22l-1.054 3.858 3.996-1.057.009-.008z"/></svg>
+    <span class="absolute inset-0 rounded-full bg-emerald-400 opacity-75 animate-ping [animation-duration:2.5s] -z-10"></span>
 </button>
 
 <div id="whatsapp-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[1001] p-4 opacity-0 transition-opacity duration-300">
-    <div class="glass-card bg-slate-900/95 rounded-3xl border border-slate-700 w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300">
+    <div class="bg-slate-900/95 backdrop-blur-xl rounded-3xl border border-slate-700 w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300">
         <div class="bg-green-600/20 border-b border-green-500/30 p-6 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white shadow-lg">
+                <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center text-white shadow-lg ring-2 ring-white/20">
                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99 0-3.903-.52-5.58-1.45L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.886-.001 2.267.655 4.398 1.849 6.22l-1.054 3.858 3.996-1.057.009-.008z"/></svg>
                 </div>
                 <div>
@@ -667,7 +833,7 @@
     document.body.addEventListener('click', (e) => {
         // IMPORTANT: Check if the click was on an interactive element.
         // If so, we do NOT create a ripple.
-        if (e.target.closest('a, button, input, textarea, .group, .bg-slate-800')) {
+        if (e.target.closest('a, button, input, textarea, .group, .bg-slate-900')) {
             return;
         }
 
@@ -751,24 +917,21 @@
     // Set current year in footer
     document.getElementById('current-year').textContent = new Date().getFullYear();
 
-    // --- SCROLL-TO-TOP BUTTON LOGIC ---
-    const scrollToTopBtn = document.getElementById('scroll-to-top');
-
-    window.addEventListener('scroll', () => {
-      // Show button if user has scrolled down 300px
-      if (window.scrollY > 300) {
-        scrollToTopBtn.classList.remove('hidden');
-      } else {
-        scrollToTopBtn.classList.add('hidden');
-      }
-    });
-
-    scrollToTopBtn.addEventListener('click', () => {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-    });
+    // --- HERO SCROLL CUE: fade out once the user starts scrolling ---
+    // (fixed to the viewport so it stays visible even when hero content
+    // is taller than the screen, instead of drifting below the fold)
+    const heroScrollCue = document.getElementById('hero-scroll-cue');
+    if (heroScrollCue) {
+      const toggleHeroScrollCue = () => {
+        if (window.scrollY > 120) {
+          heroScrollCue.classList.add('opacity-0', 'pointer-events-none');
+        } else {
+          heroScrollCue.classList.remove('opacity-0', 'pointer-events-none');
+        }
+      };
+      window.addEventListener('scroll', toggleHeroScrollCue);
+      toggleHeroScrollCue();
+    }
 
 const menuButton = document.getElementById("mobile-menu-button");
     const mobileMenu = document.getElementById("mobile-menu");
@@ -784,6 +947,63 @@ const menuButton = document.getElementById("mobile-menu-button");
         });
     });
     
+    // --- HERO WOW-FACTOR INTERACTIONS ---
+
+    // Cursor-reactive spotlight glow
+    const heroSectionEl = document.getElementById('hero');
+    const heroSpotlight = document.getElementById('hero-spotlight');
+    if (heroSectionEl && heroSpotlight) {
+        heroSectionEl.addEventListener('mousemove', (e) => {
+            const rect = heroSectionEl.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            heroSpotlight.style.setProperty('--spot-x', x + '%');
+            heroSpotlight.style.setProperty('--spot-y', y + '%');
+        });
+    }
+
+
+    // Typewriter effect cycling through what Akash builds
+    const heroRolesEl = document.getElementById('hero-roles');
+    const heroRoles = ['clean interfaces.', 'growth-driven campaigns.', 'brand stories.', 'digital experiences.'];
+    let roleIdx = 0, charIdx = 0, isDeleting = false;
+    function typeHeroRole() {
+        if (!heroRolesEl) return;
+        const current = heroRoles[roleIdx];
+        if (!isDeleting) {
+            charIdx++;
+            heroRolesEl.textContent = current.slice(0, charIdx);
+            if (charIdx === current.length) {
+                isDeleting = true;
+                setTimeout(typeHeroRole, 1800);
+                return;
+            }
+        } else {
+            charIdx--;
+            heroRolesEl.textContent = current.slice(0, charIdx);
+            if (charIdx === 0) {
+                isDeleting = false;
+                roleIdx = (roleIdx + 1) % heroRoles.length;
+            }
+        }
+        setTimeout(typeHeroRole, isDeleting ? 35 : 75);
+    }
+    typeHeroRole();
+
+    // Animated count-up for the hero stats (driven by real data, not placeholders)
+    function animateHeroCount(el, target) {
+        if (!el) return;
+        const duration = 1200;
+        const startTime = performance.now();
+        function step(now) {
+            const progress = Math.min((now - startTime) / duration, 1);
+            el.textContent = Math.floor(progress * target);
+            if (progress < 1) requestAnimationFrame(step);
+            else el.textContent = target;
+        }
+        requestAnimationFrame(step);
+    }
+
     // --- NEW: Function to Fetch and Render Hero Section ---
     async function fetchHero() {
         try {
@@ -796,6 +1016,11 @@ const menuButton = document.getElementById("mobile-menu-button");
                 document.getElementById('hero-photo').src = data.photoUrl;
             }
         } catch (error) {
+            // Graceful fallback so the hero still reads well if the API is briefly unavailable
+            document.getElementById('hero-greeting').textContent = "Hello, I'm Akash Mandal";
+            document.getElementById('hero-headline').textContent = 'Digital Marketing Specialist & Frontend Developer';
+            document.getElementById('hero-bio').textContent = 'Results-driven professional blending data-informed marketing with clean, performant frontend engineering to build brands that convert.';
+            document.getElementById('hero-photo').src = '/images/logo.jpeg';
             console.error('Error fetching hero data:', error);
         }
     }
@@ -812,14 +1037,16 @@ const menuButton = document.getElementById("mobile-menu-button");
 
             // Populate Bio
             bioContainer.innerHTML = `
-                <h3 class="text-2xl font-semibold text-white mb-4">Who Am I?</h3>
-                <p class="text-slate-400 mb-4">${data.bioParagraph1}</p>
-                <p class="text-slate-400">${data.bioParagraph2}</p>`;
+                <h3 class="text-2xl font-semibold text-slate-900 mb-4">Who Am I?</h3>
+                <p class="text-slate-600 mb-4">${data.bioParagraph1}</p>
+                <p class="text-slate-600">${data.bioParagraph2}</p>`;
 
             // Populate Skills
-            skillsContainer.innerHTML = data.skills.map(skill => 
-                `<span class="bg-slate-700 text-teal-400 font-semibold py-2 px-4 rounded-md transition-transform hover:-translate-y-1">${skill}</span>`
+            skillsContainer.innerHTML = data.skills.map(skill =>
+                `<span class="bg-teal-50 border border-teal-200 text-teal-700 font-semibold py-2 px-4 rounded-md transition-transform hover:-translate-y-1 hover:bg-teal-100">${skill}</span>`
             ).join('');
+
+            animateHeroCount(document.getElementById('stat-skills'), data.skills.length);
 
         } catch (error) {
             bioContainer.innerHTML = '<p class="text-red-500">Failed to load about information.</p>';
@@ -834,47 +1061,48 @@ const menuButton = document.getElementById("mobile-menu-button");
         const response = await fetch('/api/projects');
         const projects = await response.json();
         projectsGrid.innerHTML = '';
+        animateHeroCount(document.getElementById('stat-projects'), projects.length);
         projects.forEach(project => {
           const projectCard = `
-            <div class="flex flex-col h-full glass-card border border-slate-700/50 rounded-2xl overflow-hidden group hover:-translate-y-4 transition-all duration-500 hover:shadow-2xl hover:shadow-teal-500/30 reveal">
+            <div class="flex flex-col h-full glass-card border border-slate-200 rounded-2xl overflow-hidden group hover:-translate-y-4 transition-all duration-500 hover:shadow-2xl hover:shadow-teal-500/20 reveal">
               <!-- Image Container -->
               <div class="relative overflow-hidden w-full aspect-video">
                 <img src="${project.imageUrl}" alt="${project.name}" class="w-full h-full object-cover transform transition-transform duration-1000 group-hover:scale-110">
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500"></div>
-                
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/30 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500"></div>
+
                 <!-- Floating tags on top of image -->
                 <div class="absolute top-4 left-4 flex flex-wrap gap-2">
-                  ${project.tags.slice(0, 2).map(tag => `<span class="bg-slate-900/80 backdrop-blur-md text-teal-400 text-[10px] uppercase font-bold px-2 py-1 rounded-md border border-teal-500/30">${tag}</span>`).join('')}
+                  ${project.tags.slice(0, 2).map(tag => `<span class="bg-slate-900/80 backdrop-blur-md text-teal-300 text-[10px] uppercase font-bold px-2 py-1 rounded-md border border-teal-400/30">${tag}</span>`).join('')}
                 </div>
               </div>
 
               <!-- Content Container -->
-              <div class="flex flex-col grow p-7 relative bg-gradient-to-b from-slate-800/20 to-transparent">
+              <div class="flex flex-col grow p-7 relative bg-gradient-to-b from-slate-50/60 to-transparent">
                 <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-2xl font-bold text-white group-hover:text-teal-400 transition-colors leading-tight">${project.name}</h3>
+                    <h3 class="text-2xl font-bold text-slate-900 group-hover:text-teal-600 transition-colors leading-tight">${project.name}</h3>
                     <div class="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></div>
                 </div>
-                
-                <p class="text-slate-400 mb-6 line-clamp-2 text-sm leading-relaxed">${project.description}</p>
-                
+
+                <p class="text-slate-600 mb-6 line-clamp-2 text-sm leading-relaxed">${project.description}</p>
+
                 <!-- All Tags -->
                 <div class="flex flex-wrap gap-2 mb-8">
-                  ${project.tags.map(tag => `<span class="bg-teal-500/5 text-teal-300 font-medium py-1 px-3 rounded-lg text-[10px] border border-teal-500/10 hover:border-teal-500/40 transition-colors">${tag}</span>`).join('')}
+                  ${project.tags.map(tag => `<span class="bg-teal-50 text-teal-700 font-medium py-1 px-3 rounded-lg text-[10px] border border-teal-200 hover:border-teal-400 transition-colors">${tag}</span>`).join('')}
                 </div>
 
                 <!-- Footer Links -->
-                <div class="flex items-center gap-6 mt-auto pt-5 border-t border-slate-700/50">
+                <div class="flex items-center gap-6 mt-auto pt-5 border-t border-slate-200">
                   ${project.liveUrl ? `
-                  <a href="${project.liveUrl}" target="_blank" rel="noopener noreferrer" class="group/link flex items-center text-sm font-bold text-slate-200 hover:text-teal-400 transition-all duration-300">
-                    <span class="mr-2 p-1.5 rounded-lg bg-teal-500/10 group-hover/link:bg-teal-500/20 transition-colors">
+                  <a href="${project.liveUrl}" target="_blank" rel="noopener noreferrer" class="group/link flex items-center text-sm font-bold text-slate-700 hover:text-teal-600 transition-all duration-300">
+                    <span class="mr-2 p-1.5 rounded-lg bg-teal-50 group-hover/link:bg-teal-100 transition-colors">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                     </span>
                     Live Demo
                   </a>` : ''}
-                  
+
                   ${project.sourceUrl ? `
-                  <a href="${project.sourceUrl}" target="_blank" rel="noopener noreferrer" class="group/link flex items-center text-sm font-bold text-slate-200 hover:text-teal-400 transition-all duration-300">
-                    <span class="mr-2 p-1.5 rounded-lg bg-slate-700/50 group-hover/link:bg-slate-700/80 transition-colors text-white">
+                  <a href="${project.sourceUrl}" target="_blank" rel="noopener noreferrer" class="group/link flex items-center text-sm font-bold text-slate-700 hover:text-teal-600 transition-all duration-300">
+                    <span class="mr-2 p-1.5 rounded-lg bg-slate-100 group-hover/link:bg-slate-200 transition-colors text-slate-700">
                       <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.91 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
                     </span>
                     Code
@@ -910,27 +1138,27 @@ const menuButton = document.getElementById("mobile-menu-button");
         ];
         const gradient = gradients[index % gradients.length];
         
-        const iconHtml = service.imageUrl 
-            ? `<img src="${service.imageUrl}" alt="${service.title}" class="w-full h-full object-cover rounded-3xl transform group-hover:scale-110 transition-transform duration-500 shadow-2xl">`
-            : `<div class="w-10 h-10 text-teal-400 group-hover:scale-110 transition-transform duration-500">${service.iconSvg}</div>`;
+        const iconHtml = service.imageUrl
+            ? `<img src="${service.imageUrl}" alt="${service.title}" class="w-full h-full object-cover rounded-3xl transform group-hover:scale-110 transition-transform duration-500 shadow-lg">`
+            : `<div class="w-10 h-10 text-teal-600 group-hover:scale-110 transition-transform duration-500">${service.iconSvg}</div>`;
 
         const serviceCard = `
-          <div class="group relative glass-card border border-white/5 p-10 rounded-[2.5rem] text-center transition-all duration-700 hover:-translate-y-4 hover:shadow-[0_20px_50px_-20px_rgba(45,212,191,0.3)] reveal overflow-hidden">
+          <div class="group relative glass-card border border-slate-200 p-10 rounded-[2.5rem] text-center transition-all duration-700 hover:-translate-y-4 hover:shadow-[0_20px_50px_-20px_rgba(20,184,166,0.35)] reveal overflow-hidden">
             <!-- Background Glow -->
-            <div class="absolute -top-10 -right-10 w-32 h-32 bg-teal-500/10 rounded-full blur-3xl group-hover:bg-teal-500/20 transition-colors duration-700"></div>
-            
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-teal-400/15 rounded-full blur-3xl group-hover:bg-teal-400/25 transition-colors duration-700"></div>
+
             <!-- Icon/Image Container (Large & Vivid) -->
             <div class="relative inline-flex items-center justify-center mb-8">
-                <div class="absolute inset-0 bg-gradient-to-br ${gradient} opacity-20 rounded-3xl blur-xl group-hover:opacity-40 transition-opacity duration-700"></div>
-                <div class="relative w-24 h-24 flex items-center justify-center bg-slate-800/80 rounded-3xl border border-white/10 shadow-2xl transform group-hover:rotate-[10deg] transition-transform duration-500 overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br ${gradient} opacity-25 rounded-3xl blur-xl group-hover:opacity-40 transition-opacity duration-700"></div>
+                <div class="relative w-24 h-24 flex items-center justify-center bg-white rounded-3xl border border-slate-200 shadow-lg transform group-hover:rotate-[10deg] transition-transform duration-500 overflow-hidden">
                     ${iconHtml}
                 </div>
             </div>
 
             <!-- Content -->
-            <h3 class="text-2xl font-black text-white mb-4 tracking-tight group-hover:text-teal-300 transition-colors duration-300">${service.title}</h3>
-            <p class="text-slate-400 text-sm leading-relaxed font-medium transition-colors duration-300 group-hover:text-slate-300">${service.description}</p>
-            
+            <h3 class="text-2xl font-black text-slate-900 mb-4 tracking-tight group-hover:text-teal-600 transition-colors duration-300">${service.title}</h3>
+            <p class="text-slate-600 text-sm leading-relaxed font-medium transition-colors duration-300 group-hover:text-slate-700">${service.description}</p>
+
             <!-- Bottom Accent -->
             <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-1 bg-gradient-to-r ${gradient} group-hover:w-1/2 transition-all duration-700 rounded-t-full"></div>
           </div>`;
@@ -952,21 +1180,21 @@ const menuButton = document.getElementById("mobile-menu-button");
             if (experiences.length === 0) return;
 
             // Start with the vertical line
-            let timelineHTML = `<div class="absolute left-3 md:left-1/2 transform md:-translate-x-1/2 h-full w-0.5 bg-slate-700"></div>`;
-            
+            let timelineHTML = `<div class="absolute left-3 md:left-1/2 transform md:-translate-x-1/2 h-full w-0.5 bg-slate-300"></div>`;
+
             experiences.forEach((exp, index) => {
                 const isRightSide = index % 2 === 0; // Alternate sides
-                const alignmentClasses = isRightSide 
-                    ? 'md:text-left' 
+                const alignmentClasses = isRightSide
+                    ? 'md:text-left'
                     : 'md:text-right';
-                
-                const cardMargin = isRightSide 
-                    ? 'md:ml-[50%]' 
+
+                const cardMargin = isRightSide
+                    ? 'md:ml-[50%]'
                     : 'md:mr-[50%]';
-                
-                const datePosition = isRightSide 
-                    ? `<div class="w-full md:w-1/2"></div><div class="w-full md:w-1/2 md:pl-8 text-left"><p class="text-slate-400 font-medium">${exp.dateRange}</p></div>`
-                    : `<div class="w-full md:w-1/2 md:pr-8 text-right"><p class="text-slate-400 font-medium">${exp.dateRange}</p></div><div class="w-full md:w-1/2"></div>`;
+
+                const datePosition = isRightSide
+                    ? `<div class="w-full md:w-1/2"></div><div class="w-full md:w-1/2 md:pl-8 text-left"><p class="text-slate-500 font-medium">${exp.dateRange}</p></div>`
+                    : `<div class="w-full md:w-1/2 md:pr-8 text-right"><p class="text-slate-500 font-medium">${exp.dateRange}</p></div><div class="w-full md:w-1/2"></div>`;
 
                 timelineHTML += `
                     <div class="relative mb-12">
@@ -974,18 +1202,18 @@ const menuButton = document.getElementById("mobile-menu-button");
                         <div class="flex items-center">
                             <div class="hidden md:flex w-full">${datePosition}</div>
                             <div class="absolute left-0 md:left-1/2 transform -translate-x-1/2 z-10">
-                                <div class="w-6 h-6 rounded-full bg-slate-800 border-2 border-teal-500 flex items-center justify-center">
+                                <div class="w-6 h-6 rounded-full bg-white border-2 border-teal-500 flex items-center justify-center shadow-md">
                                     <div class="w-3 h-3 bg-teal-500 rounded-full"></div>
                                 </div>
                             </div>
                         </div>
                         <!-- Card -->
                         <div class="mt-6 md:mt-4 ml-10 md:ml-0 ${cardMargin}">
-                            <div class="glass-card border border-slate-700/50 p-6 rounded-xl shadow-lg hover:shadow-teal-500/10 transition-shadow duration-300 ${alignmentClasses} reveal">
-                                <p class="md:hidden text-teal-400 font-medium text-sm mb-2">${exp.dateRange}</p>
-                                <h3 class="text-xl font-bold text-white">${exp.title}</h3>
-                                <p class="text-teal-400/80 font-semibold mb-2">${exp.company}</p>
-                                <p class="text-slate-400">${exp.description}</p>
+                            <div class="glass-card border border-slate-200 p-6 rounded-xl shadow-md hover:shadow-lg hover:shadow-teal-500/10 transition-shadow duration-300 ${alignmentClasses} reveal">
+                                <p class="md:hidden text-teal-600 font-medium text-sm mb-2">${exp.dateRange}</p>
+                                <h3 class="text-xl font-bold text-slate-900">${exp.title}</h3>
+                                <p class="text-teal-600 font-semibold mb-2">${exp.company}</p>
+                                <p class="text-slate-600">${exp.description}</p>
                             </div>
                         </div>
                     </div>`;
