@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ─── CLASSIC TEMPLATE ────────────────────────────────────────────
     function renderClassic(data) {
-        const { personalInfo, experience, education, skills, projects, languages } = data;
+        const { personalInfo, experience, education, skills, skillCategories, projects, languages } = data;
         const p = personalInfo;
         const sections = getOrderedSections(data);
 
@@ -158,8 +158,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     `).join('');
                     break;
                 case 'skills':
-                    if (!skills?.length) return '';
-                    content = `<div class="skills-wrap">${skills.map(s => `<span class="skill-tag">${esc(s)}</span>`).join('')}</div>`;
+                    if (skillCategories?.length) {
+                        content = `<div class="skills-categories">${skillCategories.map(c => `<div class="skill-cat"><strong>${esc(c.name)}:</strong> ${esc(c.items)}</div>`).join('')}</div>`;
+                    } else if (skills?.length) {
+                        content = `<div class="skills-wrap">${skills.map(s => `<span class="skill-tag">${esc(s)}</span>`).join('')}</div>`;
+                    } else return '';
                     break;
                 case 'languages':
                     if (!languages?.length) return '';
@@ -191,7 +194,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ─── MODERN TEMPLATE ─────────────────────────────────────────────
     function renderModern(data) {
-        const { personalInfo: p, experience, education, skills, projects, languages } = data;
+        const { personalInfo: p, experience, education, skills, skillCategories, projects, languages } = data;
         const sections = getOrderedSections(data);
 
         const sidebarSections = ['skills', 'languages'];
@@ -269,7 +272,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                         ${p.github ? `<div class="rm-contact-item"><i class="fa-brands fa-github"></i><a href="${esc(p.github)}" target="_blank">GitHub</a></div>` : ''}
                     </div>
 
-                    ${skillsSec && skills?.length ? `
+                    ${skillsSec && skillCategories?.length ? `
+                        <div class="rm-sb-section">
+                            <div class="rm-sb-title">Skills</div>
+                            <div class="rm-skill-categories">
+                                ${skillCategories.map(c => `<div class="rm-skill-cat"><div class="rm-skill-cat-name">${esc(c.name)}</div><div class="rm-skill-cat-items">${esc(c.items)}</div></div>`).join('')}
+                            </div>
+                        </div>
+                    ` : skillsSec && skills?.length ? `
                         <div class="rm-sb-section">
                             <div class="rm-sb-title">Skills</div>
                             <div class="rm-skill-list">
@@ -298,7 +308,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ─── MINIMAL TEMPLATE ────────────────────────────────────────────
     function renderMinimal(data) {
-        const { personalInfo: p, experience, education, skills, projects, languages } = data;
+        const { personalInfo: p, experience, education, skills, skillCategories, projects, languages } = data;
         const sections = getOrderedSections(data);
 
         const contactHtml = [
@@ -355,8 +365,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     `).join('');
                     break;
                 case 'skills':
-                    if (!skills?.length) return '';
-                    content = `<div class="min-skills">${skills.map(s => `<span class="min-skill">${esc(s)}</span>`).join('')}</div>`;
+                    if (skillCategories?.length) {
+                        content = `<div class="min-skill-categories">${skillCategories.map(c => `<div class="min-skill-cat"><strong>${esc(c.name)}:</strong> ${esc(c.items)}</div>`).join('')}</div>`;
+                    } else if (skills?.length) {
+                        content = `<div class="min-skills">${skills.map(s => `<span class="min-skill">${esc(s)}</span>`).join('')}</div>`;
+                    } else return '';
                     break;
                 case 'languages':
                     if (!languages?.length) return '';

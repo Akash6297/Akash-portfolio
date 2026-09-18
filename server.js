@@ -251,6 +251,7 @@ app.put('/api/admin/resume', requireLogin, upload.single('resumePhoto'), async (
             }
         }
         
+        if (updateData.skillCategories && typeof updateData.skillCategories === 'string') updateData.skillCategories = JSON.parse(updateData.skillCategories);
         if (updateData.experience && typeof updateData.experience === 'string') updateData.experience = JSON.parse(updateData.experience);
         if (updateData.education && typeof updateData.education === 'string') updateData.education = JSON.parse(updateData.education);
         if (updateData.projects && typeof updateData.projects === 'string') updateData.projects = JSON.parse(updateData.projects);

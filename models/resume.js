@@ -30,6 +30,10 @@ const resumeSchema = new mongoose.Schema({
         description: { type: String, default: '' }
     }],
     skills: { type: [String], default: [] },
+    skillCategories: [{
+        name: { type: String, required: true },
+        items: { type: String, required: true }
+    }],
     languages: [{
         language: { type: String, required: true },
         proficiency: { type: String, required: true }

@@ -1327,6 +1327,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Populate Skills (Dynamic)
             populateDynamicArray('resume-skills-container', resume.skills || [], createSkillRow);
+            populateDynamicArray('resume-skill-categories-container', resume.skillCategories || [], createSkillCategoryRow);
 
             // Populate Dynamic Arrays
             populateDynamicArray('resume-experience-container', resume.experience || [], createExperienceRow);
@@ -1560,6 +1561,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return div;
     }
 
+    function createSkillCategoryRow(data = {}) {
+        const div = document.createElement('div');
+        div.className = 'skill-category-item flex flex-col md:flex-row gap-2 p-3 bg-slate-800/30 border border-slate-700/50 rounded-lg';
+        div.innerHTML = `
+            <input type="text" value="${data.name || ''}" placeholder="Category e.g. Backend" class="skill-cat-name md:w-48 bg-slate-900 border border-slate-600 p-2 rounded text-white focus:outline-none focus:border-teal-400 text-sm">
+            <input type="text" value="${data.items || ''}" placeholder="Node.js, Express.js, REST APIs, MongoDB" class="skill-cat-items flex-1 bg-slate-900 border border-slate-600 p-2 rounded text-white focus:outline-none focus:border-teal-400 text-sm">
+            <button type="button" class="text-slate-500 hover:text-red-500 transition hover:scale-110 self-center" title="Delete Category" onclick="this.parentElement.remove()">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            </button>
+        `;
+        return div;
+    }
+
     function createSkillRow(skill = '') {
         const div = document.createElement('div');
         div.className = 'resume-skill-item flex items-center gap-2 p-2 bg-slate-800/30 border border-slate-700/50 rounded-lg group';
@@ -1578,6 +1592,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('add-resume-skill')?.addEventListener('click', () => {
         document.getElementById('resume-skills-container').appendChild(createSkillRow());
+    });
+    document.getElementById('add-resume-skill-category')?.addEventListener('click', () => {
+        document.getElementById('resume-skill-categories-container').appendChild(createSkillCategoryRow());
     });
     document.getElementById('add-resume-education')?.addEventListener('click', () => {
         document.getElementById('resume-education-container').appendChild(createEducationRow());
@@ -1649,6 +1666,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const skillInputs = document.querySelectorAll('.skill-input');
             const skillsArray = Array.from(skillInputs).map(input => input.value).filter(val => val.trim() !== '');
             formData.append('skills', JSON.stringify(skillsArray));
+
+            const skillCategories = Array.from(document.querySelectorAll('.skill-category-item')).map(item => ({
+                name: item.querySelector('.skill-cat-name').value.trim(),
+                items: item.querySelector('.skill-cat-items').value.trim()
+            })).filter(c => c.name && c.items);
+            formData.append('skillCategories', JSON.stringify(skillCategories));
             formData.append('experience', JSON.stringify(experiences));
             formData.append('education', JSON.stringify(education));
             formData.append('projects', JSON.stringify(projects));

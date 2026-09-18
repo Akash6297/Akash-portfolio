@@ -720,6 +720,19 @@
                             <div id="resume-skills-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                                 <!-- Dynamic individual skill inputs will be here -->
                             </div>
+
+                            <div class="flex justify-between items-center mt-6 mb-4 pb-2 border-b border-slate-700/50">
+                                <div>
+                                    <h4 class="text-base font-bold text-teal-400">Skill Categories (optional)</h4>
+                                    <p class="text-xs text-slate-500 mt-0.5">e.g. "Backend: Node.js, Express.js, MongoDB" — shown as grouped lines instead of tags, if added.</p>
+                                </div>
+                                <button type="button" id="add-resume-skill-category" class="bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold py-1.5 px-3 rounded-lg flex items-center transition-colors">
+                                    <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>Add Category
+                                </button>
+                            </div>
+                            <div id="resume-skill-categories-container" class="space-y-3">
+                                <!-- Dynamic skill category rows will be here -->
+                            </div>
                         </div>
 
                         <!-- Experience -->
@@ -1262,6 +1275,15 @@ function downloadPreviewPdf() {
         .exp-desc { color:#374151; font-size:.85em; }
         .skills-wrap { display:flex; flex-wrap:wrap; gap:5px; }
         .skill-tag { background:#f1f5f9; border:1px solid #e2e8f0; color:#334155; padding:2px 9px; border-radius:3px; font-size:.78em; font-weight:500; }
+        .skills-categories { display:flex; flex-direction:column; gap:5px; }
+        .skill-cat { font-size:.86em; color:#374151; line-height:1.5; }
+        .skill-cat strong { color:#1e293b; font-weight:700; }
+        .rm-skill-categories { display:flex; flex-direction:column; gap:10px; }
+        .rm-skill-cat-name { font-size:.72em; font-weight:700; color:#fff; margin-bottom:3px; }
+        .rm-skill-cat-items { font-size:.72em; color:rgba(255,255,255,.75); line-height:1.4; }
+        .min-skill-categories { display:flex; flex-direction:column; gap:5px; align-items:center; }
+        .min-skill-cat { font-size:.84em; color:#475569; text-align:center; }
+        .min-skill-cat strong { color:#0f172a; font-weight:700; }
         .lang-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:5px; }
         .lang-item { font-size:.82em; }
         .resume-modern { display:grid; grid-template-columns:210px 1fr; width:820px; margin:0 auto; min-height:1120px; }
@@ -1460,6 +1482,12 @@ function collectFormData() {
     // Skills: use .skill-input (class from createSkillRow)
     const skills = [...document.querySelectorAll('.skill-input')].map(i => i.value.trim()).filter(Boolean);
 
+    // Skill categories: .skill-category-item containers, inputs use .skill-cat-name, .skill-cat-items
+    const skillCategories = [...document.querySelectorAll('.skill-category-item')].map(r => ({
+        name:  r.querySelector('.skill-cat-name')?.value.trim() || '',
+        items: r.querySelector('.skill-cat-items')?.value.trim() || '',
+    })).filter(c => c.name && c.items);
+
     // Experience: .resume-experience-item containers, inputs use .exp-company, .exp-position etc.
     const experience = [...document.querySelectorAll('.resume-experience-item')].map(r => ({
         company:     r.querySelector('.exp-company')?.value || '',
@@ -1500,10 +1528,10 @@ function collectFormData() {
     // Sections: read from resumeSections global (set by renderSectionConfig)
     const sections = (typeof resumeSections !== 'undefined' && resumeSections?.length) ? resumeSections : null;
 
-    return { selectedTemplate: tpl, personalInfo: p, experience, education, skills, projects, languages, sections };
+    return { selectedTemplate: tpl, personalInfo: p, experience, education, skills, skillCategories, projects, languages, sections };
 }
 
-function buildSec(sec, p, experience, education, skills, projects, languages, tpl) {
+function buildSec(sec, p, experience, education, skills, projects, languages, tpl, skillCategories) {
     switch(sec.id) {
         case 'summary':
             if (!p.summary) return '';
@@ -1534,6 +1562,10 @@ function buildSec(sec, p, experience, education, skills, projects, languages, tp
                 return `<div class="edu-item"><div class="exp-header"><div><div class="exp-company">${pvE(ed.institution)}</div><div class="exp-role">${pvE(ed.degree)}${scoreH}</div></div><span class="exp-date">${pvE(ed.startDate)}&ndash;${pvE(ed.endDate)}</span></div><div class="exp-desc ql-editor">${ed.description||''}</div></div>`;
             }).join('');
         case 'skills':
+            if (skillCategories?.length) {
+                if (tpl==='minimal') return `<div class="min-skill-categories">${skillCategories.map(c=>`<div class="min-skill-cat"><strong>${pvE(c.name)}:</strong> ${pvE(c.items)}</div>`).join('')}</div>`;
+                return `<div class="skills-categories">${skillCategories.map(c=>`<div class="skill-cat"><strong>${pvE(c.name)}:</strong> ${pvE(c.items)}</div>`).join('')}</div>`;
+            }
             if (!skills?.length) return '';
             if (tpl==='minimal') return `<div class="min-skills">${skills.map(s=>`<span class="min-skill">${pvE(s)}</span>`).join('')}</div>`;
             return `<div class="skills-wrap">${skills.map(s=>`<span class="skill-tag">${pvE(s)}</span>`).join('')}</div>`;
@@ -1549,7 +1581,7 @@ function renderLivePreview() {
     if (!previewEnabled) return;
     const canvas = document.getElementById('resume-canvas-inner');
     if (!canvas) return;
-    const {selectedTemplate:tpl, personalInfo:p, experience, education, skills, projects, languages, sections} = collectFormData();
+    const {selectedTemplate:tpl, personalInfo:p, experience, education, skills, skillCategories, projects, languages, sections} = collectFormData();
     const defs = [{id:'summary',name:'Summary',order:0,isVisible:true},{id:'experience',name:'Experience',order:1,isVisible:true},{id:'projects',name:'Projects',order:2,isVisible:true},{id:'education',name:'Education',order:3,isVisible:true},{id:'skills',name:'Skills',order:4,isVisible:true},{id:'languages',name:'Languages',order:5,isVisible:true}];
     const ordered = [...(sections||defs)].sort((a,b)=>a.order-b.order).filter(s=>s.isVisible);
     let html = '';
@@ -1558,8 +1590,11 @@ function renderLivePreview() {
         const mainSx=ordered.filter(s=>!sbIds.includes(s.id));
         const skSec=ordered.find(s=>s.id==='skills');
         const lgSec=ordered.find(s=>s.id==='languages');
-        const mainH=mainSx.map(s=>{const c=buildSec(s,p,experience,education,skills,projects,languages,tpl);return c?`<div><div class="rm-section-title">${pvE(s.name)}</div>${c}</div>`:''}).join('');
-        html=`<div class="resume-modern"><div class="rm-sidebar">${p.photoUrl?`<img src="${pvE(p.photoUrl)}" class="rm-photo" alt="">`:''}<div class="rm-name">${pvE(p.name)||'Your Name'}</div><div class="rm-role">${pvE(p.title)||'Title'}</div><div class="rm-sb-section"><div class="rm-sb-title">Contact</div>${p.email?`<div class="rm-contact-item"><i class="fa-solid fa-envelope"></i>${pvE(p.email)}</div>`:''}${p.phone?`<div class="rm-contact-item"><i class="fa-solid fa-phone"></i>${pvE(p.phone)}</div>`:''}${p.address?`<div class="rm-contact-item"><i class="fa-solid fa-location-dot"></i>${pvE(p.address)}</div>`:''}${p.linkedin?`<div class="rm-contact-item"><i class="fa-brands fa-linkedin"></i>LinkedIn</div>`:''}${p.github?`<div class="rm-contact-item"><i class="fa-brands fa-github"></i>GitHub</div>`:''}</div>${skSec&&skills.length?`<div class="rm-sb-section"><div class="rm-sb-title">Skills</div><div class="rm-skill-list">${skills.map(s=>`<div class="rm-skill-item">${pvE(s)}</div>`).join('')}</div></div>`:''}${lgSec&&languages.length?`<div class="rm-sb-section"><div class="rm-sb-title">Languages</div>${languages.map(l=>`<div class="rm-lang-item"><div class="rm-lang-name">${pvE(l.language)}</div><div class="rm-lang-level">${pvE(l.proficiency)}</div></div>`).join('')}</div>`:''}</div><div class="rm-main">${mainH||'<div style="padding:20px;color:#94a3b8;font-size:12px;">Fill the form to see preview.</div>'}</div></div>`;
+        const mainH=mainSx.map(s=>{const c=buildSec(s,p,experience,education,skills,projects,languages,tpl,skillCategories);return c?`<div><div class="rm-section-title">${pvE(s.name)}</div>${c}</div>`:''}).join('');
+        const skillsSbH = skillCategories?.length
+            ? `<div class="rm-skill-categories">${skillCategories.map(c=>`<div class="rm-skill-cat"><div class="rm-skill-cat-name">${pvE(c.name)}</div><div class="rm-skill-cat-items">${pvE(c.items)}</div></div>`).join('')}</div>`
+            : `<div class="rm-skill-list">${skills.map(s=>`<div class="rm-skill-item">${pvE(s)}</div>`).join('')}</div>`;
+        html=`<div class="resume-modern"><div class="rm-sidebar">${p.photoUrl?`<img src="${pvE(p.photoUrl)}" class="rm-photo" alt="">`:''}<div class="rm-name">${pvE(p.name)||'Your Name'}</div><div class="rm-role">${pvE(p.title)||'Title'}</div><div class="rm-sb-section"><div class="rm-sb-title">Contact</div>${p.email?`<div class="rm-contact-item"><i class="fa-solid fa-envelope"></i>${pvE(p.email)}</div>`:''}${p.phone?`<div class="rm-contact-item"><i class="fa-solid fa-phone"></i>${pvE(p.phone)}</div>`:''}${p.address?`<div class="rm-contact-item"><i class="fa-solid fa-location-dot"></i>${pvE(p.address)}</div>`:''}${p.linkedin?`<div class="rm-contact-item"><i class="fa-brands fa-linkedin"></i>LinkedIn</div>`:''}${p.github?`<div class="rm-contact-item"><i class="fa-brands fa-github"></i>GitHub</div>`:''}</div>${skSec&&(skillCategories?.length||skills.length)?`<div class="rm-sb-section"><div class="rm-sb-title">Skills</div>${skillsSbH}</div>`:''}${lgSec&&languages.length?`<div class="rm-sb-section"><div class="rm-sb-title">Languages</div>${languages.map(l=>`<div class="rm-lang-item"><div class="rm-lang-name">${pvE(l.language)}</div><div class="rm-lang-level">${pvE(l.proficiency)}</div></div>`).join('')}</div>`:''}</div><div class="rm-main">${mainH||'<div style="padding:20px;color:#94a3b8;font-size:12px;">Fill the form to see preview.</div>'}</div></div>`;
     } else if (tpl==='minimal') {
         const contact=[
             p.email   && `<span><i class="fa-solid fa-envelope"></i>${pvE(p.email)}</span>`,
@@ -1568,7 +1603,7 @@ function renderLivePreview() {
             p.linkedin && `<span><i class="fa-brands fa-linkedin"></i>LinkedIn</span>`,
             p.github   && `<span><i class="fa-brands fa-github"></i>GitHub</span>`
         ].filter(Boolean).join('');
-        const secsH=ordered.map(s=>{const c=buildSec(s,p,experience,education,skills,projects,languages,tpl);return c?`<div><div class="min-section-title">${pvE(s.name)}</div>${c}</div>`:''}).join('');
+        const secsH=ordered.map(s=>{const c=buildSec(s,p,experience,education,skills,projects,languages,tpl,skillCategories);return c?`<div><div class="min-section-title">${pvE(s.name)}</div>${c}</div>`:''}).join('');
         html=`<div class="resume-minimal"><div class="min-header">${p.photoUrl?`<img src="${pvE(p.photoUrl)}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin:0 auto 12px;display:block;border:3px solid #e2e8f0;" alt="">`:''}<div class="min-name">${pvE(p.name)||'YOUR NAME'}</div><div class="min-title">${pvE(p.title)||'Title'}</div><div class="min-contact">${contact}</div></div>${secsH||'<div style="padding:20px;text-align:center;color:#94a3b8;font-size:12px;">Fill the form.</div>'}</div>`;
     } else {
         const contact=[
@@ -1578,7 +1613,7 @@ function renderLivePreview() {
             p.linkedin && `<span><i class="fa-brands fa-linkedin"></i>LinkedIn</span>`,
             p.github   && `<span><i class="fa-brands fa-github"></i>GitHub</span>`
         ].filter(Boolean).join('');
-        const secsH=ordered.map(s=>{const c=buildSec(s,p,experience,education,skills,projects,languages,tpl);return c?`<div><div class="section-title">${pvE(s.name)}</div>${c}</div>`:''}).join('');
+        const secsH=ordered.map(s=>{const c=buildSec(s,p,experience,education,skills,projects,languages,tpl,skillCategories);return c?`<div><div class="section-title">${pvE(s.name)}</div>${c}</div>`:''}).join('');
         html=`<div class="resume-classic"><div class="rc-header"><div style="flex:1;"><div class="rc-name">${pvE(p.name)||'Your Name'}</div><div class="rc-title">${pvE(p.title)||'Your Title'}</div><div class="rc-contact">${contact}</div></div>${p.photoUrl?`<img src="${pvE(p.photoUrl)}" class="rc-photo ${p.photoShape==='circle'?'circle':''}" alt="">`:''}</div>${secsH||'<div style="padding:20px;color:#94a3b8;font-size:12px;">Fill the form to see preview.</div>'}</div>`;
     }
     canvas.innerHTML = html;
@@ -1628,6 +1663,15 @@ document.addEventListener('DOMContentLoaded', () => {
 .resume-canvas-inner .exp-desc{color:#374151;font-size:.85em;}
 .resume-canvas-inner .skills-wrap{display:flex;flex-wrap:wrap;gap:5px;}
 .resume-canvas-inner .skill-tag{background:#f1f5f9;border:1px solid #e2e8f0;color:#334155;padding:2px 9px;border-radius:3px;font-size:.78em;font-weight:500;}
+.resume-canvas-inner .skills-categories{display:flex;flex-direction:column;gap:5px;}
+.resume-canvas-inner .skill-cat{font-size:.86em;color:#374151;line-height:1.5;}
+.resume-canvas-inner .skill-cat strong{color:#1e293b;font-weight:700;}
+.resume-canvas-inner .rm-skill-categories{display:flex;flex-direction:column;gap:10px;}
+.resume-canvas-inner .rm-skill-cat-name{font-size:.72em;font-weight:700;color:#fff;margin-bottom:3px;}
+.resume-canvas-inner .rm-skill-cat-items{font-size:.72em;color:rgba(255,255,255,.75);line-height:1.4;}
+.resume-canvas-inner .min-skill-categories{display:flex;flex-direction:column;gap:5px;align-items:center;}
+.resume-canvas-inner .min-skill-cat{font-size:.84em;color:#475569;text-align:center;}
+.resume-canvas-inner .min-skill-cat strong{color:#0f172a;font-weight:700;}
 .resume-canvas-inner .lang-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:5px;}
 .resume-canvas-inner .lang-item{font-size:.82em;}
 .resume-canvas-inner .resume-modern{display:grid;grid-template-columns:190px 1fr;min-height:800px;}
