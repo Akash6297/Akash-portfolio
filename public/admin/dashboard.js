@@ -18,6 +18,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const experienceForm = document.getElementById('experience-form');
     const experiencesTableBody = document.getElementById('experiences-table-body');
     const clearExperienceFormBtn = document.getElementById('clear-experience-form');
+    const certificationForm = document.getElementById('certification-form');
+    const certificationsTableBody = document.getElementById('certifications-table-body');
+    const clearCertificationFormBtn = document.getElementById('clear-certification-form');
+    const achievementForm = document.getElementById('achievement-form');
+    const achievementsTableBody = document.getElementById('achievements-table-body');
+    const clearAchievementFormBtn = document.getElementById('clear-achievement-form');
     const aboutForm = document.getElementById('about-form');
     const projectImagePreview = document.getElementById('project-image-preview');
     const projectImagePlaceholder = document.getElementById('project-image-placeholder');
@@ -146,6 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setupImagePreview('project-image-file', 'project-image-preview', 'project-image-placeholder');
     setupImagePreview('service-image-file', 'service-image-preview', 'service-image-placeholder');
+    setupImagePreview('certification-image-file', 'certification-image-preview', 'certification-image-placeholder');
+    setupImagePreview('achievement-image-file', 'achievement-image-preview', 'achievement-image-placeholder');
     
     // --- UI FUNCTIONALITY: SECTION TOGGLING (CORRECTED) ---
   
@@ -268,6 +276,176 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (target.classList.contains('delete-btn') && target.dataset.type === 'experience') {
             deleteInfo = { id, type: 'experience' };
+            deleteModal.classList.remove('hidden');
+        }
+    });
+
+    // --- CERTIFICATIONS MANAGEMENT ---
+    const fetchCertifications = async () => {
+        const certifications = await apiRequest('GET', '/api/certifications');
+        if (!certifications) return;
+        certificationsTableBody.innerHTML = '';
+        certifications.forEach(cert => {
+            const row = `
+                <tr data-id="${cert._id}" class="hover:bg-slate-800/30 transition-colors">
+                    <td class="p-4 border-t border-slate-700 font-bold text-slate-200">${cert.title}</td>
+                    <td class="p-4 border-t border-slate-700 text-slate-400 text-sm">${cert.issuer}</td>
+                    <td class="p-4 border-t border-slate-700 text-sm">${cert.credentialUrl ? `<span class="text-teal-400">Linked</span>` : `<span class="text-slate-500">No link</span>`}</td>
+                    <td class="p-4 border-t border-slate-700">
+                        <button class="edit-certification-btn bg-teal-500/10 text-teal-400 border border-teal-500/30 hover:bg-teal-500 hover:text-white p-2 rounded-lg transition-all duration-300 mr-1">
+                            <svg class="w-4 h-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                        </button>
+                        <button class="delete-btn bg-red-600/10 text-red-500 border border-red-500/30 hover:bg-red-600 hover:text-white p-2 rounded-lg transition-all duration-300" data-type="certification" title="Delete Certification">
+                            <svg class="w-4 h-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                    </td>
+                </tr>`;
+            certificationsTableBody.insertAdjacentHTML('beforeend', row);
+        });
+    };
+
+    const clearCertificationForm = () => {
+        certificationForm.reset();
+        certificationForm.querySelector('#certification-id').value = '';
+        certificationForm.querySelector('#certification-imageUrl').value = '';
+        const preview = document.getElementById('certification-image-preview');
+        const placeholder = document.getElementById('certification-image-placeholder');
+        if (preview) { preview.src = ''; preview.classList.add('hidden'); }
+        if (placeholder) placeholder.classList.remove('hidden');
+    };
+
+    certificationForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = certificationForm.querySelector('#certification-id').value;
+        const formData = new FormData(certificationForm);
+        const url = id ? `/api/admin/certifications/${id}` : '/api/admin/certifications';
+        const method = id ? 'PUT' : 'POST';
+        const result = await apiRequest(method, url, formData);
+        if (result) {
+            clearCertificationForm();
+            await fetchCertifications();
+            showToast('Certification saved successfully!');
+        }
+    });
+
+    clearCertificationFormBtn.addEventListener('click', clearCertificationForm);
+
+    certificationsTableBody.addEventListener('click', async (e) => {
+        const target = e.target;
+        const row = target.closest('tr');
+        if (!row) return;
+        const id = row.dataset.id;
+
+        if (target.classList.contains('edit-certification-btn')) {
+            const [cert] = await apiRequest('GET', `/api/admin/certifications/${id}`);
+            if (!cert) return;
+            certificationForm.querySelector('#certification-id').value = cert._id;
+            certificationForm.querySelector('#certification-title').value = cert.title;
+            certificationForm.querySelector('#certification-issuer').value = cert.issuer;
+            certificationForm.querySelector('#certification-issueDate').value = cert.issueDate;
+            certificationForm.querySelector('#certification-credentialId').value = cert.credentialId || '';
+            certificationForm.querySelector('#certification-credentialUrl').value = cert.credentialUrl || '';
+            certificationForm.querySelector('#certification-imageUrl').value = cert.imageUrl || '';
+
+            const preview = document.getElementById('certification-image-preview');
+            const placeholder = document.getElementById('certification-image-placeholder');
+            if (cert.imageUrl) {
+                preview.src = cert.imageUrl;
+                preview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            } else {
+                preview.src = '';
+                preview.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+            }
+        }
+
+        if (target.classList.contains('delete-btn') && target.dataset.type === 'certification') {
+            deleteInfo = { id, type: 'certification' };
+            deleteModal.classList.remove('hidden');
+        }
+    });
+
+    // --- ACHIEVEMENTS MANAGEMENT ---
+    const fetchAchievements = async () => {
+        const achievements = await apiRequest('GET', '/api/achievements');
+        if (!achievements) return;
+        achievementsTableBody.innerHTML = '';
+        achievements.forEach(ach => {
+            const row = `
+                <tr data-id="${ach._id}" class="hover:bg-slate-800/30 transition-colors">
+                    <td class="p-4 border-t border-slate-700 font-bold text-slate-200">${ach.title}</td>
+                    <td class="p-4 border-t border-slate-700 text-slate-400 text-sm">${ach.date || '-'}</td>
+                    <td class="p-4 border-t border-slate-700">
+                        <button class="edit-achievement-btn bg-teal-500/10 text-teal-400 border border-teal-500/30 hover:bg-teal-500 hover:text-white p-2 rounded-lg transition-all duration-300 mr-1">
+                            <svg class="w-4 h-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                        </button>
+                        <button class="delete-btn bg-red-600/10 text-red-500 border border-red-500/30 hover:bg-red-600 hover:text-white p-2 rounded-lg transition-all duration-300" data-type="achievement" title="Delete Achievement">
+                            <svg class="w-4 h-4 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                    </td>
+                </tr>`;
+            achievementsTableBody.insertAdjacentHTML('beforeend', row);
+        });
+    };
+
+    const clearAchievementForm = () => {
+        achievementForm.reset();
+        achievementForm.querySelector('#achievement-id').value = '';
+        achievementForm.querySelector('#achievement-imageUrl').value = '';
+        const preview = document.getElementById('achievement-image-preview');
+        const placeholder = document.getElementById('achievement-image-placeholder');
+        if (preview) { preview.src = ''; preview.classList.add('hidden'); }
+        if (placeholder) placeholder.classList.remove('hidden');
+    };
+
+    achievementForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = achievementForm.querySelector('#achievement-id').value;
+        const formData = new FormData(achievementForm);
+        const url = id ? `/api/admin/achievements/${id}` : '/api/admin/achievements';
+        const method = id ? 'PUT' : 'POST';
+        const result = await apiRequest(method, url, formData);
+        if (result) {
+            clearAchievementForm();
+            await fetchAchievements();
+            showToast('Achievement saved successfully!');
+        }
+    });
+
+    clearAchievementFormBtn.addEventListener('click', clearAchievementForm);
+
+    achievementsTableBody.addEventListener('click', async (e) => {
+        const target = e.target;
+        const row = target.closest('tr');
+        if (!row) return;
+        const id = row.dataset.id;
+
+        if (target.classList.contains('edit-achievement-btn')) {
+            const [ach] = await apiRequest('GET', `/api/admin/achievements/${id}`);
+            if (!ach) return;
+            achievementForm.querySelector('#achievement-id').value = ach._id;
+            achievementForm.querySelector('#achievement-title').value = ach.title;
+            achievementForm.querySelector('#achievement-description').value = ach.description;
+            achievementForm.querySelector('#achievement-date').value = ach.date || '';
+            achievementForm.querySelector('#achievement-link').value = ach.link || '';
+            achievementForm.querySelector('#achievement-imageUrl').value = ach.imageUrl || '';
+
+            const preview = document.getElementById('achievement-image-preview');
+            const placeholder = document.getElementById('achievement-image-placeholder');
+            if (ach.imageUrl) {
+                preview.src = ach.imageUrl;
+                preview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            } else {
+                preview.src = '';
+                preview.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+            }
+        }
+
+        if (target.classList.contains('delete-btn') && target.dataset.type === 'achievement') {
+            deleteInfo = { id, type: 'achievement' };
             deleteModal.classList.remove('hidden');
         }
     });
@@ -652,6 +830,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (type === 'project') await fetchProjects();
                 else if (type === 'service') await fetchServices();
                 else if (type === 'experience') await fetchExperiences();
+                else if (type === 'certification') await fetchCertifications();
+                else if (type === 'achievement') await fetchAchievements();
                 else if (type === 'message') await fetchMessages();
                 else if (type === 'booking') await fetchBookings();
             }
@@ -970,6 +1150,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sectionId === 'experience-management') fetchExperiences();
         if (sectionId === 'projects-management') fetchProjects();
         if (sectionId === 'services-management') fetchServices();
+        if (sectionId === 'certifications-management') fetchCertifications();
+        if (sectionId === 'achievements-management') fetchAchievements();
         if (sectionId === 'resume-management') if (typeof loadResume === 'function') loadResume();
         if (sectionId === 'bookings-management') {
             fetchBookings();

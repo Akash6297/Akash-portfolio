@@ -25,6 +25,8 @@ const EmailTemplate = require('./models/emailTemplate');
 const Booking = require('./models/booking');
 const BookingSetting = require('./models/bookingSetting');
 const Resume = require('./models/resume');
+const Certification = require('./models/certification');
+const Achievement = require('./models/achievement');
 
 // --- Multer, App, Port, DB Connection, Middleware (UNCHANGED) ---
 const storage = multer.memoryStorage();
@@ -161,6 +163,24 @@ app.get('/api/projects', async (req, res) => {
 app.get('/api/services', async (req, res) => {
     try {
         const data = await Service.find();
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+app.get('/api/certifications', async (req, res) => {
+    try {
+        const data = await Certification.find().sort({ createdAt: -1 });
+        res.json(data);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+app.get('/api/achievements', async (req, res) => {
+    try {
+        const data = await Achievement.find().sort({ createdAt: -1 });
         res.json(data);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -900,6 +920,112 @@ app.delete('/api/admin/services/:id', requireLogin, async (req, res) => {
     try {
         await Service.findByIdAndDelete(req.params.id);
         res.json({ message: 'Service deleted successfully' });
+    } catch (error) { res.status(500).json({ message: error.message }); }
+});
+
+// --- PROTECTED CRUD API ROUTES FOR CERTIFICATIONS ---
+app.post('/api/admin/certifications', requireLogin, upload.single('certificationImage'), async (req, res) => {
+    try {
+        const certData = { ...req.body };
+        if (req.file) {
+            const formData = new FormData();
+            formData.append('image', req.file.buffer, { filename: req.file.originalname });
+            const response = await axios.post(`https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`, formData, { headers: formData.getHeaders() });
+            certData.imageUrl = response.data.data.url;
+        }
+        const newCert = new Certification(certData);
+        await newCert.save();
+        res.status(201).json(newCert);
+    } catch (error) {
+        console.error('Error creating certification:', error.response ? error.response.data : error.message);
+        res.status(400).json({ message: 'Error creating certification.' });
+    }
+});
+
+app.get('/api/admin/certifications/:id', requireLogin, async (req, res) => {
+    try {
+        const cert = await Certification.findById(req.params.id);
+        res.json([cert]);
+    } catch (error) { res.status(404).json({ message: 'Certification not found' }); }
+});
+
+app.put('/api/admin/certifications/:id', requireLogin, upload.single('certificationImage'), async (req, res) => {
+    try {
+        const updateData = { ...req.body };
+        if (req.file) {
+            const formData = new FormData();
+            formData.append('image', req.file.buffer, { filename: req.file.originalname });
+            const response = await axios.post(`https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`, formData, { headers: formData.getHeaders() });
+            updateData.imageUrl = response.data.data.url;
+        } else {
+            const cert = await Certification.findById(req.params.id);
+            updateData.imageUrl = cert ? cert.imageUrl : '';
+        }
+        const updatedCert = await Certification.findByIdAndUpdate(req.params.id, updateData, { new: true });
+        res.json(updatedCert);
+    } catch (error) {
+        console.error('Error updating certification:', error.response ? error.response.data : error.message);
+        res.status(400).json({ message: 'Error updating certification.' });
+    }
+});
+
+app.delete('/api/admin/certifications/:id', requireLogin, async (req, res) => {
+    try {
+        await Certification.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Certification deleted successfully' });
+    } catch (error) { res.status(500).json({ message: error.message }); }
+});
+
+// --- PROTECTED CRUD API ROUTES FOR ACHIEVEMENTS ---
+app.post('/api/admin/achievements', requireLogin, upload.single('achievementImage'), async (req, res) => {
+    try {
+        const achData = { ...req.body };
+        if (req.file) {
+            const formData = new FormData();
+            formData.append('image', req.file.buffer, { filename: req.file.originalname });
+            const response = await axios.post(`https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`, formData, { headers: formData.getHeaders() });
+            achData.imageUrl = response.data.data.url;
+        }
+        const newAchievement = new Achievement(achData);
+        await newAchievement.save();
+        res.status(201).json(newAchievement);
+    } catch (error) {
+        console.error('Error creating achievement:', error.response ? error.response.data : error.message);
+        res.status(400).json({ message: 'Error creating achievement.' });
+    }
+});
+
+app.get('/api/admin/achievements/:id', requireLogin, async (req, res) => {
+    try {
+        const achievement = await Achievement.findById(req.params.id);
+        res.json([achievement]);
+    } catch (error) { res.status(404).json({ message: 'Achievement not found' }); }
+});
+
+app.put('/api/admin/achievements/:id', requireLogin, upload.single('achievementImage'), async (req, res) => {
+    try {
+        const updateData = { ...req.body };
+        if (req.file) {
+            const formData = new FormData();
+            formData.append('image', req.file.buffer, { filename: req.file.originalname });
+            const response = await axios.post(`https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`, formData, { headers: formData.getHeaders() });
+            updateData.imageUrl = response.data.data.url;
+        } else {
+            const achievement = await Achievement.findById(req.params.id);
+            updateData.imageUrl = achievement ? achievement.imageUrl : '';
+        }
+        const updatedAchievement = await Achievement.findByIdAndUpdate(req.params.id, updateData, { new: true });
+        res.json(updatedAchievement);
+    } catch (error) {
+        console.error('Error updating achievement:', error.response ? error.response.data : error.message);
+        res.status(400).json({ message: 'Error updating achievement.' });
+    }
+});
+
+app.delete('/api/admin/achievements/:id', requireLogin, async (req, res) => {
+    try {
+        await Achievement.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Achievement deleted successfully' });
     } catch (error) { res.status(500).json({ message: error.message }); }
 });
 
