@@ -1,7 +1,11 @@
 // Personal details, availability and copy used across the site.
-// Edit this file to change your headline, bio, availability or contact details.
+//
+// These are the built-in defaults. Once you import content in the admin panel
+// (/admin), the database copy is used instead and this file becomes the fallback.
 
-export const profile = {
+import type { ProfileData } from './types';
+
+export const profile: ProfileData = {
   name: 'Akash Mandal',
   shortName: 'Akash',
   brand: 'AKASH.',
@@ -16,6 +20,13 @@ export const profile = {
     timezone: 'Asia/Kolkata',
   },
   email: 'akashmandal6297@gmail.com',
+  /** WhatsApp number in international format, digits only (e.g. 9198xxxxxxxx). Empty hides the WhatsApp option. */
+  whatsapp: '',
+  socials: [
+    { id: 'github', label: 'GitHub', handle: '@Akash6297', href: 'https://github.com/Akash6297' },
+    { id: 'linkedin', label: 'LinkedIn', handle: 'in/akash-mandal07', href: 'https://www.linkedin.com/in/akash-mandal07/' },
+    { id: 'email', label: 'Email', handle: 'akashmandal6297@gmail.com', href: 'mailto:akashmandal6297@gmail.com' },
+  ],
   resume: {
     href: '/resume/Akash-Mandal-Resume.pdf',
     fileName: 'Akash-Mandal-Resume.pdf',
@@ -43,7 +54,9 @@ export const profile = {
   experienceSummary: '2+ years',
 
   hero: {
-    headline: 'Building digital experiences that actually work.',
+    /** Wrap words in *asterisks* to set them in italics. */
+    /** Wrap words in *asterisks* to set them in italics. */
+    headline: 'Building digital experiences that *actually work*.',
     statement:
       'I engineer modern web applications, scalable backend systems, and digital products that solve real problems.',
     intro:
@@ -78,6 +91,4 @@ export const profile = {
     statement: 'Designed and engineered by Akash Mandal. Built with Next.js, deployed on Vercel.',
     closing: 'Thanks for scrolling this far.',
   },
-} as const;
-
-export type Profile = typeof profile;
+};

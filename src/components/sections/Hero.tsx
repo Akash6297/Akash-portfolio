@@ -1,9 +1,5 @@
 import { ArrowDown, ArrowRight } from 'lucide-react';
-import { profile } from '@/data/profile';
-import { socials } from '@/data/socials';
-import { skillGroups } from '@/data/skills';
-import { sortedProjects } from '@/data/projects';
-import { experience } from '@/data/experience';
+import type { ExperienceItem, ProfileData, Project, SkillGroup } from '@/data/types';
 import { Availability } from '@/components/ui/Availability';
 import { ButtonLink } from '@/components/ui/Button';
 import { Magnetic } from '@/components/ui/MagneticLink';
@@ -12,7 +8,34 @@ import { formatMonth } from '@/lib/utils';
 
 const delay = (ms: number) => ({ animationDelay: `${ms}ms` }) as React.CSSProperties;
 
-export function Hero() {
+/** Renders *wrapped* words in italics; a trailing period is set in the accent colour. */
+function Headline({ text }: { text: string }) {
+  const trimmed = text.trim();
+  const endsWithPeriod = trimmed.endsWith('.');
+  const body = endsWithPeriod ? trimmed.slice(0, -1) : trimmed;
+  const parts = body.split(/(\*[^*]+\*)/g).filter(Boolean);
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.startsWith('*') && part.endsWith('*') ? (
+          <em key={i} className="italic text-fg/95">{part.slice(1, -1)}</em>
+        ) : (
+          <span key={i}>{part}</span>
+        ),
+      )}
+      {endsWithPeriod && <span className="text-accent">.</span>}
+    </>
+  );
+}
+
+interface HeroProps {
+  profile: ProfileData;
+  skillGroups: SkillGroup[];
+  projects: Project[];
+  experience: ExperienceItem[];
+}
+
+export function Hero({ profile, skillGroups, projects, experience }: HeroProps) {
   // Only the data the terminal needs is sent to the browser.
   const terminalData: TerminalData = {
     name: profile.name,
@@ -22,9 +45,9 @@ export function Hero() {
     availability: profile.availability.open ? profile.availability.label : 'Not taking new work right now',
     email: profile.email,
     resume: profile.resume.href,
-    socials: socials.map(({ label, href, handle }) => ({ label, href, handle })),
+    socials: profile.socials.map(({ label, href, handle }) => ({ label, href, handle })),
     skills: skillGroups.map((g) => ({ title: g.title, items: g.skills.map((s) => s.name) })),
-    projects: sortedProjects.map(({ slug, name, tagline, category }) => ({ slug, name, tagline, category })),
+    projects: projects.map(({ slug, name, tagline, category }) => ({ slug, name, tagline, category })),
     experience: experience.map((e) => ({
       period: `${formatMonth(e.start)} – ${formatMonth(e.end)}`,
       role: e.role,
@@ -36,7 +59,7 @@ export function Hero() {
     { label: 'Currently', value: `${profile.current.role} at ${profile.current.company}` },
     { label: 'Based in', value: `${profile.location.city}, ${profile.location.region} · IST` },
     { label: 'Core stack', value: 'React · Next.js · Node.js · MongoDB · PostgreSQL' },
-    { label: 'Experience', value: `${profile.experienceSummary} · ${sortedProjects.length} projects documented` },
+    { label: 'Experience', value: `${profile.experienceSummary} · ${projects.length} projects documented` },
   ];
 
   return (
@@ -47,12 +70,11 @@ export function Hero() {
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-10">
           <div className="lg:col-span-7">
             <div className="animate-enter" style={delay(0)}>
-              <Availability />
+              <Availability availability={profile.availability} />
             </div>
 
             <h1 id="hero-title" className="font-display mt-7 text-[clamp(2.9rem,8.4vw,5.9rem)] text-fg animate-enter" style={delay(80)}>
-              Building digital experiences that <em className="italic text-fg/95">actually work</em>
-              <span className="text-accent">.</span>
+              <Headline text={profile.hero.headline} />
             </h1>
 
             <p className="mt-7 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[13px] text-muted animate-enter" style={delay(160)}>

@@ -1,10 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Geist, Instrument_Serif } from 'next/font/google';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
 import { Providers } from '@/components/layout/Providers';
 import { RevealObserver } from '@/components/layout/RevealObserver';
-import { personJsonLd, websiteJsonLd, jsonLdScript } from '@/lib/structured-data';
 import { site, siteUrl } from '@/lib/site';
 import { profile } from '@/data/profile';
 import './globals.css';
@@ -56,7 +53,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         {/* Marks JS as available before first paint so reveal styles never hide content without JS. */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript([personJsonLd(), websiteJsonLd()])} />
       </head>
       <body>
         <a
@@ -65,11 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to content
         </a>
-        <Providers>
-          <Header />
-          <main id="main">{children}</main>
-          <Footer />
-        </Providers>
+        <Providers>{children}</Providers>
         <RevealObserver />
       </body>
     </html>

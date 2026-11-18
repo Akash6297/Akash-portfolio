@@ -1,14 +1,14 @@
 import Image from 'next/image';
-import { profile } from '@/data/profile';
-import { education } from '@/data/experience';
+import type { EducationItem, ProfileData } from '@/data/types';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { canOptimize } from '@/lib/utils';
 
-export function About() {
+export function About({ profile, education }: { profile: ProfileData; education: EducationItem[] }) {
   const degree = education[0];
   const facts = [
     { k: 'Based in', v: profile.location.label },
     { k: 'Experience', v: `${profile.experienceSummary}, professional and freelance` },
-    { k: 'Education', v: `${degree.degree} — ${degree.institution} (${degree.start}–${degree.end})` },
+    ...(degree ? [{ k: 'Education', v: `${degree.degree} — ${degree.institution} (${degree.start}–${degree.end})` }] : []),
     { k: 'Languages', v: profile.about.languages.map((l) => `${l.language} (${l.level.toLowerCase()})`).join(', ') },
   ];
 
@@ -27,6 +27,7 @@ export function About() {
             <div className="relative aspect-[4/5] overflow-hidden rounded-lg border border-line bg-surface">
               <Image
                 src={profile.portrait.src}
+                unoptimized={!canOptimize(profile.portrait.src)}
                 alt={profile.portrait.alt}
                 fill
                 sizes="(min-width: 1024px) 380px, (min-width: 640px) 60vw, 100vw"

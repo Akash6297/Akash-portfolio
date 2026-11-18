@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import type { ImageAsset } from '@/data/types';
-import { cn, hostname } from '@/lib/utils';
+import { canOptimize, cn, hostname } from '@/lib/utils';
 
 interface BrowserFrameProps {
   image: ImageAsset;
@@ -30,6 +30,7 @@ export function BrowserFrame({ image, url, priority, sizes = '(min-width: 1024px
       <div className="relative overflow-hidden bg-bg" style={{ aspectRatio: `${image.width} / ${image.height}` }}>
         <Image
           src={image.src}
+          unoptimized={!canOptimize(image.src)}
           alt={image.alt}
           fill
           sizes={sizes}
@@ -46,7 +47,7 @@ export function PhoneFrame({ image, className }: { image: ImageAsset; className?
   return (
     <figure className={cn('mx-auto w-full max-w-[260px] overflow-hidden rounded-[28px] border border-line-strong bg-surface p-2', className)}>
       <div className="relative overflow-hidden rounded-[20px] bg-bg" style={{ aspectRatio: '390 / 760' }}>
-        <Image src={image.src} alt={image.alt} fill sizes="260px" className="object-cover object-top" />
+        <Image src={image.src} unoptimized={!canOptimize(image.src)} alt={image.alt} fill sizes="260px" className="object-cover object-top" />
       </div>
     </figure>
   );

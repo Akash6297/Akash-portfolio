@@ -164,3 +164,19 @@
   }
   .js [data-reveal]:not([data-revealed]) { opacity: 1; transform: none; }
 }
+
+/* ── Resume (public /resume page and admin preview) ─────────────────────── */
+.resume-paper {
+  width: 210mm;
+  min-height: 297mm;
+  background: #fff;
+  color-scheme: light;
+  -webkit-font-smoothing: antialiased;
+}
+.resume-paper a { color: inherit; }
+
+@media print {
+  @page { size: A4; margin: 0; }
+  html, body { background: #fff !important; }
+  .resume-paper { width: 100%; min-height: auto; }
+}

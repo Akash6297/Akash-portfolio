@@ -1,10 +1,11 @@
-import { sortedProjects, filterLabels } from '@/data/projects';
+import { filterLabels } from '@/data/projects';
+import type { Project } from '@/data/types';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { ProjectsExplorer, type ProjectSummary } from '@/components/projects/ProjectsExplorer';
 
-export function Projects() {
+export function Projects({ projects }: { projects: Project[] }) {
   // Send only what the list needs; case-study text stays on the server.
-  const items: ProjectSummary[] = sortedProjects.map(({ caseStudy: _caseStudy, gallery: _gallery, ...rest }) => rest);
+  const items: ProjectSummary[] = projects.map(({ caseStudy: _caseStudy, gallery: _gallery, ...rest }) => rest);
 
   return (
     <section id="projects" aria-labelledby="projects-title" className="py-20 md:py-28">

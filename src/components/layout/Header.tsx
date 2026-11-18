@@ -5,10 +5,9 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence } from 'motion/react';
 import * as m from 'motion/react-m';
-import { Download, Menu, X } from 'lucide-react';
+import { FileText, Menu, X } from 'lucide-react';
 import { navItems } from '@/lib/site';
-import { profile } from '@/data/profile';
-import { socials } from '@/data/socials';
+import type { Social } from '@/data/types';
 import { cn } from '@/lib/utils';
 
 function useActiveSection(enabled: boolean) {
@@ -41,7 +40,13 @@ function useActiveSection(enabled: boolean) {
   return active;
 }
 
-export function Header() {
+interface HeaderProps {
+  name: string;
+  resumeHref: string;
+  socials: Social[];
+}
+
+export function Header({ name, resumeHref, socials }: HeaderProps) {
   const pathname = usePathname();
   const isHome = pathname === '/';
   const active = useActiveSection(isHome);
@@ -86,7 +91,7 @@ export function Header() {
       )}
     >
       <nav aria-label="Main" className="container-page flex h-16 items-center justify-between gap-6">
-        <Link href="/" className="relative z-10 text-[15px] font-semibold tracking-[0.12em] text-fg" aria-label={`${profile.name} — home`}>
+        <Link href="/" className="relative z-10 text-[15px] font-semibold tracking-[0.12em] text-fg" aria-label={`${name} — home`}>
           AKASH<span className="text-accent">.</span>
         </Link>
 
@@ -111,14 +116,13 @@ export function Header() {
         </ul>
 
         <div className="flex items-center gap-2">
-          <a
-            href={profile.resume.href}
-            download={profile.resume.fileName}
+          <Link
+            href={resumeHref}
             className="hidden min-h-9 items-center gap-2 rounded-md border border-line-strong px-3.5 text-sm text-fg transition-colors hover:border-subtle hover:bg-raised sm:inline-flex"
           >
-            <Download className="size-3.5" aria-hidden />
+            <FileText className="size-3.5" aria-hidden />
             Resume
-          </a>
+          </Link>
           <button
             ref={menuButton}
             type="button"
@@ -166,13 +170,12 @@ export function Header() {
               ))}
             </ul>
             <div className="container-page mt-auto flex flex-col gap-4 py-8">
-              <a
-                href={profile.resume.href}
-                download={profile.resume.fileName}
+              <Link
+                href={resumeHref}
                 className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-fg text-sm font-medium text-bg"
               >
-                <Download className="size-4" aria-hidden /> Download resume
-              </a>
+                <FileText className="size-4" aria-hidden /> View resume
+              </Link>
               <div className="flex justify-between text-sm text-muted">
                 {socials.map((s) => (
                   <a key={s.id} href={s.href} className="py-2 hover:text-fg" {...(s.id !== 'email' ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>

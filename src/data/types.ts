@@ -71,9 +71,11 @@ export interface EducationItem {
 export interface Certification {
   title: string;
   issuer: string;
+  /** Where it was earned, e.g. "Coursera". */
+  platform?: string;
   date: string;
-  credentialId: string;
-  url: string;
+  credentialId?: string;
+  url?: string;
 }
 
 export interface SkillGroup {
@@ -99,4 +101,57 @@ export interface Service {
   deliverables: string[];
   /** Slug of a project that demonstrates this service. */
   proof?: string;
+}
+
+export interface Social {
+  id: 'github' | 'linkedin' | 'email' | 'twitter' | 'instagram' | 'website';
+  label: string;
+  handle: string;
+  href: string;
+}
+
+export interface ProfileData {
+  name: string;
+  shortName: string;
+  brand: string;
+  role: string;
+  roles: string[];
+  location: { city: string; region: string; country: string; countryCode: string; label: string; timezone: string };
+  email: string;
+  whatsapp: string;
+  socials: Social[];
+  resume: { href: string; fileName: string };
+  portrait: { src: string; alt: string; width: number; height: number };
+  availability: { open: boolean; label: string; detail: string };
+  current: { role: string; company: string };
+  experienceSummary: string;
+  hero: { headline: string; statement: string; intro: string };
+  about: {
+    lead: string;
+    paragraphs: string[];
+    principles: Array<{ title: string; text: string }>;
+    languages: Array<{ language: string; level: string }>;
+  };
+  contact: { headline: string; text: string };
+  footer: { statement: string; closing: string };
+}
+
+export interface Achievement {
+  title: string;
+  description: string;
+  date?: string;
+  link?: string;
+  image?: ImageAsset;
+}
+
+/** Every editable list the admin panel manages, plus the data the public site renders. */
+export interface SiteContent {
+  profile: ProfileData;
+  projects: Project[];
+  experience: ExperienceItem[];
+  education: EducationItem[];
+  certifications: Certification[];
+  achievements: Achievement[];
+  skillGroups: SkillGroup[];
+  services: Service[];
 }

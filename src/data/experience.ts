@@ -88,6 +88,7 @@ export const certifications: Certification[] = [
   {
     title: 'Architecting with Google Kubernetes Engine',
     issuer: 'Google Cloud',
+    platform: 'Coursera',
     date: 'Sep 2022',
     credentialId: 'XME4JKXZB67V',
     url: 'https://www.coursera.org/account/accomplishments/specialization/XME4JKXZB67V',
@@ -95,6 +96,7 @@ export const certifications: Certification[] = [
   {
     title: 'Algorithms Specialization',
     issuer: 'Stanford University',
+    platform: 'Coursera',
     date: 'May 2022',
     credentialId: '2P9DRQNF8EVM',
     url: 'https://www.coursera.org/account/accomplishments/specialization/2P9DRQNF8EVM',
@@ -102,6 +104,7 @@ export const certifications: Certification[] = [
   {
     title: 'Introduction to Scripting in Python Specialization',
     issuer: 'Rice University',
+    platform: 'Coursera',
     date: 'May 2022',
     credentialId: 'JJKWGEMY8G6Q',
     url: 'https://www.coursera.org/account/accomplishments/specialization/JJKWGEMY8G6Q',

@@ -9,7 +9,7 @@ import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import type { Project, ProjectFilter } from '@/data/types';
 import { BrowserFrame } from '@/components/ui/BrowserFrame';
 import { ProjectCover } from '@/components/ui/ProjectCover';
-import { cn } from '@/lib/utils';
+import { canOptimize, cn } from '@/lib/utils';
 
 export type ProjectSummary = Omit<Project, 'caseStudy' | 'gallery'>;
 type FilterKey = 'all' | ProjectFilter;
@@ -239,7 +239,7 @@ function ProjectIndex({ projects, all, title }: { projects: ProjectSummary[]; al
             <div className="overflow-hidden rounded-md border border-line-strong bg-surface shadow-2xl">
               {hovered.cover ? (
                 <div className="relative aspect-[16/10]">
-                  <Image src={hovered.cover.src} alt="" fill sizes="320px" className="object-cover object-top" />
+                  <Image src={hovered.cover.src} unoptimized={!canOptimize(hovered.cover.src)} alt="" fill sizes="320px" className="object-cover object-top" />
                 </div>
               ) : (
                 <div className="flex aspect-[16/10] flex-col justify-end bg-grid p-4">

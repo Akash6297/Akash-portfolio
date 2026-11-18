@@ -140,18 +140,29 @@ test.describe('contact form', () => {
 });
 
 test.describe('resume & legacy links', () => {
-  test('resume PDF downloads and legacy URL redirects', async ({ page, request }) => {
+  test('resume page, PDF download and legacy redirects', async ({ page, request }) => {
     const pdf = await request.get('/resume/Akash-Mandal-Resume.pdf');
     expect(pdf.status()).toBe(200);
     expect(pdf.headers()['content-type']).toContain('application/pdf');
-    for (const legacy of ['/resume.html', '/resume']) {
+    for (const [legacy, target] of [['/resume.html', '/resume'], ['/admin/dashboard.html', '/admin'], ['/admin/login.html', '/admin/login']]) {
       const res = await request.get(legacy, { maxRedirects: 0 });
       expect([307, 308]).toContain(res.status());
-      expect(res.headers()['location']).toContain('/resume/Akash-Mandal-Resume.pdf');
+      expect(new URL(res.headers()['location'], 'http://x').pathname).toBe(target);
     }
+
+    // Header link opens the live resume page.
     await page.goto('/');
-    const download = page.waitForEvent('download');
     await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Resume' }).click();
+    await expect(page).toHaveURL(/\/resume$/);
+    await expect(page.locator('article.resume-paper h1')).toHaveText('Akash Mandal');
+    await expect(page.getByRole('button', { name: 'Print / Save as PDF' })).toBeVisible();
+    // No private details on the public resume: no phone number, no street/village address.
+    // ("Balarampur" alone is legitimately the school name, so check the address form "Vill-".)
+    expect(await page.locator('article.resume-paper').innerText()).not.toMatch(/\d{10}|Vill-/);
+
+    // PDF download from the resume page.
+    const download = page.waitForEvent('download');
+    await page.getByRole('link', { name: 'PDF' }).click();
     expect((await download).suggestedFilename()).toBe('Akash-Mandal-Resume.pdf');
   });
 });
@@ -172,7 +183,9 @@ test.describe('SEO', () => {
     expect(await (await request.get('/robots.txt')).text()).toContain('Sitemap:');
     const og = await request.get('/opengraph-image');
     expect(og.headers()['content-type']).toBe('image/png');
-    expect((await request.get('/work/lakshya/opengraph-image')).status()).toBe(200);
+    await page.goto('/work/lakshya');
+    const caseOg = await page.locator('meta[property="og:image"]').getAttribute('content');
+    expect((await request.get(new URL(caseOg!).pathname)).headers()['content-type']).toBe('image/png');
   });
 });
 

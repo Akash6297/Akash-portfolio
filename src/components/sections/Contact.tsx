@@ -1,13 +1,14 @@
-import { ArrowUpRight, Download, MapPin } from 'lucide-react';
-import { profile } from '@/data/profile';
-import { socials } from '@/data/socials';
+import Link from 'next/link';
+import { ArrowUpRight, Download, FileText, MapPin } from 'lucide-react';
+import type { ProfileData } from '@/data/types';
 import { Availability } from '@/components/ui/Availability';
 import { SocialIcon } from '@/components/ui/SocialIcon';
-import { ContactForm } from '@/components/contact/ContactForm';
+import { ContactPanel } from '@/components/contact/ContactPanel';
 import { CopyEmail } from '@/components/contact/CopyEmail';
+import { WhatsAppLead } from '@/components/contact/WhatsAppLead';
 
-export function Contact() {
-  const external = socials.filter((s) => s.id !== 'email');
+export function Contact({ profile, bookingEnabled }: { profile: ProfileData; bookingEnabled: boolean }) {
+  const external = profile.socials.filter((s) => s.href.startsWith('http'));
   return (
     <section id="contact" aria-labelledby="contact-title" className="relative py-20 md:py-28">
       <div className="container-page">
@@ -20,13 +21,13 @@ export function Contact() {
         <div className="mt-10 grid grid-cols-1 gap-14 lg:grid-cols-12 lg:gap-10">
           <div className="lg:col-span-6">
             <h2 id="contact-title" className="font-display text-[clamp(2.75rem,6.5vw,5rem)] text-fg" data-reveal>
-              Have an idea? <em className="italic text-muted">Let&apos;s build something meaningful.</em>
+              {splitHeadline(profile.contact.headline)}
             </h2>
             <p className="mt-6 max-w-md text-[17px] leading-relaxed text-muted" data-reveal>
               {profile.contact.text}
             </p>
             <div className="mt-8" data-reveal>
-              <Availability />
+              <Availability availability={profile.availability} />
               <p className="mt-3 text-sm text-subtle">{profile.availability.detail}</p>
             </div>
 
@@ -39,7 +40,7 @@ export function Contact() {
                 </dd>
               </div>
               {external.map((s) => (
-                <div key={s.id} className="flex items-center justify-between gap-3 py-4">
+                <div key={s.href} className="flex items-center justify-between gap-3 py-4">
                   <dt className="label-mono">{s.label}</dt>
                   <dd>
                     <a href={s.href} target="_blank" rel="noopener noreferrer" className="group inline-flex min-h-9 items-center gap-2 text-fg">
@@ -51,15 +52,26 @@ export function Contact() {
                   </dd>
                 </div>
               ))}
+              {profile.whatsapp && (
+                <div className="flex items-center justify-between gap-3 py-4">
+                  <dt className="label-mono">WhatsApp</dt>
+                  <dd>
+                    <WhatsAppLead number={profile.whatsapp} />
+                  </dd>
+                </div>
+              )}
               <div className="flex items-center justify-between gap-3 py-4">
                 <dt className="label-mono">Location</dt>
-                <dd className="inline-flex items-center gap-2 text-fg"><MapPin className="size-3.5 text-muted" aria-hidden />{profile.location.label}</dd>
+                <dd className="inline-flex items-center gap-2 text-right text-fg"><MapPin className="size-3.5 shrink-0 text-muted" aria-hidden />{profile.location.label}</dd>
               </div>
-              <div className="flex items-center justify-between gap-3 py-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 py-4">
                 <dt className="label-mono">Resume</dt>
-                <dd>
+                <dd className="flex items-center gap-4">
+                  <Link href="/resume" className="inline-flex min-h-9 items-center gap-2 text-fg hover:underline hover:underline-offset-4">
+                    <FileText className="size-3.5 text-muted" aria-hidden /> View
+                  </Link>
                   <a href={profile.resume.href} download={profile.resume.fileName} className="inline-flex min-h-9 items-center gap-2 text-fg hover:underline hover:underline-offset-4">
-                    <Download className="size-3.5 text-muted" aria-hidden /> PDF, 2 pages
+                    <Download className="size-3.5 text-muted" aria-hidden /> PDF
                   </a>
                 </dd>
               </div>
@@ -67,10 +79,21 @@ export function Contact() {
           </div>
 
           <div className="lg:col-span-6" data-reveal>
-            <ContactForm email={profile.email} />
+            <ContactPanel email={profile.email} bookingEnabled={bookingEnabled} />
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+/** "Have an idea? Let's build…" → first sentence upright, the rest in muted italics. */
+function splitHeadline(text: string) {
+  const match = text.match(/^(.+?[?.!])\s+(.+)$/);
+  if (!match) return text;
+  return (
+    <>
+      {match[1]} <em className="italic text-muted">{match[2]}</em>
+    </>
   );
 }

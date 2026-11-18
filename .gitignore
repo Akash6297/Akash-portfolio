@@ -3,6 +3,7 @@
 
 # Next.js
 /.next
+/.next-admin-test
 /out
 next-env.d.ts
 *.tsbuildinfo

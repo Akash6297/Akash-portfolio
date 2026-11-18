@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { AppWindow, ArrowRight, Building2, Gauge, Layers, LayoutTemplate, PenTool, Server, ShoppingBag, type LucideIcon } from 'lucide-react';
-import { services } from '@/data/services';
-import { getProject } from '@/data/projects';
+import type { Project, Service } from '@/data/types';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 
 // Icon keys used in src/data/services.ts.
@@ -16,7 +15,7 @@ const ICONS: Record<string, LucideIcon> = {
   'pen-tool': PenTool,
 };
 
-export function Services() {
+export function Services({ services, projects }: { services: Service[]; projects: Project[] }) {
   return (
     <section id="services" aria-labelledby="services-title" className="py-20 md:py-28">
       <div className="container-page">
@@ -30,7 +29,7 @@ export function Services() {
         <ul data-reveal className="grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
           {services.map((s, i) => {
             const Icon = ICONS[s.icon] ?? Layers;
-            const proof = s.proof ? getProject(s.proof) : undefined;
+            const proof = s.proof ? projects.find((p) => p.slug === s.proof) : undefined;
             return (
               <li key={s.title} className="group flex flex-col bg-bg p-6 transition-colors duration-300 hover:bg-surface">
                 <div className="flex items-start justify-between">

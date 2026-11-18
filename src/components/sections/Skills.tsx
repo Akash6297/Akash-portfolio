@@ -1,17 +1,16 @@
-import { skillGroups } from '@/data/skills';
-import { sortedProjects } from '@/data/projects';
+import type { Project, SkillGroup } from '@/data/types';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { TechIcon, brandColor } from '@/components/ui/TechIcon';
 import { SkillPanel, type SkillView } from '@/components/skills/SkillPanel';
 
 const normalise = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-export function Skills() {
+export function Skills({ skillGroups, projects }: { skillGroups: SkillGroup[]; projects: Project[] }) {
   const groups = skillGroups.map((group) => ({
     ...group,
     skills: group.skills.map<SkillView>((skill) => {
       const names = [skill.name, ...(skill.aliases ?? [])].map(normalise);
-      const usedIn = sortedProjects
+      const usedIn = projects
         .filter((p) => p.stack.some((t) => names.includes(normalise(t))))
         .map((p) => ({ slug: p.slug, name: p.name }));
       return {

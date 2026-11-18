@@ -46,3 +46,16 @@ export function hostname(url: string) {
     return url;
   }
 }
+
+/**
+ * Whether next/image may optimise this source: local files and ImgBB uploads
+ * (see images.remotePatterns). Other URLs are rendered unoptimised instead of failing.
+ */
+export function canOptimize(src: string) {
+  return src.startsWith('/') || src.startsWith('https://i.ibb.co/');
+}
+
+/** Only allow web, mail and phone links from stored data. */
+export function safeHref(href: string | undefined) {
+  return href && /^(https?:\/\/|mailto:|tel:|\/(?!\/))/i.test(href) ? href : undefined;
+}

@@ -1,9 +1,17 @@
+import Image from 'next/image';
 import { ArrowUpRight } from 'lucide-react';
-import { experience, education, certifications } from '@/data/experience';
+import type { Achievement, Certification, EducationItem, ExperienceItem } from '@/data/types';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { cn, formatDuration, formatMonth } from '@/lib/utils';
+import { canOptimize, cn, formatDuration, formatMonth } from '@/lib/utils';
 
-export function Experience() {
+interface ExperienceProps {
+  experience: ExperienceItem[];
+  education: EducationItem[];
+  certifications: Certification[];
+  achievements: Achievement[];
+}
+
+export function Experience({ experience, education, certifications, achievements }: ExperienceProps) {
   return (
     <section id="experience" aria-labelledby="experience-title" className="py-20 md:py-28">
       <div className="container-page">
@@ -96,26 +104,58 @@ export function Experience() {
             <h3 className="label-mono">Certifications</h3>
             <ul className="mt-6 space-y-4">
               {certifications.map((c) => (
-                <li key={c.credentialId}>
+                <li key={c.credentialId || c.title}>
                   <a
-                    href={c.url}
+                    href={c.url || undefined}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group flex items-start justify-between gap-4"
                   >
                     <span>
                       <span className="font-medium text-fg group-hover:underline group-hover:decoration-line-strong group-hover:underline-offset-4">{c.title}</span>
-                      <span className="mt-1 block text-sm text-muted">{c.issuer} · Coursera · {c.date}</span>
-                      <span className="mt-0.5 block font-mono text-[11px] text-subtle">Credential {c.credentialId}</span>
+                      <span className="mt-1 block text-sm text-muted">{[c.issuer, c.platform, c.date].filter(Boolean).join(' · ')}</span>
+                      {c.credentialId && <span className="mt-0.5 block font-mono text-[11px] text-subtle">Credential {c.credentialId}</span>}
                     </span>
-                    <ArrowUpRight className="mt-1 size-4 shrink-0 text-subtle transition-colors group-hover:text-fg" aria-hidden />
-                    <span className="sr-only">(opens credential in a new tab)</span>
+                    {c.url && (
+                      <>
+                        <ArrowUpRight className="mt-1 size-4 shrink-0 text-subtle transition-colors group-hover:text-fg" aria-hidden />
+                        <span className="sr-only">(opens credential in a new tab)</span>
+                      </>
+                    )}
                   </a>
                 </li>
               ))}
             </ul>
           </div>
         </div>
+
+        {achievements.length > 0 && (
+          <div className="mt-6 rounded-lg border border-line p-6 sm:p-8" data-reveal>
+            <h3 className="label-mono">Achievements</h3>
+            <ul className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+              {achievements.map((a) => (
+                <li key={a.title} className="flex gap-4">
+                  {a.image?.src && (
+                    <div className="relative size-16 shrink-0 overflow-hidden rounded-md border border-line bg-surface">
+                      <Image src={a.image.src} unoptimized={!canOptimize(a.image.src)} alt={a.image.alt || ''} fill sizes="64px" className="object-cover" />
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="font-medium text-fg">
+                      {a.link ? (
+                        <a href={a.link} target="_blank" rel="noopener noreferrer" className="hover:underline hover:underline-offset-4">{a.title}</a>
+                      ) : (
+                        a.title
+                      )}
+                    </p>
+                    {a.date && <p className="mt-0.5 font-mono text-xs text-subtle">{a.date}</p>}
+                    <p className="mt-1.5 text-sm leading-relaxed text-muted">{a.description}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </section>
   );

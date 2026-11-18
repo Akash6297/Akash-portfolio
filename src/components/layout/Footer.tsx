@@ -1,12 +1,11 @@
 import Link from 'next/link';
 import { ArrowUp, ArrowUpRight } from 'lucide-react';
-import { profile } from '@/data/profile';
-import { socials } from '@/data/socials';
+import type { ProfileData } from '@/data/types';
 import { navItems } from '@/lib/site';
 import { SocialIcon } from '@/components/ui/SocialIcon';
 import { CurrentYear } from './CurrentYear';
 
-export function Footer() {
+export function Footer({ profile }: { profile: ProfileData }) {
   return (
     <footer className="border-t border-line bg-bg">
       <div className="container-page grid grid-cols-1 gap-12 py-16 md:grid-cols-12 md:py-20">
@@ -29,9 +28,9 @@ export function Footer() {
               </li>
             ))}
             <li>
-              <a href={profile.resume.href} download={profile.resume.fileName} className="inline-flex min-h-9 items-center text-muted transition-colors hover:text-fg">
-                Resume (PDF)
-              </a>
+              <Link href="/resume" className="inline-flex min-h-9 items-center text-muted transition-colors hover:text-fg">
+                Resume
+              </Link>
             </li>
           </ul>
         </nav>
@@ -39,12 +38,12 @@ export function Footer() {
         <div className="md:col-span-3">
           <p className="label-mono mb-4">Connect</p>
           <ul className="space-y-1">
-            {socials.map((s) => (
-              <li key={s.id}>
+            {profile.socials.map((s) => (
+              <li key={s.id + s.href}>
                 <a
                   href={s.href}
                   className="group inline-flex min-h-9 items-center gap-2.5 text-muted transition-colors hover:text-fg"
-                  {...(s.id !== 'email' ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                  {...(s.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                 >
                   <SocialIcon id={s.id} className="size-3.5" />
                   {s.label}

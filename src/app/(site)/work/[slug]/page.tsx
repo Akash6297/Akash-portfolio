@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowRight, ArrowUpRight } from 'lucide-react';
-import { projects, getProject, getAdjacentProjects } from '@/data/projects';
-import { skillGroups } from '@/data/skills';
+import { adjacentProjects, getProject, getProjects, getSkillGroups } from '@/lib/content';
+import type { SkillGroup } from '@/data/types';
 import { BrowserFrame, PhoneFrame } from '@/components/ui/BrowserFrame';
 import { ProjectCover } from '@/components/ui/ProjectCover';
 import { TechIcon } from '@/components/ui/TechIcon';
@@ -13,15 +13,17 @@ import { hostname } from '@/lib/utils';
 
 type Params = { slug: string };
 
-export const dynamicParams = false;
+// Projects added later in the admin panel render on first request.
+export const dynamicParams = true;
+export const revalidate = 3600;
 
-export function generateStaticParams(): Params[] {
-  return projects.map((p) => ({ slug: p.slug }));
+export async function generateStaticParams(): Promise<Params[]> {
+  return (await getProjects()).map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug } = await params;
-  const project = getProject(slug);
+  const project = await getProject(slug);
   if (!project) return {};
   const title = `${project.name} — ${project.category} case study`;
   return {
@@ -36,7 +38,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 const KIND_LABEL = { client: 'Client project', product: 'Own product', personal: 'Personal project', team: 'Team project' } as const;
 
 // Map a stack entry to a skill icon, when one exists.
-const iconFor = (tech: string) => {
+const iconFor = (skillGroups: SkillGroup[], tech: string) => {
   const n = tech.toLowerCase();
   for (const g of skillGroups) for (const s of g.skills) {
     if ([s.name, ...(s.aliases ?? [])].some((x) => x.toLowerCase() === n)) return s.icon;
@@ -46,10 +48,10 @@ const iconFor = (tech: string) => {
 
 export default async function CaseStudyPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
-  const project = getProject(slug);
+  const [project, projects, skillGroups] = await Promise.all([getProject(slug), getProjects(), getSkillGroups()]);
   if (!project) notFound();
 
-  const { previous, next } = getAdjacentProjects(project.slug);
+  const { previous, next } = adjacentProjects(projects, project.slug);
   const cs = project.caseStudy;
   const desktopShots = project.gallery.filter((g) => g.device !== 'mobile');
   const mobileShots = project.gallery.filter((g) => g.device === 'mobile');
@@ -190,7 +192,7 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
             <ul className="flex flex-wrap gap-2">
               {project.stack.map((t) => (
                 <li key={t} className="inline-flex min-h-9 items-center gap-2 rounded-md border border-line px-3 text-sm text-muted">
-                  <TechIcon icon={iconFor(t)} name={t} className="text-subtle" />
+                  <TechIcon icon={iconFor(skillGroups, t)} name={t} className="text-subtle" />
                   {t}
                 </li>
               ))}
