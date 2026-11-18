@@ -1,0 +1,711 @@
+{
+  "fetchedAt": "2026-11-18T07:04:31.794Z",
+  "user": {
+    "publicRepos": 64,
+    "htmlUrl": "https://github.com/Akash6297"
+  },
+  "repos": [
+    {
+      "name": "LAKSHYA",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/LAKSHYA",
+      "homepage": "https://lakshya-ved.vercel.app",
+      "language": "TypeScript",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2026-11-18T06:26:37Z"
+    },
+    {
+      "name": "BackgroundBlaster",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/BackgroundBlaster",
+      "homepage": "http://akash6297.github.io/BackgroundBlaster/",
+      "language": "JavaScript",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2026-11-13T12:53:23Z"
+    },
+    {
+      "name": "Akash-portfolio",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/Akash-portfolio",
+      "homepage": "https://akash-portfolio-olive.vercel.app",
+      "language": "HTML",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2026-09-18T09:43:42Z"
+    },
+    {
+      "name": "KATARUKA",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/KATARUKA",
+      "homepage": null,
+      "language": "HTML",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2026-08-17T17:35:24Z"
+    },
+    {
+      "name": "MISK-HEALTHCARE-PRIVATE-LIMITED",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/MISK-HEALTHCARE-PRIVATE-LIMITED",
+      "homepage": null,
+      "language": "HTML",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2026-08-04T07:01:20Z"
+    },
+    {
+      "name": "RoomLedger",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/RoomLedger",
+      "homepage": null,
+      "language": "JavaScript",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2026-07-29T10:59:26Z"
+    },
+    {
+      "name": "B-S-T-C-PRIVATE-LIMITED",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/B-S-T-C-PRIVATE-LIMITED",
+      "homepage": "https://akash6297.github.io/B-S-T-C-PRIVATE-LIMITED/",
+      "language": "HTML",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2026-07-06T13:21:29Z"
+    },
+    {
+      "name": "Postal-Pathshala",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/Postal-Pathshala",
+      "homepage": null,
+      "language": "CSS",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2026-06-16T06:33:37Z"
+    },
+    {
+      "name": "CIL-Prep",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/CIL-Prep",
+      "homepage": null,
+      "language": "JavaScript",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2026-06-05T13:02:52Z"
+    },
+    {
+      "name": "buffer-blog",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/buffer-blog",
+      "homepage": null,
+      "language": "HTML",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2026-05-01T08:22:58Z"
+    },
+    {
+      "name": "ExamPrep-Pro",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/ExamPrep-Pro",
+      "homepage": null,
+      "language": "JavaScript",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2026-04-02T09:15:48Z"
+    },
+    {
+      "name": "mission-2026",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/mission-2026",
+      "homepage": "https://mission-2026.vercel.app",
+      "language": "JavaScript",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2026-04-01T09:59:46Z"
+    },
+    {
+      "name": "test",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/test",
+      "homepage": null,
+      "language": "HTML",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2026-01-28T18:31:49Z"
+    },
+    {
+      "name": "Bim",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/Bim",
+      "homepage": null,
+      "language": "HTML",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2025-12-05T19:04:56Z"
+    },
+    {
+      "name": "Liza-Portfolio",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/Liza-Portfolio",
+      "homepage": null,
+      "language": null,
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2025-09-06T04:24:24Z"
+    },
+    {
+      "name": "Akash-Mandal",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/Akash-Mandal",
+      "homepage": "https://akash6297.github.io/Akash-Mandal/",
+      "language": "HTML",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2025-07-24T06:26:19Z"
+    },
+    {
+      "name": "drishtibhongi",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/drishtibhongi",
+      "homepage": "https://akash6297.github.io/drishtibhongi/",
+      "language": "HTML",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2025-06-10T07:22:47Z"
+    },
+    {
+      "name": "drishti-bhongi",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/drishti-bhongi",
+      "homepage": null,
+      "language": null,
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2025-05-19T08:12:37Z"
+    },
+    {
+      "name": "pdf_redirector",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/pdf_redirector",
+      "homepage": null,
+      "language": "HTML",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2025-05-14T09:39:56Z"
+    },
+    {
+      "name": "Mess",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/Mess",
+      "homepage": null,
+      "language": "JavaScript",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2025-05-03T17:24:36Z"
+    },
+    {
+      "name": "mess-server",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/mess-server",
+      "homepage": null,
+      "language": "JavaScript",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2025-05-03T09:57:34Z"
+    },
+    {
+      "name": "Student-Youtube",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/Student-Youtube",
+      "homepage": "https://studentyt.netlify.app/",
+      "language": "JavaScript",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2024-07-19T17:18:56Z"
+    },
+    {
+      "name": "data-manager",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/data-manager",
+      "homepage": "https://akash6297.github.io/data-manager/",
+      "language": "HTML",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2024-05-16T20:11:02Z"
+    },
+    {
+      "name": "ImageTransmuter",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/ImageTransmuter",
+      "homepage": "https://akash6297.github.io/ImageTransmuter/",
+      "language": "JavaScript",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2024-04-13T16:51:23Z"
+    },
+    {
+      "name": "aikatan-2023-frontend",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/aikatan-2023-frontend",
+      "homepage": "https://www.aikatan.org.in/",
+      "language": null,
+      "stars": 0,
+      "fork": true,
+      "pushedAt": "2024-04-09T11:17:10Z"
+    },
+    {
+      "name": "Menja",
+      "description": "Play and Enjoy the Menja Game",
+      "htmlUrl": "https://github.com/Akash6297/Menja",
+      "homepage": "https://akash6297.github.io/Menja/",
+      "language": "JavaScript",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2024-03-30T09:15:36Z"
+    },
+    {
+      "name": "readmore-showless",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/readmore-showless",
+      "homepage": null,
+      "language": "TypeScript",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2024-01-27T05:39:25Z"
+    },
+    {
+      "name": "eshop-ecommerce-master",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/eshop-ecommerce-master",
+      "homepage": null,
+      "language": "JavaScript",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2024-01-06T05:57:45Z"
+    },
+    {
+      "name": "eshop-backend",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/eshop-backend",
+      "homepage": null,
+      "language": "JavaScript",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2023-12-27T03:25:21Z"
+    },
+    {
+      "name": "Eshop",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/Eshop",
+      "homepage": null,
+      "language": "CSS",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2023-12-25T08:16:50Z"
+    },
+    {
+      "name": "food-app",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/food-app",
+      "homepage": null,
+      "language": null,
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2023-12-25T05:17:08Z"
+    },
+    {
+      "name": "ExpensaZen",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/ExpensaZen",
+      "homepage": null,
+      "language": "JavaScript",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2023-12-24T13:50:31Z"
+    },
+    {
+      "name": "Backend-B",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/Backend-B",
+      "homepage": null,
+      "language": "JavaScript",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-12-22T05:46:38Z"
+    },
+    {
+      "name": "Placement-Cell-MNCUD",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/Placement-Cell-MNCUD",
+      "homepage": "https://akash6297.github.io/Placement-Cell-MNCUD/",
+      "language": "HTML",
+      "stars": 0,
+      "fork": false,
+      "pushedAt": "2023-10-27T05:29:00Z"
+    },
+    {
+      "name": "Placement-Cell",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/Placement-Cell",
+      "homepage": "https://placementcellrkmgec.netlify.app/",
+      "language": "JavaScript",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-09-07T08:45:45Z"
+    },
+    {
+      "name": "Frontend-T",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/Frontend-T",
+      "homepage": null,
+      "language": "JavaScript",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-08-01T14:47:57Z"
+    },
+    {
+      "name": "Tribal-Trends",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/Tribal-Trends",
+      "homepage": "https://akash6297.github.io/Tribal-Trends/",
+      "language": "JavaScript",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-07-25T05:39:49Z"
+    },
+    {
+      "name": "Movie-Recommender-System",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/Movie-Recommender-System",
+      "homepage": "https://movie-recommender-system-v6sx3hmk1ls.streamlit.app/",
+      "language": "Python",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-07-10T02:22:57Z"
+    },
+    {
+      "name": "Akash6297",
+      "description": "Config files for my GitHub profile.",
+      "htmlUrl": "https://github.com/Akash6297/Akash6297",
+      "homepage": "https://github.com/Akash6297",
+      "language": null,
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-07-06T03:47:02Z"
+    },
+    {
+      "name": "FoodieHut",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/FoodieHut",
+      "homepage": null,
+      "language": "HTML",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-07-04T02:18:01Z"
+    },
+    {
+      "name": "food-delivery-website",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/food-delivery-website",
+      "homepage": "https://akash6297.github.io/food-delivery-website/",
+      "language": "HTML",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-06-29T07:48:00Z"
+    },
+    {
+      "name": "Cukiss",
+      "description": "This is the project created for Microsoft Future Ready Talent Virtual Internship Program.",
+      "htmlUrl": "https://github.com/Akash6297/Cukiss",
+      "homepage": "https://akash6297.github.io/Cukiss/",
+      "language": "HTML",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-06-26T03:57:15Z"
+    },
+    {
+      "name": "snake-game",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/snake-game",
+      "homepage": "https://akash6297.github.io/snake-game/",
+      "language": "JavaScript",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-06-24T09:06:29Z"
+    },
+    {
+      "name": "School-Management-Frontend",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/School-Management-Frontend",
+      "homepage": null,
+      "language": "JavaScript",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-05-22T17:54:07Z"
+    },
+    {
+      "name": "School-Management-Backend",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/School-Management-Backend",
+      "homepage": null,
+      "language": "JavaScript",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-04-25T17:38:15Z"
+    },
+    {
+      "name": "express-hello-world",
+      "description": "Implements the Expressjs Hello World example to provide a faster start deploying on the Cyclic platform",
+      "htmlUrl": "https://github.com/Akash6297/express-hello-world",
+      "homepage": null,
+      "language": null,
+      "stars": 1,
+      "fork": true,
+      "pushedAt": "2023-04-04T07:38:45Z"
+    },
+    {
+      "name": "car-racing",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/car-racing",
+      "homepage": "https://akash6297.github.io/car-racing/",
+      "language": "HTML",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-03-29T19:14:14Z"
+    },
+    {
+      "name": "ludo",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/ludo",
+      "homepage": "https://akash6297.github.io/ludo/",
+      "language": "JavaScript",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-03-29T18:44:27Z"
+    },
+    {
+      "name": "Text-To-Speech-",
+      "description": "It converts your text to speech ",
+      "htmlUrl": "https://github.com/Akash6297/Text-To-Speech-",
+      "homepage": null,
+      "language": "JavaScript",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-03-26T04:01:58Z"
+    },
+    {
+      "name": "OIBSIP-Task2",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/OIBSIP-Task2",
+      "homepage": "https://akash6297.github.io/OIBSIP-Task2/",
+      "language": "HTML",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-03-01T18:37:28Z"
+    },
+    {
+      "name": "OIBSIP-Task3",
+      "description": "Web Development Internship from Oasis Infobyte. Task2.",
+      "htmlUrl": "https://github.com/Akash6297/OIBSIP-Task3",
+      "homepage": "https://akash6297.github.io/OIBSIP-Task3/",
+      "language": "JavaScript",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-03-01T17:34:09Z"
+    },
+    {
+      "name": "OIBSIP-Task1",
+      "description": "Web Development Internship from Oasis Infobyte . Task 1",
+      "htmlUrl": "https://github.com/Akash6297/OIBSIP-Task1",
+      "homepage": "https://akash6297.github.io/OIBSIP-Task1/",
+      "language": "HTML",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-03-01T17:12:13Z"
+    },
+    {
+      "name": "-LGM-FEB2023-Task1",
+      "description": "Lets Grow More Feb Task 1 Repository",
+      "htmlUrl": "https://github.com/Akash6297/-LGM-FEB2023-Task1",
+      "homepage": null,
+      "language": "JavaScript",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-02-27T08:49:24Z"
+    },
+    {
+      "name": "LGM-FEB2023-Task4",
+      "description": "It is a web calculator with many funtionalities.",
+      "htmlUrl": "https://github.com/Akash6297/LGM-FEB2023-Task4",
+      "homepage": "https://akash6297.github.io/LGM-FEB2023-Task4/",
+      "language": "HTML",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-02-27T08:35:33Z"
+    },
+    {
+      "name": "Akash-Codepen",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/Akash-Codepen",
+      "homepage": null,
+      "language": null,
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-02-22T09:36:56Z"
+    },
+    {
+      "name": "photos_by_akash",
+      "description": "https://akash6297.github.io/photos_by_akash/",
+      "htmlUrl": "https://github.com/Akash6297/photos_by_akash",
+      "homepage": null,
+      "language": "HTML",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-02-02T14:35:24Z"
+    },
+    {
+      "name": "Responsive_website",
+      "description": "https://akash6297.github.io/Responsive_website/",
+      "htmlUrl": "https://github.com/Akash6297/Responsive_website",
+      "homepage": null,
+      "language": "CSS",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2023-01-07T15:02:37Z"
+    },
+    {
+      "name": "unitconverter",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/unitconverter",
+      "homepage": null,
+      "language": null,
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2022-12-31T09:34:55Z"
+    },
+    {
+      "name": "Javascript-Speeach-to-Text",
+      "description": null,
+      "htmlUrl": "https://github.com/Akash6297/Javascript-Speeach-to-Text",
+      "homepage": null,
+      "language": null,
+      "stars": 1,
+      "fork": true,
+      "pushedAt": "2022-12-07T08:02:57Z"
+    },
+    {
+      "name": "Contact-From",
+      "description": "Contact From using Emailjs ",
+      "htmlUrl": "https://github.com/Akash6297/Contact-From",
+      "homepage": "https://akash6297.github.io/Contact-From/",
+      "language": "HTML",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2022-08-11T17:34:08Z"
+    },
+    {
+      "name": "Library-Management-System",
+      "description": "A school library management is a project that manages and stores books information electronically according to students needs. The system helps both students and library manager to keep a constant track of all the books available in the library. It allows both the admin and the student to search for the desired book. It becomes necessary for sch…",
+      "htmlUrl": "https://github.com/Akash6297/Library-Management-System",
+      "homepage": null,
+      "language": null,
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2022-07-05T17:20:16Z"
+    },
+    {
+      "name": "Bank-Management-System",
+      "description": "A menu driven Banking Management System Program written in C++ .",
+      "htmlUrl": "https://github.com/Akash6297/Bank-Management-System",
+      "homepage": null,
+      "language": "C++",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2022-07-05T16:50:18Z"
+    },
+    {
+      "name": "Medicine-dose-tracker-web-app",
+      "description": "A simple medicine dose tracker web app.",
+      "htmlUrl": "https://github.com/Akash6297/Medicine-dose-tracker-web-app",
+      "homepage": null,
+      "language": "HTML",
+      "stars": 1,
+      "fork": false,
+      "pushedAt": "2022-07-05T16:40:23Z"
+    },
+    {
+      "name": "Master-Tailwind",
+      "description": "Source code for the videos in the Master Tailwind course at CodeWithHarry - https://www.codewithharry.com/videos/tailwind-course-in-hindi-1/",
+      "htmlUrl": "https://github.com/Akash6297/Master-Tailwind",
+      "homepage": null,
+      "language": null,
+      "stars": 1,
+      "fork": true,
+      "pushedAt": "2022-04-13T15:12:02Z"
+    }
+  ],
+  "events": [
+    {
+      "id": "20483735446",
+      "type": "ReleaseEvent",
+      "repo": "Akash6297/LAKSHYA",
+      "createdAt": "2026-11-18T06:26:37Z",
+      "commits": null,
+      "ref": null,
+      "refType": null,
+      "action": "published"
+    },
+    {
+      "id": "27478016720",
+      "type": "PushEvent",
+      "repo": "Akash6297/LAKSHYA",
+      "createdAt": "2026-11-17T06:02:24Z",
+      "commits": null,
+      "ref": "refs/heads/main",
+      "refType": null,
+      "action": null
+    },
+    {
+      "id": "27240579899",
+      "type": "PushEvent",
+      "repo": "Akash6297/BackgroundBlaster",
+      "createdAt": "2026-11-13T12:53:24Z",
+      "commits": null,
+      "ref": "refs/heads/main",
+      "refType": null,
+      "action": null
+    },
+    {
+      "id": "27106114181",
+      "type": "PushEvent",
+      "repo": "Akash6297/LAKSHYA",
+      "createdAt": "2026-11-12T10:46:49Z",
+      "commits": null,
+      "ref": "refs/heads/main",
+      "refType": null,
+      "action": null
+    },
+    {
+      "id": "27087173249",
+      "type": "PushEvent",
+      "repo": "Akash6297/LAKSHYA",
+      "createdAt": "2026-11-12T11:08:30Z",
+      "commits": null,
+      "ref": "refs/heads/main",
+      "refType": null,
+      "action": null
+    },
+    {
+      "id": "26948171620",
+      "type": "CreateEvent",
+      "repo": "Akash6297/LAKSHYA",
+      "createdAt": "2026-11-12T10:12:28Z",
+      "commits": null,
+      "ref": "main",
+      "refType": "branch",
+      "action": null
+    }
+  ]
+}

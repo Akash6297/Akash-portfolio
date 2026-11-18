@@ -1,5 +1,23 @@
 # Dependencies
 /node_modules
 
-# Environment variables
+# Next.js
+/.next
+/out
+next-env.d.ts
+*.tsbuildinfo
+
+# Testing
+/test-results
+/playwright-report
+/tests/screenshots/*.png
+!/tests/screenshots/.gitkeep
+
+# Environment variables (copy .env.example to .env.local)
 .env
+.env*.local
+
+# Misc
+.DS_Store
+.vercel
+npm-debug.log*

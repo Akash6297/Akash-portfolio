@@ -1,34 +1,40 @@
 {
-  "name": "portfolio-advanced",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "akash-mandal-portfolio",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Portfolio of Akash Mandal, Full-Stack Developer.",
   "scripts": {
-    "start": "node server.js",
-    "dev": "concurrently \"nodemon server.js\" \"npm:watch:css\"",
-    "watch:css": "npx @tailwindcss/cli -i ./src/input.css -o ./public/output.css --watch"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "assets:screenshots": "node scripts/capture-screenshots.mjs",
+    "assets:resume": "node scripts/build-resume-pdf.mjs"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
-    "axios": "^1.11.0",
-    "bcryptjs": "^3.0.2",
-    "connect-mongo": "^5.1.0",
-    "crypto": "^1.0.1",
-    "dotenv": "^17.2.0",
-    "express": "^5.1.0",
-    "express-session": "^1.18.2",
-    "mongoose": "^8.16.4",
-    "multer": "^2.0.2",
-    "nodemailer": "^7.0.5"
+    "lucide-react": "^1.75.0",
+    "motion": "^14.14.0",
+    "next": "^16.4.6",
+    "nodemailer": "^10.6.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "server-only": "^0.0.1",
+    "simple-icons": "^16.38.0"
   },
   "devDependencies": {
-    "@tailwindcss/cli": "^4.1.11",
-    "concurrently": "^9.2.0",
-    "copyfiles": "^2.4.1",
-    "nodemon": "^3.1.10",
-    "tailwindcss": "^4.1.11"
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.65.1",
+    "@tailwindcss/postcss": "^4.3.5",
+    "@types/node": "^24.0.0",
+    "@types/nodemailer": "^8.0.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "sharp": "^0.35.5",
+    "tailwindcss": "^4.3.5",
+    "typescript": "~5.9.3"
+  },
+  "engines": {
+    "node": ">=20.9"
   }
 }
